@@ -1,6 +1,28 @@
-<h1>Welcome to MyRoomeo</h1>
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Roomeo — Find Your Perfect Roommate</title>
+    <meta name="description" content="Discover your roommate personality type and get matched with compatible people." />
+    <meta name="theme-color" content="#0462D2" />
 
-<h3>Welcome to MyRoomeo.com!</h3>
+    <!-- Poppins font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
 
-<h4>The best roommate finder in the world!</h4>
-
+    <!-- Apple Sign In SDK (loaded here so it's available before React mounts) -->
+    <script
+      src="https://appleid.cdn-apple.com/appleauth/static/jsapi/appleid/1/en_US/appleid.auth.js"
+      defer
+    ></script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
