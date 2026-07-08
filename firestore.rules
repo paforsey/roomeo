@@ -2,9 +2,10 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     match /survey_sessions/{sessionId} {
+      // Writes happen server-side via the submitSurvey Cloud Function (Admin SDK),
+      // which bypasses these rules — clients have no legitimate reason to write here.
       allow read: if true;
-      allow create, update: if true;
-      allow delete: if true;
+      allow create, update, delete: if false;
     }
   }
 }
