@@ -2,6 +2,16 @@
 // Replace VITE_GOOGLE_CLIENT_ID and VITE_APPLE_CLIENT_ID in your .env file
 
 import { useState, useEffect, useRef } from "react";
+import {
+  createUserWithEmailAndPassword,
+  onAuthStateChanged,
+  sendEmailVerification,
+  sendPasswordResetEmail,
+  signInWithEmailAndPassword,
+  signOut,
+  updateProfile,
+} from "firebase/auth";
+import { auth } from "./firebase";
 
 
 // ─── Design Tokens ────────────────────────────────────────────────────────────
@@ -778,6 +788,311 @@ function ResetPasswordScreen({ email, onSuccess, onBack }) {
   );
 }
 
+function mapFirebaseAuthError(error) {
+  const code = error?.code || "";
+  if (code === "auth/invalid-credential" || code === "auth/wrong-password" || code === "auth/user-not-found") {
+    return "Incorrect email or password.";
+  }
+  if (code === "auth/email-already-in-use") {
+    return "An account with this email already exists.";
+  }
+  if (code === "auth/invalid-email") {
+    return "Enter a valid email address.";
+  }
+  if (code === "auth/weak-password") {
+    return "Password should be at least 6 characters.";
+  }
+  if (code === "auth/too-many-requests") {
+    return "Too many attempts. Please try again later.";
+  }
+  return "Something went wrong. Please try again.";
+}
+
+function AuthModal({ open, defaultTab = "login", onClose, onAuthenticated }) {
+  const [tab, setTab] = useState(defaultTab);
+  const [loginEmail, setLoginEmail] = useState("");
+  const [loginPassword, setLoginPassword] = useState("");
+  const [signUpName, setSignUpName] = useState("");
+  const [signUpEmail, setSignUpEmail] = useState("");
+  const [signUpPassword, setSignUpPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [resetEmail, setResetEmail] = useState("");
+  const [mode, setMode] = useState("tabs");
+  const [error, setError] = useState("");
+  const [info, setInfo] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [showLoginPassword, setShowLoginPassword] = useState(false);
+  const [showSignUpPassword, setShowSignUpPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  useEffect(() => {
+    if (!open) return;
+    setTab(defaultTab);
+    setMode("tabs");
+    setError("");
+    setInfo("");
+  }, [open, defaultTab]);
+
+  useEffect(() => {
+    if (!open) return undefined;
+    function handleKeyDown(event) {
+      if (event.key === "Escape") onClose();
+    }
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [open, onClose]);
+
+  if (!open) return null;
+
+  const signUpStrength = calcStrength(signUpPassword);
+  const signUpReqs = pwReqs(signUpPassword);
+
+  async function handleLogin(event) {
+    event.preventDefault();
+    if (!loginEmail || !loginPassword) {
+      setError("Email and password are required.");
+      return;
+    }
+    setLoading(true);
+    setError("");
+    setInfo("");
+    try {
+      const cred = await signInWithEmailAndPassword(auth, loginEmail.trim(), loginPassword);
+      onAuthenticated({
+        provider: "email",
+        name: cred.user.displayName || cred.user.email?.split("@")[0] || "there",
+        email: cred.user.email || loginEmail.trim(),
+        emailVerified: cred.user.emailVerified,
+      });
+    } catch (firebaseError) {
+      setError(mapFirebaseAuthError(firebaseError));
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleSignUp(event) {
+    event.preventDefault();
+    if (!signUpName.trim()) {
+      setError("Full name is required.");
+      return;
+    }
+    if (!signUpEmail || !/\S+@\S+\.\S+/.test(signUpEmail)) {
+      setError("Enter a valid email address.");
+      return;
+    }
+    if (signUpStrength < 2) {
+      setError("Please choose a stronger password.");
+      return;
+    }
+    if (signUpPassword !== confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
+    setLoading(true);
+    setError("");
+    setInfo("");
+    try {
+      const cred = await createUserWithEmailAndPassword(auth, signUpEmail.trim(), signUpPassword);
+      if (signUpName.trim()) {
+        await updateProfile(cred.user, { displayName: signUpName.trim() });
+      }
+      try {
+        await sendEmailVerification(cred.user);
+      } catch (verificationError) {
+        console.error("Failed to send verification email", verificationError);
+      }
+      onAuthenticated({
+        provider: "email",
+        name: signUpName.trim(),
+        email: cred.user.email || signUpEmail.trim(),
+        emailVerified: cred.user.emailVerified,
+      });
+    } catch (firebaseError) {
+      setError(mapFirebaseAuthError(firebaseError));
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handlePasswordReset(event) {
+    event.preventDefault();
+    if (!resetEmail || !/\S+@\S+\.\S+/.test(resetEmail)) {
+      setError("Enter a valid email address.");
+      return;
+    }
+    setLoading(true);
+    setError("");
+    setInfo("");
+    try {
+      await sendPasswordResetEmail(auth, resetEmail.trim());
+      setInfo("Password reset link sent. Check your inbox.");
+    } catch (firebaseError) {
+      setError(mapFirebaseAuthError(firebaseError));
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <div className="auth-modal-shell" role="dialog" aria-modal="true" aria-labelledby="auth-modal-title">
+      <div className="auth-modal-backdrop" onClick={onClose} />
+      <div className="auth-modal">
+        <button className="auth-modal-close" onClick={onClose} aria-label="Close">
+          ✕
+        </button>
+        <div className="auth-modal-logo"><RoomeoLogo width={132} /></div>
+        <h2 id="auth-modal-title" className="auth-modal-title">
+          {mode === "reset" ? "Recover your password" : "Welcome back"}
+        </h2>
+        <p className="auth-modal-sub">
+          {mode === "reset" ? "Enter your email and we’ll send you a reset link." : "Log in or create an account to continue."}
+        </p>
+
+        {mode !== "reset" && (
+          <div className="auth-tabs" role="tablist" aria-label="Authentication tabs">
+            <button className={`auth-tab ${tab === "login" ? "active" : ""}`} onClick={() => { setTab("login"); setError(""); setInfo(""); }}>
+              Login
+            </button>
+            <button className={`auth-tab ${tab === "signup" ? "active" : ""}`} onClick={() => { setTab("signup"); setError(""); setInfo(""); }}>
+              Create account
+            </button>
+          </div>
+        )}
+
+        {error && <div className="roo-server-error">{error}</div>}
+        {info && <div className="auth-modal-info">{info}</div>}
+
+        {mode === "reset" ? (
+          <form className="roo-form" onSubmit={handlePasswordReset}>
+            <Field label="Email" type="email" placeholder="your@email.com" value={resetEmail} onChange={setResetEmail} />
+            <button className="roo-btn-primary" type="submit" disabled={loading}>
+              {loading ? <Spinner /> : "Send Reset Link"}
+            </button>
+            <button className="auth-inline-link" type="button" onClick={() => { setMode("tabs"); setError(""); setInfo(""); }}>
+              ← Back to login
+            </button>
+          </form>
+        ) : tab === "login" ? (
+          <form className="roo-form" onSubmit={handleLogin}>
+            <Field label="Email" type="email" placeholder="your@email.com" value={loginEmail} onChange={setLoginEmail} />
+            <Field
+              label="Password"
+              type="password"
+              placeholder="Enter your password"
+              value={loginPassword}
+              onChange={setLoginPassword}
+              showToggle
+              showVal={showLoginPassword}
+              onToggle={() => setShowLoginPassword((prev) => !prev)}
+            />
+            <div className="roo-forgot-row">
+              <button className="roo-forgot" type="button" onClick={() => { setMode("reset"); setResetEmail(loginEmail); setError(""); setInfo(""); }}>
+                Forgot Password?
+              </button>
+            </div>
+            <button className="roo-btn-primary" type="submit" disabled={loading}>
+              {loading ? <Spinner /> : "Log in"}
+            </button>
+          </form>
+        ) : (
+          <form className="roo-form" onSubmit={handleSignUp}>
+            <Field label="Full Name" placeholder="Jane Smith" value={signUpName} onChange={setSignUpName} />
+            <Field label="Email" type="email" placeholder="your@email.com" value={signUpEmail} onChange={setSignUpEmail} />
+            <div>
+              <Field
+                label="Password"
+                type="password"
+                placeholder="Minimum 8 characters"
+                value={signUpPassword}
+                onChange={setSignUpPassword}
+                showToggle
+                showVal={showSignUpPassword}
+                onToggle={() => setShowSignUpPassword((prev) => !prev)}
+              />
+              {signUpPassword.length > 0 && (
+                <>
+                  <div className="roo-pw-strength">
+                    <div className="roo-pw-bars">
+                      {[1, 2, 3, 4].map((i) => (
+                        <div key={i} className="roo-pw-bar" style={{ background: i <= signUpStrength ? STRENGTH_COLOR[signUpStrength] : C.stroke }} />
+                      ))}
+                    </div>
+                    <span style={{ color: STRENGTH_COLOR[signUpStrength], fontSize: 12, fontWeight: 600 }}>
+                      {STRENGTH_LABEL[signUpStrength]}
+                    </span>
+                  </div>
+                  <div className="roo-pw-reqs">
+                    {[
+                      [signUpReqs.length, "8+ characters"],
+                      [signUpReqs.upper, "Uppercase letter"],
+                      [signUpReqs.number, "Number"],
+                      [signUpReqs.special, "Special character"],
+                    ].map(([met, label]) => (
+                      <span key={label} className={`roo-pw-req ${met ? "met" : ""}`}>
+                        <span>{met ? "✓" : "○"}</span> {label}
+                      </span>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
+            <Field
+              label="Confirm Password"
+              type="password"
+              placeholder="Re-enter your password"
+              value={confirmPassword}
+              onChange={setConfirmPassword}
+              showToggle
+              showVal={showConfirmPassword}
+              onToggle={() => setShowConfirmPassword((prev) => !prev)}
+            />
+            <button className="roo-btn-primary" type="submit" disabled={loading}>
+              {loading ? <Spinner /> : "Create Account"}
+            </button>
+          </form>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function WelcomeScreen({ onLoginClick, onCreateAccountClick, onSkip, currentUser, onLogout }) {
+  return (
+    <div className="welcome-shell">
+      <header className="welcome-header">
+        <RoomeoLogo width={150} />
+        <div className="welcome-header-actions">
+          {currentUser ? (
+            <>
+              <span className="welcome-user-pill">{currentUser.email}</span>
+              <button className="welcome-login-btn welcome-login-btn--ghost" onClick={onLogout}>Log out</button>
+            </>
+          ) : (
+            <button className="welcome-login-btn" onClick={onLoginClick}>Login</button>
+          )}
+        </div>
+      </header>
+
+      <div className="welcome-card">
+        <div className="roo-hero"><HeroIllustration /></div>
+        <div className="roo-heading">
+          <h1>Find your perfect<br /><span>roommate</span> today 🏠</h1>
+          <p>Join with email to save your progress, or continue as a guest and explore the survey right away.</p>
+        </div>
+        <div className="welcome-actions">
+          {!currentUser && (
+            <button className="roo-btn-primary" onClick={onCreateAccountClick}>Create Account</button>
+          )}
+          <button className="roo-btn-secondary" onClick={onSkip}>
+            {currentUser ? "Continue to Survey" : "Skip for now"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── Scoring Engine ───────────────────────────────────────────────────────────
 function scoreAnswers(answers) {
   let axis1 = 0, axis2 = 0;
@@ -1433,15 +1748,78 @@ function SurveyScreen({ onBack, onComplete }) {
   );
 }
 
+function VerifyEmailBanner({ email }) {
+  const [status, setStatus] = useState("idle"); // idle | sending | sent | error
+  const [cooldown, setCooldown] = useState(0);
+
+  useEffect(() => {
+    if (cooldown <= 0) return undefined;
+    const t = setInterval(() => setCooldown((s) => Math.max(0, s - 1)), 1000);
+    return () => clearInterval(t);
+  }, [cooldown]);
+
+  async function handleResend() {
+    if (!auth.currentUser || cooldown > 0) return;
+    setStatus("sending");
+    try {
+      await sendEmailVerification(auth.currentUser);
+      setStatus("sent");
+      setCooldown(30);
+    } catch {
+      setStatus("error");
+    }
+  }
+
+  return (
+    <div className="verify-banner">
+      <span className="verify-banner-text">
+        Please verify <strong>{email}</strong> to secure your account.
+        {status === "sent" && " Verification email sent — check your inbox."}
+        {status === "error" && " Couldn't send email, please try again."}
+      </span>
+      <button
+        className="verify-banner-btn"
+        onClick={handleResend}
+        disabled={status === "sending" || cooldown > 0}
+      >
+        {cooldown > 0 ? `Resend in ${cooldown}s` : status === "sending" ? "Sending…" : "Resend email"}
+      </button>
+    </div>
+  );
+}
+
 // ─── Root ─────────────────────────────────────────────────────────────────────
 export default function App() {
-  const [screen, setScreen] = useState("login"); // login | signup | success | survey
+  const [screen, setScreen] = useState("welcome"); // welcome | success | survey | result
   const [authData, setAuthData] = useState({});
+  const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [authModalTab, setAuthModalTab] = useState("login");
+
+  useEffect(() => {
+    const unsub = onAuthStateChanged(auth, (user) => {
+      if (!user) return;
+      setAuthData((prev) => ({
+        ...prev,
+        provider: "email",
+        name: user.displayName || user.email?.split("@")[0] || prev.name,
+        email: user.email || prev.email,
+        emailVerified: user.emailVerified,
+      }));
+    });
+    return () => unsub();
+  }, []);
 
   function handleSuccess(provider, data) {
     if (provider === "skip") { setScreen("survey"); return; }
     setAuthData({ provider, ...data });
+    setAuthModalOpen(false);
     setScreen("success");
+  }
+
+  async function handleLogout() {
+    await signOut(auth);
+    setAuthData({});
+    setScreen("welcome");
   }
 
   return (
@@ -1462,6 +1840,189 @@ export default function App() {
           display: flex; align-items: center; justify-content: center;
           padding: 24px 16px;
           background: linear-gradient(150deg, #e8ecf4 0%, #dce6f5 60%, #e4e8f2 100%);
+        }
+
+        .welcome-shell {
+          width: 100%;
+          max-width: 1120px;
+          display: flex;
+          flex-direction: column;
+          gap: 28px;
+        }
+        .welcome-header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 16px;
+        }
+        .welcome-header-actions {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          flex-wrap: wrap;
+          justify-content: flex-end;
+        }
+        .welcome-login-btn {
+          min-height: 44px;
+          border-radius: 999px;
+          border: none;
+          background: #1F1F1F;
+          color: white;
+          font-family: 'Poppins', sans-serif;
+          font-size: 14px;
+          font-weight: 600;
+          padding: 0 18px;
+          cursor: pointer;
+        }
+        .welcome-login-btn--ghost {
+          background: white;
+          color: #1F1F1F;
+          border: 1px solid #D9DFEB;
+        }
+        .welcome-user-pill {
+          min-height: 40px;
+          display: inline-flex;
+          align-items: center;
+          border-radius: 999px;
+          padding: 0 14px;
+          background: rgba(255,255,255,0.75);
+          color: #4B5563;
+          font-size: 13px;
+          font-weight: 500;
+          border: 1px solid rgba(4,98,210,0.08);
+        }
+        .welcome-card {
+          background: rgba(255,255,255,0.92);
+          border-radius: 32px;
+          box-shadow: 0 24px 64px rgba(4,98,210,0.09), 0 4px 16px rgba(0,0,0,0.06);
+          padding: 40px 40px 44px;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          text-align: center;
+        }
+        .welcome-card .roo-heading {
+          margin-bottom: 26px;
+          max-width: 580px;
+        }
+        .welcome-actions {
+          display: flex;
+          gap: 14px;
+          flex-wrap: wrap;
+          justify-content: center;
+        }
+        .welcome-actions .roo-btn-primary,
+        .welcome-actions .roo-btn-secondary {
+          width: auto;
+          min-width: 200px;
+          padding: 0 28px;
+        }
+
+        .auth-modal-shell {
+          position: fixed;
+          inset: 0;
+          z-index: 1000;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 24px 16px;
+        }
+        .auth-modal-backdrop {
+          position: absolute;
+          inset: 0;
+          background: rgba(26, 28, 30, 0.56);
+          backdrop-filter: blur(6px);
+        }
+        .auth-modal {
+          position: relative;
+          z-index: 1;
+          width: 100%;
+          max-width: 520px;
+          max-height: min(92vh, 840px);
+          overflow-y: auto;
+          background: #fff;
+          border-radius: 30px;
+          box-shadow: 0 28px 80px rgba(16,24,40,0.22);
+          padding: 32px 28px 28px;
+        }
+        .auth-modal-close {
+          position: absolute;
+          top: 16px;
+          right: 16px;
+          width: 36px;
+          height: 36px;
+          border: none;
+          border-radius: 50%;
+          background: #F6F7F9;
+          cursor: pointer;
+          color: #6C7278;
+          font-size: 15px;
+        }
+        .auth-modal-logo {
+          display: flex;
+          justify-content: center;
+          margin-bottom: 18px;
+        }
+        .auth-modal-title {
+          font-size: 28px;
+          font-weight: 700;
+          color: #1A1C1E;
+          text-align: center;
+          margin-bottom: 8px;
+        }
+        .auth-modal-sub {
+          margin: 0 0 22px;
+          text-align: center;
+          font-size: 14px;
+          color: #6C7278;
+          line-height: 1.6;
+        }
+        .auth-tabs {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 8px;
+          padding: 6px;
+          border-radius: 18px;
+          background: #F6F7F9;
+          margin-bottom: 18px;
+        }
+        .auth-tab {
+          min-height: 46px;
+          border: none;
+          border-radius: 14px;
+          background: transparent;
+          cursor: pointer;
+          font-family: 'Poppins', sans-serif;
+          font-size: 14px;
+          font-weight: 600;
+          color: #6C7278;
+        }
+        .auth-tab.active {
+          background: white;
+          color: #1A1C1E;
+          box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08);
+        }
+        .auth-modal-info {
+          background: #EEF6FF;
+          border: 1px solid #CFE2FF;
+          border-radius: 10px;
+          padding: 10px 14px;
+          font-size: 13px;
+          color: #1D4ED8;
+          font-family: 'Poppins', sans-serif;
+          line-height: 1.5;
+          margin-bottom: 14px;
+        }
+        .auth-inline-link {
+          background: none;
+          border: none;
+          color: #0462D2;
+          font-size: 13px;
+          font-weight: 600;
+          cursor: pointer;
+          padding: 0;
+          align-self: center;
+          margin-top: 4px;
         }
 
         .roo-card {
@@ -1763,6 +2324,38 @@ export default function App() {
           .roo-page { padding: 0; align-items: flex-start; background: #fff; }
           .roo-card { min-height: 100dvh; border-radius: 0; box-shadow: none; max-width: 100%; padding: 48px 24px 40px; }
           .roo-btn-primary { font-size: 18px; height: 58px; }
+          .welcome-shell { gap: 0; }
+          .welcome-header {
+            position: sticky;
+            top: 0;
+            z-index: 5;
+            background: rgba(255,255,255,0.92);
+            backdrop-filter: blur(12px);
+            padding: 18px 16px 12px;
+          }
+          .welcome-card {
+            min-height: calc(100dvh - 82px);
+            border-radius: 0;
+            box-shadow: none;
+            padding: 24px 20px 40px;
+            justify-content: center;
+          }
+          .welcome-actions {
+            width: 100%;
+            flex-direction: column;
+          }
+          .welcome-actions .roo-btn-primary,
+          .welcome-actions .roo-btn-secondary {
+            width: 100%;
+          }
+          .auth-modal-shell { padding: 0; }
+          .auth-modal {
+            max-width: 100%;
+            max-height: 100dvh;
+            border-radius: 0;
+            min-height: 100dvh;
+            padding: 52px 20px 24px;
+          }
         }
         @media (min-width: 640px) {
           .roo-card { padding: 44px 44px 48px; }
@@ -1822,40 +2415,48 @@ export default function App() {
         .roo-verify-sub strong { color: #1A1C1E; }
         .roo-verify-hint { font-size: 13px; color: #86909C; line-height: 1.6; max-width: 290px; }
         .roo-verify-resend { display: flex; align-items: center; gap: 6px; font-size: 13px; color: #6C7278; }
+
+        .verify-banner {
+          width: 100%;
+          max-width: 1120px;
+          margin: 0 auto 16px;
+          display: flex; flex-wrap: wrap; align-items: center; justify-content: center;
+          gap: 12px;
+          padding: 12px 20px;
+          border-radius: 14px;
+          background: #FFF7E6;
+          border: 1px solid #FCE1A8;
+          font-size: 13px;
+          color: #7A5A00;
+          text-align: center;
+        }
+        .verify-banner-text strong { color: #4A3800; }
+        .verify-banner-btn {
+          flex-shrink: 0;
+          border: 1px solid #F0C36D;
+          background: #fff;
+          color: #7A5A00;
+          font-family: 'Poppins', sans-serif;
+          font-size: 12px;
+          font-weight: 600;
+          padding: 6px 12px;
+          border-radius: 8px;
+          cursor: pointer;
+        }
+        .verify-banner-btn:disabled { opacity: 0.6; cursor: default; }
       `}</style>
 
       <div className="roo-page">
-        {screen === "login" && (
-          <LoginScreen
-            onSignUp={() => setScreen("signup")}
-            onSuccess={handleSuccess}
-            onForgotPassword={() => setScreen("forgot")}
-          />
+        {authData.email && authData.emailVerified === false && (
+          <VerifyEmailBanner email={authData.email} />
         )}
-        {screen === "signup" && (
-          <SignUpScreen
-            onLogin={() => setScreen("login")}
-            onSuccess={handleSuccess}
-          />
-        )}
-        {screen === "forgot" && (
-          <ForgotPasswordScreen
-            onBack={() => setScreen("login")}
-            onSent={(email) => { setAuthData(p => ({...p, resetEmail: email})); setScreen("check-reset"); }}
-          />
-        )}
-        {screen === "check-reset" && (
-          <CheckResetEmailScreen
-            email={authData.resetEmail}
-            onBack={() => setScreen("forgot")}
-            onResetPassword={() => setScreen("reset-password")}
-          />
-        )}
-        {screen === "reset-password" && (
-          <ResetPasswordScreen
-            email={authData.resetEmail}
-            onSuccess={() => setScreen("login")}
-            onBack={() => setScreen("login")}
+        {screen === "welcome" && (
+          <WelcomeScreen
+            currentUser={authData.email ? authData : null}
+            onLoginClick={() => { setAuthModalTab("login"); setAuthModalOpen(true); }}
+            onCreateAccountClick={() => { setAuthModalTab("signup"); setAuthModalOpen(true); }}
+            onSkip={() => handleSuccess("skip", {})}
+            onLogout={handleLogout}
           />
         )}
         {screen === "success" && (
@@ -1867,7 +2468,7 @@ export default function App() {
         )}
         {screen === "survey" && (
           <SurveyScreen
-            onBack={() => setScreen("login")}
+            onBack={() => setScreen("welcome")}
             onComplete={(answers) => { setAuthData(p => ({...p, answers})); setScreen("result"); }}
           />
         )}
@@ -1875,9 +2476,15 @@ export default function App() {
           <SuccessScreen
             provider={authData.provider}
             userData={authData}
-            onContinue={() => setScreen("login")}
+            onContinue={() => setScreen("welcome")}
           />
         )}
+        <AuthModal
+          open={authModalOpen}
+          defaultTab={authModalTab}
+          onClose={() => setAuthModalOpen(false)}
+          onAuthenticated={(data) => handleSuccess("email", data)}
+        />
       </div>
     </>
   );

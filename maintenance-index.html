@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MyRoomeo Under Construction</title>
+  <style>
+    :root {
+      --bg: #f6f1e8;
+      --card: rgba(255, 255, 255, 0.86);
+      --text: #2f1d14;
+      --muted: #7f6759;
+      --accent: #d76f4d;
+      --line: rgba(47, 29, 20, 0.12);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      font-family: Georgia, "Times New Roman", serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(215, 111, 77, 0.16), transparent 30%),
+        linear-gradient(180deg, #fcf8f2 0%, var(--bg) 100%);
+    }
+
+    .card {
+      width: min(680px, 100%);
+      padding: 48px 40px;
+      border: 1px solid var(--line);
+      border-radius: 28px;
+      background: var(--card);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 24px 60px rgba(47, 29, 20, 0.10);
+      text-align: center;
+    }
+
+    .eyebrow {
+      margin: 0 0 18px;
+      font: 700 13px/1.2 Arial, sans-serif;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+
+    h1 {
+      margin: 0 0 16px;
+      font-size: clamp(38px, 7vw, 64px);
+      line-height: 0.95;
+    }
+
+    p {
+      margin: 0 auto;
+      max-width: 34ch;
+      font: 400 18px/1.65 Arial, sans-serif;
+      color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <p class="eyebrow">Temporary Notice</p>
+    <h1>MyRoomeo is under construction.</h1>
+    <p>
+      We’re making updates behind the scenes and will be back soon.
+      Thank you for your patience.
+    </p>
+  </main>
+</body>
+</html>
