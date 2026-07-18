@@ -1,4 +1,9 @@
+.DS_Store
+.cursor/
+.gstack/
 node_modules/
+.preview-shots/
+compare-preview-real/
+.gstack-*.png
 dist/
 .env
-.DS_Store

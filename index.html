@@ -1,28 +1,52 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Roomeo — Find Your Perfect Roommate</title>
-    <meta name="description" content="Discover your roommate personality type and get matched with compatible people." />
-    <meta name="theme-color" content="#0462D2" />
-
-    <!-- Poppins font -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
-      rel="stylesheet"
-    />
-
-    <!-- Apple Sign In SDK (loaded here so it's available before React mounts) -->
-    <script
-      src="https://appleid.cdn-apple.com/appleauth/static/jsapi/appleid/1/en_US/appleid.auth.js"
-      defer
-    ></script>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>MyRoomeo — Every home has a vibe</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Roboto:wght@400;600;700&family=Roboto+Slab:wght@900&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet" />
+  <style>
+    :root{--paper:#f8f2e7;--ink:#2d1b14;--body:#4a3b33;--orange:#c7522b;--muted:#947d69;--page:1360px}
+    *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--paper);color:var(--ink);font-family:Roboto,Arial,sans-serif}a{color:inherit}img{display:block;max-width:100%}figure{margin:0}
+    .page{width:min(100%,var(--page));margin:0 auto;overflow:visible}.header{height:72px;width:1184px;max-width:calc(100% - 88px);margin:0 auto;display:flex;align-items:center}.header a{display:inline-block;transition:transform .25s ease,opacity .25s ease}.header a:hover{transform:translateY(-1px);opacity:.86}.header img{width:178px;height:auto;object-fit:contain;object-position:left center}
+    .section{width:100%;max-width:1280px;margin:10px auto 0;padding:23px 44px 0}.hero-title{width:960px;max-width:100%;margin:0 auto;text-align:center;font:400 76px/82px Fraunces,Georgia,serif;letter-spacing:-3.2px;font-variation-settings:"SOFT" 0,"WONK" 1}.hero-title .line-one{color:var(--muted);white-space:nowrap}.hero-title .line-two{color:#251711;white-space:nowrap}.hero-mascot{display:inline-block;width:73px;height:74px;vertical-align:-14px;margin:0 9px;position:relative}.hero-mascot img{width:73px;height:74px;object-fit:contain}.hero-intro{width:600px;max-width:100%;height:168px;margin:0 auto;text-align:center;padding-top:0}.hero-intro p{margin:0;font:400 19px/29px Roboto,Arial,sans-serif;color:#45403b}.hero-cta{display:flex;width:248px;height:60px;margin:22px auto 0;border-radius:15px;background:var(--orange);box-shadow:0 8px 18px rgba(51,26,15,.18);align-items:center;justify-content:center;color:#fdf9f1;text-decoration:none;font:700 16px/20px Roboto,Arial,sans-serif;transition:transform .22s ease,background-color .22s ease,box-shadow .22s ease}.hero-cta:hover{background:#ad4525;transform:translateY(-2px);box-shadow:0 12px 24px rgba(51,26,15,.22)}.hero-cta:active{transform:translateY(0);box-shadow:0 5px 12px rgba(51,26,15,.18)}.hero-cta:focus-visible{outline:0;box-shadow:0 0 0 4px rgba(199,82,43,.2),0 10px 22px rgba(51,26,15,.2)}
+    .double-wrap{height:596px;width:100%;position:relative;z-index:2}.duel-frame{position:absolute;inset:18px 0 auto;height:516px;filter:drop-shadow(0 18px 22px rgba(63,43,31,.16))}.duel-panel{position:absolute;top:0;bottom:0;width:calc(50% + 35px);overflow:hidden;background:#d5c1aa}.duel-panel img{width:100%;height:100%;object-fit:cover}.duel-harmony{left:0;clip-path:polygon(0 2%,calc(100% - 6px) 0,calc(100% - 76px) 100%,0 100%);border-radius:18px 0 0 18px}.duel-chaos{right:0;clip-path:polygon(76px 0,100% 2%,100% 100%,6px 100%);border-radius:0 18px 18px 0}.duel-label{position:absolute;z-index:3;width:252px;min-height:108px;padding:21px 24px;border-radius:17px;background:rgba(255,252,247,.91);box-shadow:0 10px 22px rgba(47,32,24,.16);backdrop-filter:blur(10px)}.duel-label h3{display:flex;align-items:center;gap:10px;margin:0 0 11px;font:700 20px/24px Fraunces,Georgia,serif}.duel-label h3 img{width:21px;height:21px}.duel-label p{margin:0;font:400 13px/19px Roboto,Arial,sans-serif}.duel-label-left{left:-8px;bottom:-10px;color:#566448}.duel-label-right{right:-8px;top:-10px;color:#563074}.duel-vs{position:absolute;z-index:4;left:50%;top:54%;width:124px;height:124px;transform:translate(-50%,-50%)}.duel-vs img{width:100%;height:100%}.duel-vs span{position:absolute;inset:0;display:grid;place-items:center;color:#473c35;font:600 31px/1 Fraunces,Georgia,serif}
+    .types{width:1360px;max-width:calc(100% + 88px);margin-left:-44px;position:relative;background:var(--paper)}.types-intro{height:240px;padding-top:120px;text-align:center}.types-intro h2{margin:0;font:400 60px/68px Fraunces,Georgia,serif;letter-spacing:-2.4px;font-variation-settings:"SOFT" 0,"WONK" 1}.cast-scroll{height:620vh;position:relative}.cast-stage{position:sticky;top:0;width:100%;height:100vh;min-height:700px;overflow:hidden;isolation:isolate;background:radial-gradient(circle at 50% 30%,#fffaf4 0,var(--paper) 58%,#ead8c2 100%)}.cast-stage:after{content:"";position:absolute;inset:auto 0 0;height:18vh;z-index:2;pointer-events:none;background:linear-gradient(transparent,rgba(83,56,38,.06))}.cast-canvas{position:absolute;inset:0;width:100%;height:100%;display:block}.cast-role-info{position:absolute;z-index:4;left:72px;bottom:88px;width:330px;opacity:0;transform:translateY(14px);transition:opacity .32s ease,transform .32s ease;pointer-events:none}.cast-role-info.is-visible{opacity:1;transform:translateY(0)}.cast-role-info .cast-index{margin:0 0 12px;color:#c7522b;font:700 11px/1 'Space Grotesk',Arial,sans-serif;letter-spacing:.16em;text-transform:uppercase}.cast-role-info h3{margin:0;font:400 48px/52px Fraunces,Georgia,serif;letter-spacing:-1.5px}.cast-role-info .cast-slogan{margin:13px 0 0;color:#5f4e45;font:400 15px/23px 'Space Grotesk',Arial,sans-serif}.cast-counter{position:absolute;z-index:4;left:50%;bottom:28px;transform:translateX(-50%);margin:0;color:#78665a;font:500 11px/1 'Space Grotesk',Arial,sans-serif;letter-spacing:.12em;text-transform:uppercase;pointer-events:none}
+    .match{height:1180px;width:100vw;max-width:none;margin-left:calc(50% - 50vw);position:relative;overflow:hidden;background:var(--paper)}.match-lawn{position:absolute;left:0;right:0;top:875px;bottom:0;background:url('assets/figma-home/footer-lawn-clean.png') center bottom/cover no-repeat}.footer-house,.footer-people{position:absolute;left:0;top:220px;width:100%;height:760px;object-fit:cover;z-index:1;pointer-events:none}.footer-people{transform:scale(1.08);transform-origin:center center;object-position:center 42%}.match:after{content:"";position:absolute;left:0;right:0;bottom:0;height:350px;background:linear-gradient(transparent,rgba(45,27,20,.68));pointer-events:none;z-index:2}.match-content{position:absolute;top:64px;left:0;right:0;text-align:center;z-index:3}.match-content h2{margin:0;font:400 60px/72px Fraunces,Georgia,serif;letter-spacing:-.38px;font-variation-settings:"SOFT" 0,"WONK" 1}.match-content p{margin:18px auto 0;max-width:720px;color:#6b5a50;font:400 16px/24px Roboto,Arial,sans-serif}.email{position:relative;height:58px;width:410px;margin:26px auto 0;border:1px solid rgba(252,111,49,.14);border-radius:30px;background:rgba(46,26,19,.56);box-shadow:0 10px 26px rgba(45,27,20,.14);display:flex;align-items:center;padding-left:22px;overflow:hidden;transition:border-color .22s ease,background-color .22s ease,box-shadow .22s ease}.email:hover{background:rgba(46,26,19,.63)}.email:focus-within{border-color:rgba(255,255,255,.5);background:rgba(46,26,19,.68);box-shadow:0 0 0 4px rgba(199,82,43,.13),0 12px 30px rgba(45,27,20,.18)}.email input{flex:1;min-width:0;border:0;background:transparent;outline:0;color:#fff;font:400 14px Roboto,Arial,sans-serif}.email input::placeholder{color:#fff;opacity:1}.email button{height:48px;width:140px;margin-right:5px;border:0;border-radius:25px;background:#ff6a2a;color:#fff;font:600 13px Roboto,Arial,sans-serif;cursor:pointer;transition:transform .2s ease,background-color .2s ease,box-shadow .2s ease}.email button:hover{background:#e9561f;transform:translateY(-1px);box-shadow:0 6px 14px rgba(45,27,20,.2)}.email button:active{transform:translateY(0);box-shadow:none}.email button:focus-visible{outline:0;box-shadow:0 0 0 3px rgba(255,255,255,.34)}.footer-row{position:absolute;left:max(72px,calc((100vw - 1280px)/2 + 72px));right:max(72px,calc((100vw - 1280px)/2 + 72px));top:948px;height:112px;z-index:4;display:flex;align-items:flex-end;justify-content:space-between}.footer-brand{display:flex;align-items:center;height:30px;margin-bottom:12px;color:#fff}.footer-copy{color:#f8f1e6;font:500 15px/20px 'Space Grotesk',Arial,sans-serif;letter-spacing:.01em}.social{display:flex;gap:24px;align-items:center;height:30px;margin-bottom:12px}.social img{width:30px;height:30px;filter:brightness(0) invert(1);opacity:.92;transition:transform .2s ease,opacity .2s ease}.social img:hover{transform:translateY(-2px);opacity:1}
+    @media(max-width:900px){.header{max-width:calc(100% - 36px)}.section{padding-left:18px;padding-right:18px}.hero-title{font-size:clamp(40px,8vw,76px);line-height:1}.hero-title .line-one,.hero-title .line-two{white-space:normal}.hero-mascot{width:48px;height:49px;vertical-align:-10px}.hero-mascot img{width:48px;height:49px}.double-wrap{height:auto;aspect-ratio:1192/554}.duel-frame{inset:10px 0;height:calc(100% - 20px)}.duel-label{display:none}.duel-vs{width:76px;height:76px}.duel-vs span{font-size:22px}.types{max-width:100%;margin:0}.types-intro{height:190px;padding-top:90px}.types-intro h2{font-size:clamp(38px,8vw,54px);line-height:1}.cast-scroll{height:560vh}.cast-stage{min-height:620px}.cast-role-info{left:24px;right:24px;bottom:70px;width:auto}.cast-role-info h3{font-size:36px;line-height:40px}.cast-role-info .cast-slogan{max-width:340px}.match{height:900px}.match-content{top:48px;padding:0 22px}.match-content h2{font-size:40px;line-height:1.1}.match-content p{font-size:14px;line-height:21px}.email{width:min(410px,100%);margin-top:22px}.footer-house,.footer-people{top:245px;height:520px}.match-lawn{top:690px}.footer-row{left:24px;right:24px;top:738px}.copyright{left:24px;top:834px}.social{gap:10px}}
+    .cast-stage{background:var(--paper)}
+    .cast-stage:after{display:none}
+    @media(prefers-reduced-motion:reduce){.header a,.hero-cta,.email,.email button,.social img{transition:none}.header a:hover,.hero-cta:hover,.email button:hover,.social img:hover{transform:none}}
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header class="header"><a href="index.html" aria-label="MyRoomeo home"><img src="assets/brand/logo02.svg" alt="MyRoomeo" /></a></header>
+    <main class="section">
+      <section aria-labelledby="hero-title">
+        <h1 class="hero-title" id="hero-title"><span class="line-one">Every <span class="hero-mascot"><img src="assets/figma-home/mascot.png" alt="" /></span> home has a vibe.</span><br><span class="line-two">You choose who creates it.</span></h1>
+        <div class="hero-intro"><p>Discover your roomie type in under 5 minutes.</p><a class="hero-cta" href="quiz.html?version=20260718c&amp;start=1">Take the Roomie Test&nbsp; →</a></div>
+      </section>
+      <section class="double-wrap" aria-label="Harmony and chaos roomie comparison"><div class="duel-frame"><figure class="duel-panel duel-harmony"><img src="assets/figma-home/harmony.png" alt="Roomies enjoying a harmonious home"></figure><figure class="duel-panel duel-chaos"><img src="assets/figma-home/chaos.png" alt="Roomies experiencing a chaotic home"></figure><div class="duel-label duel-label-left"><h3><img src="assets/figma-home/smile.svg" alt="">The Harmony Crew</h3><p>Good vibes. Shared meals.<br>Respect. Recharge together.</p></div><div class="duel-label duel-label-right"><h3><img src="assets/figma-home/angry.svg" alt="">The Chaos Crew</h3><p>Different lifestyles.<br>Different priorities.</p></div><div class="duel-vs" aria-hidden="true"><img src="assets/figma-home/vs.svg" alt=""><span>VS</span></div></div></section>
+      <section class="types" id="types" aria-labelledby="types-title">
+        <div class="types-intro"><h2 id="types-title">Which roomie type are you?</h2></div>
+        <div class="cast-scroll" data-roomie-cast>
+          <div class="cast-stage">
+          <canvas class="cast-canvas" aria-hidden="true"></canvas>
+          <aside class="cast-role-info" aria-live="polite">
+            <p class="cast-index" data-cast-index>ROOMIE TYPE · 01 / 06</p>
+            <h3 data-cast-name>The Beaver</h3>
+            <p class="cast-slogan" data-cast-slogan></p>
+          </aside>
+          <p class="cast-counter" data-cast-counter>Scroll to meet all six</p>
+          </div>
+        </div>
+      </section>
+    </main>
+    <section class="match" id="match"><div class="match-lawn"></div><img class="footer-house" src="assets/figma-home/footer-house-clean.png" alt=""><img class="footer-people" src="assets/figma-home/footer-people-clean.png" alt=""><div class="match-content"><h2>Join the first match pool</h2><p>The right roomie makes all the difference.<br>Discover your roomie type in under 5 minutes and prepare for smarter matching in Phase 2.</p><form class="email"><input type="email" placeholder="Enter your email" aria-label="Email address"><button type="submit">Join beta →</button></form></div><div class="footer-row"><div class="footer-brand"><span class="footer-copy">© 2026 MyRoomeo. All rights reserved.</span></div><div class="social"><img src="assets/figma-home/tiktok.svg" alt="TikTok"><img src="assets/figma-home/x.svg" alt="X"><img src="assets/figma-home/instagram.svg" alt="Instagram"></div></div></section>
+  </div>
+<script type="module" src="roomie-cast.js?v=24"></script>
+</body>
 </html>

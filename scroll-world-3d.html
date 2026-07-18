@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MyRoomeo — 3D roommate house</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root { --paper:#f8f2e8; --ink:#2d1b14; --muted:#78665a; --accent:#d66a48; }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: Inter, system-ui, sans-serif; }
+    .world { height: 760vh; }
+    .stage { position: sticky; top: 0; height: 100vh; overflow: hidden; isolation: isolate; }
+    .stage::before { content:""; position:absolute; inset:0; z-index:-2; background: radial-gradient(circle at 50% 25%, #fffaf4 0, var(--paper) 52%, #ead8c2 100%); }
+    .stage::after { content:""; position:absolute; inset:auto 0 0; height:18vh; z-index:3; pointer-events:none; background:linear-gradient(transparent,rgba(83,56,38,.06)); }
+    #scene { position:absolute; inset:0; display:block; width:100%; height:100%; }
+    .topbar { position:absolute; z-index:8; top:22px; left:clamp(20px,4vw,56px); right:clamp(20px,4vw,56px); display:flex; align-items:center; justify-content:space-between; }
+    .brand { display:inline-flex; align-items:center; min-height:44px; color:var(--ink); text-decoration:none; }
+    .brand img { width:auto; height:34px; display:block; }
+    .top-cta { display:inline-flex; align-items:center; justify-content:center; min-height:44px; padding:0 18px; border-radius:999px; background:var(--ink); color:#fff8ee; text-decoration:none; font-size:13px; font-weight:600; box-shadow:0 8px 20px rgba(45,27,20,.12); transition:transform .2s ease, background .2s ease; }
+    .top-cta:hover { transform:translateY(-2px); background:#4b2c20; }
+    .copy { position:absolute; z-index:5; left:50%; top:clamp(28px,7vh,82px); width:min(760px,calc(100vw - 40px)); transform:translateX(-50%); padding:10px 24px 14px; text-align:center; pointer-events:none; background:radial-gradient(ellipse at center,rgba(248,242,232,.94) 0,rgba(248,242,232,.72) 46%,rgba(248,242,232,0) 78%); }
+    .eyebrow { margin:0 0 14px; color:var(--accent); font:600 12px/1 Inter,sans-serif; letter-spacing:.16em; text-transform:uppercase; }
+    h1 { margin:0; font:600 clamp(40px,6vw,82px)/.94 Fraunces,Georgia,serif; letter-spacing:-.045em; }
+    .copy p { max-width:540px; margin:17px auto 0; color:var(--muted); font-size:clamp(14px,1.5vw,18px); line-height:1.5; }
+    .counter { margin-top:18px; color:var(--muted); font-size:11px; letter-spacing:.12em; text-transform:uppercase; }
+    .hero-cta { display:inline-flex; align-items:center; justify-content:center; min-height:48px; margin-top:22px; padding:0 24px; border-radius:999px; background:#d66a48; color:#fff8ee; text-decoration:none; font-size:14px; font-weight:600; box-shadow:0 10px 22px rgba(214,106,72,.22); pointer-events:auto; transition:transform .2s ease, background .2s ease; }
+    .hero-cta:hover { transform:translateY(-2px); background:#bf5739; }
+    .role-info { position:absolute; z-index:6; left:clamp(24px,4vw,70px); bottom:clamp(70px,12vh,126px); width:min(300px,25vw); opacity:0; transform:translateY(14px); transition:opacity .35s ease, transform .35s ease; pointer-events:none; }
+    .role-info.is-visible { opacity:1; transform:translateY(0); }
+    .role-info .role-index { margin:0 0 12px; color:var(--accent); font-size:11px; font-weight:600; letter-spacing:.16em; text-transform:uppercase; }
+    .role-info h2 { margin:0; font:600 clamp(28px,3.5vw,48px)/.98 Fraunces,Georgia,serif; letter-spacing:-.04em; }
+    .role-info p { margin:12px 0 0; color:var(--muted); font-size:14px; line-height:1.5; }
+    .hint { position:absolute; z-index:5; left:50%; bottom:28px; transform:translateX(-50%); color:var(--muted); font-size:11px; letter-spacing:.1em; text-transform:uppercase; }
+    .end { min-height:75vh; padding:15vh 24px; background:#f2e8da; text-align:center; }
+    .end h2 { margin:0; font:600 clamp(36px,5vw,68px)/1 Fraunces,Georgia,serif; letter-spacing:-.04em; }
+    .end p { max-width:500px; margin:18px auto 0; color:var(--muted); line-height:1.6; }
+    .end a { display:inline-flex; margin-top:28px; padding:14px 22px; border-radius:999px; background:var(--ink); color:#fff8ee; text-decoration:none; font-weight:600; }
+    @media (max-width:720px) { .world { height:600vh; } .copy { top:42px; } .copy p { margin-top:12px; } .role-info { left:24px; right:24px; bottom:72px; width:auto; } .role-info h2 { font-size:32px; } .role-info p { max-width:320px; } .hint { bottom:20px; font-size:10px; } }
+    @media (prefers-reduced-motion:reduce) { html { scroll-behavior:auto; } }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="world" aria-label="A 3D house for the six Roomie types">
+      <div class="stage">
+        <canvas id="scene" aria-hidden="true"></canvas>
+        <div class="topbar">
+          <a class="brand" href="index.html" aria-label="MyRoomeo home"><img src="assets/brand/logo02.svg" alt="MyRoomeo" /></a>
+          <a class="top-cta" href="quiz.html?version=20260718c&amp;start=1">Take the survey&nbsp; →</a>
+        </div>
+        <div class="copy">
+          <p class="eyebrow">MyRoomeo / the house of habits</p>
+          <h1>Every home has a vibe.</h1>
+          <p>Scroll into the house and meet the six rhythms that make a roommate feel like a match.</p>
+          <a class="hero-cta" href="quiz.html?version=20260718c&amp;start=1">Discover your Roomie type&nbsp; →</a>
+          <div class="counter" id="counter">Outside the house · 01 / 06</div>
+        </div>
+        <aside class="role-info" id="roleInfo" aria-live="polite">
+          <p class="role-index" id="roleIndex">ROOMIE TYPE · 01 / 06</p>
+          <h2 id="roleName">The Cat</h2>
+          <p id="roleSlogan"></p>
+        </aside>
+        <div class="hint">Scroll to enter the house</div>
+      </div>
+    </section>
+    <section class="end">
+      <h2>Find the rhythm that fits yours.</h2>
+      <p>Take the survey in under five minutes. Your answers help us build a better first match pool for the Roomeo community.</p>
+      <a href="quiz.html?version=20260718c&amp;start=1">Take the survey&nbsp; →</a>
+    </section>
+  </main>
+
+  <script type="module">
+    import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
+
+    const canvas = document.querySelector('#scene');
+    const world = document.querySelector('.world');
+    const counter = document.querySelector('#counter');
+    const roleInfo = document.querySelector('#roleInfo');
+    const roleIndex = document.querySelector('#roleIndex');
+    const roleName = document.querySelector('#roleName');
+    const roleSlogan = document.querySelector('#roleSlogan');
+    const renderer = new THREE.WebGLRenderer({canvas, antialias:true, alpha:true});
+    renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+
+    const scene = new THREE.Scene();
+    scene.fog = new THREE.Fog('#f8f2e8', 30, 80);
+    const camera = new THREE.OrthographicCamera(-10,10,6,-6,.1,100);
+    const loader = new THREE.TextureLoader();
+    const house = new THREE.Group();
+    house.position.y = -3.6;
+    scene.add(house);
+
+    const roles = [
+      {slug:'cat', name:'The Cat', slogan:"I don't live here. I'm just a recurring guest in your life.", color:'#dfe4b0', window:'rect', windowSize:[3.18,3.28]},
+      {slug:'owl', name:'The Owl', slogan:"I'm not being rude, I'm just practicing the fine art of existing without being perceived.", color:'#e6b197', window:'rect', windowSize:[3.34,3.18]},
+      {slug:'beaver', name:'The Beaver', slogan:"I'm not controlling, I'm just the only one here with a frontal lobe.", color:'#e7b79b', window:'arch', windowSize:[3.2,3.52]},
+      {slug:'bunny', name:'The Bunny', slogan:"Living alone is for people with boring secrets. Anyway, is it okay if 8 people come over for a few drinks?", color:'#e5c2b7', window:'rect', windowSize:[3.18,3.18]},
+      {slug:'fox', name:'The Fox', slogan:"I know I haven't done my dishes, but look at this vintage lamp I found on the sidewalk!", color:'#d4c3a8', window:'arch', windowSize:[3.2,3.5]},
+      {slug:'turtle', name:'The Turtle', slogan:"I'm not stuck at home. I'm thriving in my ecosystem. Also, is that my specialized mug you're touching?", color:'#dfe4b0', window:'rect', windowSize:[3.34,3.18]},
+    ];
+
+    const mat = (color, rough=.9) => new THREE.MeshStandardMaterial({color, roughness:rough, metalness:0});
+    const wallMat = mat('#dfb8aa');
+    const insideMat = mat('#e3cdb4');
+    const sillMat = mat('#d1ad98');
+
+    // House shell: a recognizable front-facing home, with a real wall, roof, door and window rhythm.
+    const body = new THREE.Mesh(new THREE.BoxGeometry(13.8,7.2,4.2), wallMat);
+    body.position.set(0,3.6,0); body.castShadow = true; body.receiveShadow = true; house.add(body);
+    const roofShape = new THREE.Shape();
+    roofShape.moveTo(-7.25,0); roofShape.lineTo(-1.3,2.45); roofShape.lineTo(4.2,2.85); roofShape.lineTo(7.25,0); roofShape.closePath();
+    const roofGeo = new THREE.ExtrudeGeometry(roofShape,{depth:4.35,bevelEnabled:false});
+    roofGeo.translate(0,0,-2.18);
+    const roof = new THREE.Mesh(roofGeo, mat('#c18870'));
+    roof.position.y = 7.05; roof.castShadow = true; roof.receiveShadow = true; house.add(roof);
+    const eave = new THREE.Mesh(new THREE.BoxGeometry(14.6,.18,.34), sillMat);
+    eave.position.set(0,7.02,2.22); eave.castShadow = true; house.add(eave);
+    const frontFrameMat = mat('#a77d69');
+    const frontLeft = new THREE.Mesh(new THREE.BoxGeometry(.16,7.25,.24), frontFrameMat);
+    frontLeft.position.set(-6.9,3.6,2.2); frontLeft.castShadow = true; house.add(frontLeft);
+    const frontRight = frontLeft.clone(); frontRight.position.x = 6.9; house.add(frontRight);
+    const door = new THREE.Mesh(new THREE.BoxGeometry(1.5,2.8,.14), mat('#5b3b31'));
+    door.position.set(4.65,1.4,2.23); door.castShadow = true; house.add(door);
+    const doorStep = new THREE.Mesh(new THREE.BoxGeometry(1.86,.14,.45), sillMat);
+    doorStep.position.set(4.65,.02,2.42); doorStep.castShadow=true; house.add(doorStep);
+
+    const light = new THREE.HemisphereLight('#fff9ef','#c3a27d',2.1); scene.add(light);
+    const sun = new THREE.DirectionalLight('#fff1d9',3.4); sun.position.set(-5,11,10); sun.castShadow = true; sun.shadow.mapSize.set(2048,2048); scene.add(sun);
+
+    function shapeFor(type, w=3.6, h=3.0) {
+      const s = new THREE.Shape();
+      if (type === 'arch') { s.moveTo(-w/2,-h/2); s.lineTo(-w/2,h*.12); s.absarc(0,h*.12,w/2,Math.PI,0,true); s.lineTo(w/2,-h/2); s.closePath(); }
+      else if (type === 'gable') { s.moveTo(-w/2,-h/2); s.lineTo(-w/2,h*.06); s.lineTo(0,h/2); s.lineTo(w/2,h*.06); s.lineTo(w/2,-h/2); s.closePath(); }
+      else if (type === 'angled') { s.moveTo(-w/2,-h/2); s.lineTo(w*.26,-h/2); s.lineTo(w/2,-h*.16); s.lineTo(w/2,h/2); s.lineTo(-w/2,h/2); s.closePath(); }
+      else if (type === 'oval') { s.absellipse(0,0,w/2,h/2,0,Math.PI*2,false,0); }
+      else { s.moveTo(-w/2,-h/2); s.lineTo(w/2,-h/2); s.lineTo(w/2,h/2); s.lineTo(-w/2,h/2); s.closePath(); }
+      return s;
+    }
+
+    function labelTexture(name, line) {
+      const c = document.createElement('canvas'); c.width = 720; c.height = 220;
+      const ctx = c.getContext('2d');
+      ctx.fillStyle = '#2d1b14'; ctx.font = '600 42px Fraunces, Georgia, serif'; ctx.fillText(name,36,72);
+      ctx.fillStyle = '#78665a'; ctx.font = '25px Inter, sans-serif';
+      const words = line.split(' '); let row = '', y = 118;
+      for (const word of words) { const next = row ? row + ' ' + word : word; if (ctx.measureText(next).width > 630) { ctx.fillText(row,36,y); row = word; y += 34; } else row = next; }
+      if (row) ctx.fillText(row,36,y);
+      const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace; return tex;
+    }
+
+    // The Figma role cards are wide cut-outs with a colored house silhouette behind each person.
+    // Remove the flat chroma-key color so the full-body character can sit naturally inside our windows.
+    function cutoutRoleTexture(path, done) {
+      const img = new Image(); img.onload = () => {
+        const c = document.createElement('canvas'); c.width = img.naturalWidth; c.height = img.naturalHeight;
+        const ctx = c.getContext('2d'); ctx.drawImage(img,0,0);
+        const image = ctx.getImageData(0,0,c.width,c.height); const px = image.data; const w=c.width, h=c.height;
+        const orange = i => { const r=px[i], g=px[i+1], b=px[i+2], a=px[i+3]; return a>20 && r>232 && g>66 && g<148 && b<88 && r-g>108; };
+        // Remove the flat orange silhouette everywhere, including the enclosed roof shard behind the head.
+        // The stricter chroma key keeps the shaded orange fur intact.
+        for(let p=0;p<w*h;p++) if(orange(p*4)) px[p*4+3]=0;
+        ctx.putImageData(image,0,0);
+        let minX=w,minY=h,maxX=0,maxY=0; for(let y=0;y<h;y++) for(let x=0;x<w;x++) if(px[(y*w+x)*4+3]>24){ minX=Math.min(minX,x); minY=Math.min(minY,y); maxX=Math.max(maxX,x); maxY=Math.max(maxY,y); }
+        const pad=18; minX=Math.max(0,minX-pad); minY=Math.max(0,minY-pad); maxX=Math.min(w,maxX+pad); maxY=Math.min(h,maxY+pad);
+        const crop=document.createElement('canvas'); crop.width=maxX-minX; crop.height=maxY-minY; crop.getContext('2d').drawImage(c,minX,minY,crop.width,crop.height,0,0,crop.width,crop.height);
+        const tex=new THREE.CanvasTexture(crop); tex.colorSpace=THREE.SRGBColorSpace; done(tex,crop.width/crop.height);
+      }; img.src=path;
+    }
+
+    roles.forEach((role, i) => {
+      const col = i % 3; const row = i < 3 ? 0 : 1;
+      const group = new THREE.Group();
+      group.name = role.name;
+      group.position.set((col-1)*4.65, row === 0 ? 4.9 : 1.55, 2.55);
+      const [ww, hh] = role.windowSize;
+      const frame = new THREE.Mesh(new THREE.ShapeGeometry(shapeFor(role.window,ww+.16,hh+.16)), mat('#f5eee5'));
+      frame.position.z = .12; frame.castShadow = true; group.add(frame);
+      const inner = new THREE.Mesh(new THREE.ShapeGeometry(shapeFor(role.window,ww,hh)), insideMat);
+      inner.position.z = .17; group.add(inner);
+      const backTexture = loader.load(`assets/result-hero/${role.slug}.png`); backTexture.colorSpace = THREE.SRGBColorSpace;
+      const roomBack = new THREE.Mesh(new THREE.PlaneGeometry(ww*.9,hh*.84), new THREE.MeshBasicMaterial({map:backTexture, transparent:true, opacity:0}));
+      roomBack.position.set(0,.02,.21); group.add(roomBack);
+      const characterMaterial = new THREE.MeshBasicMaterial({transparent:true, alphaTest:.02, depthTest:false});
+      const character = new THREE.Mesh(new THREE.PlaneGeometry(1,1), characterMaterial);
+      character.position.set(0,-.12,.43); character.castShadow = true; group.add(character);
+      cutoutRoleTexture(`assets/roommate-type-cards/RoommateTypeCard_${role.slug}.png`, (texture, aspect) => {
+        character.material.map = texture; character.material.needsUpdate = true;
+        const targetH = hh * .88; const targetW = Math.min(ww * .86, targetH * aspect);
+        character.scale.set(targetW,targetH,1);
+      });
+      const sill = new THREE.Mesh(new THREE.BoxGeometry(3.92,.12,.34), sillMat); sill.position.set(0,-1.73,.38); sill.castShadow=true; group.add(sill);
+      group.userData = {index:i, focus:0, baseScale:1}; house.add(group);
+    });
+
+    const rooms = house.children.filter(n => roles.some(r => n.name === r.name));
+    const route = [
+      {p:0, pos:[0,1.65,25], target:[0,1.3,0]},
+      {p:.16, pos:[-4.4,1.7,7.2], target:[-4.4,1.3,2.3]},
+      {p:.32, pos:[0,1.7,6.4], target:[0,1.3,2.3]},
+      {p:.48, pos:[4.4,1.7,7.2], target:[4.4,1.3,2.3]},
+      {p:.64, pos:[-4.4,-1.65,6.4], target:[-4.4,-2.05,2.3]},
+      {p:.80, pos:[0,-1.65,5.4], target:[0,-2.05,2.3]},
+      {p:1, pos:[4.4,-1.65,6.4], target:[4.4,-2.05,2.3]},
+    ];
+    const ease = t => t*t*(3-2*t);
+    function routeAt(p) {
+      for (let i=0;i<route.length-1;i++) if (p <= route[i+1].p) {
+        const a=route[i], b=route[i+1], t=ease((p-a.p)/(b.p-a.p));
+        return {pos:a.pos.map((v,j)=>THREE.MathUtils.lerp(v,b.pos[j],t)),target:a.target.map((v,j)=>THREE.MathUtils.lerp(v,b.target[j],t))};
+      }
+      return route[route.length-1];
+    }
+    function resize() { const w=innerWidth, h=innerHeight; const frustumH=12; const frustumW=frustumH*w/h; renderer.setSize(w,h,false); camera.left=-frustumW/2; camera.right=frustumW/2; camera.top=frustumH/2; camera.bottom=-frustumH/2; camera.updateProjectionMatrix(); }
+    addEventListener('resize',resize); resize();
+    let scrollP=0;
+    camera.position.set(...route[0].pos); camera.lookAt(new THREE.Vector3(...route[0].target));
+    function render() {
+      const max=Math.max(1,world.offsetHeight-innerHeight); scrollP=Math.min(1,Math.max(0,(scrollY-world.offsetTop)/max));
+      const r=routeAt(scrollP); camera.position.lerp(new THREE.Vector3(...r.pos),.12); camera.lookAt(new THREE.Vector3(...r.target)); camera.zoom=1.05 + Math.sin(scrollP*Math.PI)*.95; camera.updateProjectionMatrix();
+      const focus=scrollP*6; let active=Math.round(focus)-1; if(scrollP<.08) active=-1;
+      if(active<0) { counter.textContent='Outside the house · scroll to enter'; roleInfo.classList.remove('is-visible'); }
+      else { counter.textContent=''; roleIndex.textContent=`ROOMIE TYPE · ${String(active+1).padStart(2,'0')} / 06`; roleName.textContent=roles[active].name; roleSlogan.textContent=roles[active].slogan; roleInfo.classList.add('is-visible'); }
+      rooms.forEach((room,i)=>{ const d=Math.abs(i-focus); const s=1-Math.min(.06,d*.018); room.scale.setScalar(s); });
+      renderer.render(scene,camera); requestAnimationFrame(render);
+    }
+    addEventListener('scroll',()=>{}, {passive:true});
+    render();
+  </script>
+</body>
+</html>

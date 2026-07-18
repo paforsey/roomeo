@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MyRoomeo — Scroll world preview</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --paper: #f8f2e8;
+      --ink: #2d1b14;
+      --muted: #78665a;
+      --roof: #996445;
+      --wall: #f0e2d0;
+      --sill: #d5b691;
+      --accent: #d66a48;
+      --olive: #a5a35c;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: Inter, system-ui, sans-serif; }
+    .scroll-world { height: 690vh; }
+    .world-sticky { position: sticky; top: 0; height: 100vh; overflow: hidden; isolation: isolate; }
+    .world-sticky::before { content: ""; position: absolute; inset: 0; background: radial-gradient(circle at 50% 22%, #fffaf4 0, var(--paper) 52%, #ead9c4 100%); z-index: -2; }
+    .world-sticky::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 18vh; background: linear-gradient(transparent, rgba(74,50,40,.08)); z-index: -1; pointer-events: none; }
+    .world-copy { position: absolute; z-index: 5; left: 50%; top: clamp(28px, 8vh, 86px); transform: translateX(-50%); width: min(720px, calc(100vw - 48px)); text-align: center; }
+    .eyebrow { margin: 0 0 18px; color: var(--accent); font: 600 12px/1 Inter, sans-serif; letter-spacing: .16em; text-transform: uppercase; }
+    h1 { margin: 0; font: 600 clamp(38px, 6vw, 78px)/.95 Fraunces, Georgia, serif; letter-spacing: -.045em; }
+    .world-copy p { margin: 18px auto 0; max-width: 520px; color: var(--muted); font-size: clamp(14px, 1.5vw, 18px); line-height: 1.55; }
+    .progress { margin: 24px auto 0; color: var(--muted); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; }
+    .diorama { position: absolute; left: 50%; top: 57%; width: min(900px, 90vw); height: min(560px, 58vh); transform-style: preserve-3d; transform: translate3d(-50%, -50%, 0) rotateX(9deg) rotateY(0deg); transition: transform .16s linear; }
+    .ground { position: absolute; left: -8%; right: -8%; bottom: -8%; height: 24%; border-radius: 50%; background: radial-gradient(ellipse at center, rgba(111,92,69,.24), rgba(111,92,69,0) 72%); transform: rotateX(68deg) translateZ(-90px); }
+    .roof { position: absolute; z-index: 1; left: 6%; top: -3%; width: 88%; height: 28%; background: var(--roof); clip-path: polygon(50% 0, 100% 100%, 0 100%); transform: translateZ(-38px); filter: saturate(.82); }
+    .roof::after { content: ""; position: absolute; left: 8%; right: 8%; bottom: 0; height: 18%; background: rgba(255,255,255,.08); clip-path: polygon(50% 0, 100% 100%, 0 100%); }
+    .house-body { position: absolute; inset: 12% 6% 5%; z-index: 2; padding: clamp(20px, 2.2vw, 34px); border-radius: 30px 30px 22px 22px; background: var(--wall); box-shadow: 0 24px 55px rgba(66,42,28,.18), inset 0 0 0 1px rgba(78,44,28,.08); transform: translateZ(0); }
+    .rooms { display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(2, 1fr); gap: clamp(10px, 1.5vw, 18px); width: 100%; height: 100%; perspective: 1000px; }
+    .room { --focus: 1; --tilt: 0deg; position: relative; min-width: 0; overflow: hidden; border-radius: 22px; background: #e7d3be center / cover no-repeat; transform: translateZ(0) rotate(var(--tilt)) scale(var(--focus)); transform-origin: center; transition: transform .38s cubic-bezier(.2,.7,.2,1), filter .38s ease, opacity .38s ease; filter: saturate(calc(.75 + var(--focus) * .25)) contrast(calc(.9 + var(--focus) * .1)); }
+    .room::before { content: ""; position: absolute; inset: 0; background: linear-gradient(150deg, rgba(255,250,243,.12), rgba(35,18,10,.34)); pointer-events: none; }
+    .room::after { content: ""; position: absolute; inset: 0; box-shadow: inset 0 0 0 2px rgba(255,249,241,.32); border-radius: inherit; pointer-events: none; }
+    .room[data-type="beaver"] { background-image: url("assets/result-hero/beaver.png"); --tilt: -1deg; }
+    .room[data-type="cat"] { background-image: url("assets/result-hero/cat.png"); --tilt: 1deg; }
+    .room[data-type="owl"] { background-image: url("assets/result-hero/owl.png"); --tilt: -1deg; }
+    .room[data-type="fox"] { background-image: url("assets/result-hero/fox.png"); --tilt: 1deg; }
+    .room[data-type="bunny"] { background-image: url("assets/result-hero/bunny.png"); --tilt: -1deg; }
+    .room[data-type="turtle"] { background-image: url("assets/result-hero/turtle.png"); --tilt: 1deg; }
+    .room-label { position: absolute; z-index: 2; left: 14px; right: 14px; bottom: 14px; padding: 12px 14px 13px; border-radius: 14px; background: rgba(250,246,238,.88); color: var(--ink); backdrop-filter: blur(12px); transform: translateZ(20px); }
+    .room-label strong { display: block; font: 600 17px/1.1 Fraunces, Georgia, serif; }
+    .room-label span { display: block; margin-top: 5px; color: var(--muted); font-size: 11px; line-height: 1.35; }
+    .house-sill { position: absolute; z-index: 3; left: 5%; right: 5%; bottom: 1%; height: 18px; border-radius: 20px; background: var(--sill); box-shadow: 0 8px 0 rgba(130,90,57,.08); transform: translateZ(30px); }
+    .world-note { position: absolute; z-index: 4; bottom: clamp(24px, 6vh, 64px); left: 50%; transform: translateX(-50%); color: var(--muted); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; }
+    .after { min-height: 70vh; padding: 14vh 24px; background: #f3e9dc; text-align: center; }
+    .after h2 { margin: 0; font: 600 clamp(34px, 5vw, 64px)/1 Fraunces, Georgia, serif; letter-spacing: -.04em; }
+    .after p { max-width: 500px; margin: 18px auto 0; color: var(--muted); line-height: 1.6; }
+    .after a { display: inline-flex; margin-top: 30px; padding: 14px 22px; border-radius: 999px; background: var(--ink); color: #fff8ee; text-decoration: none; font-weight: 600; }
+    @media (max-width: 720px) {
+      .scroll-world { height: 560vh; }
+      .world-copy { top: 46px; }
+      .world-copy p { margin-top: 12px; }
+      .diorama { top: 58%; width: 96vw; height: 54vh; }
+      .house-body { inset: 15% 3% 6%; padding: 14px; border-radius: 22px; }
+      .rooms { gap: 8px; }
+      .room { border-radius: 13px; }
+      .room-label { left: 7px; right: 7px; bottom: 7px; padding: 8px 9px; border-radius: 9px; }
+      .room-label strong { font-size: 12px; }
+      .room-label span { display: none; }
+      .roof { left: 2%; width: 96%; }
+      .world-note { bottom: 22px; font-size: 10px; }
+    }
+    @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } .room, .diorama { transition: none; } }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="scroll-world" aria-label="Scroll through the six Roomie worlds">
+      <div class="world-sticky">
+        <div class="world-copy">
+          <p class="eyebrow">MyRoomeo / the house of habits</p>
+          <h1>Every home has a vibe.</h1>
+          <p>Scroll through the six Roomie worlds — the people, rhythms, and tiny habits that make a place feel like home.</p>
+          <div class="progress" id="progress" aria-live="polite">01 / 06 · The Beaver</div>
+        </div>
+        <div class="diorama" id="diorama">
+          <div class="ground"></div>
+          <div class="roof"></div>
+          <div class="house-body">
+            <div class="rooms">
+              <article class="room" data-type="beaver" data-name="The Beaver"><div class="room-label"><strong>The Beaver</strong><span>Schedules, systems, and a clean kitchen.</span></div></article>
+              <article class="room" data-type="cat" data-name="The Cat"><div class="room-label"><strong>The Cat</strong><span>Independent, low-maintenance, selectively social.</span></div></article>
+              <article class="room" data-type="owl" data-name="The Owl"><div class="room-label"><strong>The Owl</strong><span>Quiet rituals and a little personal space.</span></div></article>
+              <article class="room" data-type="fox" data-name="The Fox"><div class="room-label"><strong>The Fox</strong><span>Found objects, side quests, good stories.</span></div></article>
+              <article class="room" data-type="bunny" data-name="The Bunny"><div class="room-label"><strong>The Bunny</strong><span>Open doors, full calendars, instant plans.</span></div></article>
+              <article class="room" data-type="turtle" data-name="The Turtle"><div class="room-label"><strong>The Turtle</strong><span>A small ecosystem that works beautifully.</span></div></article>
+            </div>
+          </div>
+          <div class="house-sill"></div>
+        </div>
+        <div class="world-note">Keep scrolling to meet the housemates</div>
+      </div>
+    </section>
+    <section class="after">
+      <h2>Find the rhythm that fits yours.</h2>
+      <p>Take the survey in under five minutes. Your answers help us build a better first match pool for the Roomeo community.</p>
+      <a href="quiz.html?version=20260718c&amp;start=1">Take the survey&nbsp; →</a>
+    </section>
+  </main>
+  <script>
+    const world = document.querySelector('.scroll-world');
+    const diorama = document.querySelector('#diorama');
+    const rooms = [...document.querySelectorAll('.room')];
+    const progressLabel = document.querySelector('#progress');
+    let raf = 0;
+    const names = rooms.map(room => room.dataset.name);
+    function render() {
+      raf = 0;
+      const max = Math.max(1, world.offsetHeight - innerHeight);
+      const p = Math.min(1, Math.max(0, (scrollY - world.offsetTop) / max));
+      const focus = p * (rooms.length - 1);
+      const active = Math.round(focus);
+      rooms.forEach((room, index) => {
+        const distance = Math.abs(index - focus);
+        const scale = Math.max(.82, 1 - distance * .055);
+        room.style.setProperty('--focus', scale.toFixed(3));
+        room.style.opacity = String(Math.max(.52, 1 - distance * .08));
+      });
+      const yaw = (p - .5) * -10;
+      const lift = Math.sin(p * Math.PI) * 18;
+      diorama.style.transform = `translate3d(-50%, calc(-50% - ${lift}px), 0) rotateX(${9 + p * 3}deg) rotateY(${yaw}deg)`;
+      progressLabel.textContent = `${String(active + 1).padStart(2, '0')} / 06 · ${names[active]}`;
+    }
+    function schedule() { if (!raf) raf = requestAnimationFrame(render); }
+    addEventListener('scroll', schedule, { passive: true });
+    addEventListener('resize', schedule);
+    render();
+  </script>
+</body>
+</html>

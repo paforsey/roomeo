@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" width="192" height="192" role="img" aria-label="QR code placeholder">
+  <rect width="192" height="192" fill="#FFFFFF"/>
+  <!-- Placeholder QR  replace assets/site/share-qr-placeholder.svg when real code is ready -->
+  <g fill="#2D1B14">
+    <!-- top-left finder -->
+    <rect x="12" y="12" width="42" height="42" rx="4"/>
+    <rect x="18" y="18" width="30" height="30" fill="#FFFFFF"/>
+    <rect x="24" y="24" width="18" height="18"/>
+    <!-- top-right finder -->
+    <rect x="138" y="12" width="42" height="42" rx="4"/>
+    <rect x="144" y="18" width="30" height="30" fill="#FFFFFF"/>
+    <rect x="150" y="24" width="18" height="18"/>
+    <!-- bottom-left finder -->
+    <rect x="12" y="138" width="42" height="42" rx="4"/>
+    <rect x="18" y="144" width="30" height="30" fill="#FFFFFF"/>
+    <rect x="24" y="150" width="18" height="18"/>
+    <!-- data modules (decorative) -->
+    <rect x="66" y="12" width="6" height="6"/><rect x="78" y="12" width="6" height="6"/><rect x="90" y="12" width="6" height="6"/><rect x="102" y="12" width="6" height="6"/><rect x="114" y="12" width="6" height="6"/>
+    <rect x="60" y="24" width="6" height="6"/><rect x="72" y="24" width="6" height="6"/><rect x="96" y="24" width="6" height="6"/><rect x="120" y="24" width="6" height="6"/>
+    <rect x="66" y="36" width="6" height="6"/><rect x="84" y="36" width="6" height="6"/><rect x="108" y="36" width="6" height="6"/><rect x="126" y="36" width="6" height="6"/>
+    <rect x="12" y="66" width="6" height="6"/><rect x="24" y="66" width="6" height="6"/><rect x="36" y="66" width="6" height="6"/><rect x="48" y="66" width="6" height="6"/>
+    <rect x="66" y="60" width="6" height="6"/><rect x="78" y="60" width="6" height="6"/><rect x="90" y="66" width="6" height="6"/><rect x="102" y="72" width="6" height="6"/><rect x="114" y="60" width="6" height="6"/><rect x="126" y="66" width="6" height="6"/>
+    <rect x="60" y="78" width="6" height="6"/><rect x="84" y="84" width="6" height="6"/><rect x="96" y="78" width="6" height="6"/><rect x="108" y="84" width="6" height="6"/><rect x="120" y="78" width="6" height="6"/><rect x="132" y="84" width="6" height="6"/>
+    <rect x="66" y="96" width="6" height="6"/><rect x="78" y="102" width="6" height="6"/><rect x="90" y="96" width="6" height="6"/><rect x="102" y="108" width="6" height="6"/><rect x="114" y="96" width="6" height="6"/><rect x="138" y="102" width="6" height="6"/><rect x="150" y="96" width="6" height="6"/><rect x="162" y="108" width="6" height="6"/><rect x="174" y="96" width="6" height="6"/>
+    <rect x="60" y="114" width="6" height="6"/><rect x="72" y="120" width="6" height="6"/><rect x="96" y="114" width="6" height="6"/><rect x="108" y="120" width="6" height="6"/><rect x="132" y="114" width="6" height="6"/><rect x="144" y="120" width="6" height="6"/><rect x="168" y="114" width="6" height="6"/>
+    <rect x="66" y="132" width="6" height="6"/><rect x="84" y="138" width="6" height="6"/><rect x="102" y="132" width="6" height="6"/><rect x="120" y="138" width="6" height="6"/><rect x="138" y="132" width="6" height="6"/><rect x="156" y="138" width="6" height="6"/><rect x="174" y="132" width="6" height="6"/>
+    <rect x="60" y="150" width="6" height="6"/><rect x="78" y="156" width="6" height="6"/><rect x="96" y="150" width="6" height="6"/><rect x="114" y="156" width="6" height="6"/><rect x="132" y="150" width="6" height="6"/><rect x="150" y="156" width="6" height="6"/><rect x="168" y="150" width="6" height="6"/>
+    <rect x="66" y="168" width="6" height="6"/><rect x="90" y="168" width="6" height="6"/><rect x="108" y="174" width="6" height="6"/><rect x="126" y="168" width="6" height="6"/><rect x="144" y="174" width="6" height="6"/><rect x="162" y="168" width="6" height="6"/><rect x="180" y="174" width="6" height="6"/>
+  </g>
+</svg>

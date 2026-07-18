@@ -1,150 +1,103 @@
-# Roomeo — Find Your Perfect Roommate
+# MyRoomeo
 
-A React + Vite single-page application with a personality-based roommate matching flow.
+Personality-driven roommate matching — a static marketing site plus a 12-question roommate type quiz with scrapbook-style results, profile builder, and share/compare flows.
 
----
+**Brand:** MyRoomeo · Logo: `assets/brand/logo02.svg`  
+**Repo:** [github.com/c4han-star/Roomeo](https://github.com/c4han-star/Roomeo) (private)
+
+## What's in the repo
+
+| Page | File | Purpose |
+|------|------|---------|
+| Landing | [`index.html`](index.html) | Hero, six roomie type cards, trust section, CTA into quiz |
+| Quiz app | [`quiz.html`](quiz.html) | Intro → 12 questions → results → optional profile → waitlist |
+
+### Quiz flow (all client-side)
+
+1. **Intro** — start the quiz  
+2. **12 questions** — each maps votes to one of six types (see [scoring doc](docs/quiz-scoring-logic-en.md))  
+3. **Results** — scrapbook-style report: quote, roast, six folder sections, compatibility, share CTAs  
+4. **Profile builder** (optional, 4 steps + waitlist)  
+   - Logistics (city, budget, neighborhoods via Leaflet)  
+   - Living habits & sliders  
+   - Identity reveal + roommate card preview  
+   - Trust / verification toggles  
+5. **Waitlist** — name + email, success confirmation, share & compare while waiting  
+
+No backend yet — answers, profile, and waitlist state live in `sessionStorage` only.
+
+### Six roomie types
+
+`beaver` · `bunny` · `cat` · `fox` · `owl` · `turtle`
+
+Use type slugs in preview URLs below (e.g. `#turtle` → The Turtle result page).
+
+## Run locally
+
+Opening HTML via `file://` can break asset paths and maps. Serve from the project root:
+
+```bash
+python3 -m http.server 8765
+```
+
+| URL | What you see |
+|-----|----------------|
+| http://127.0.0.1:8765/ | Landing page |
+| http://127.0.0.1:8765/quiz.html | Quiz intro |
+| http://127.0.0.1:8765/quiz.html#turtle | Results for **The Turtle** (no quiz required) |
+| http://127.0.0.1:8765/quiz.html#beaver | Results for **The Beaver** |
+| http://127.0.0.1:8765/quiz.html?previewResult=owl | Design / Figma capture preview (results page) |
+
+Other type slugs: `bunny`, `cat`, `fox`, `owl`.
+
+With Node.js:
+
+```bash
+npx --yes serve -l 8765
+```
 
 ## Stack
 
-| Layer     | Technology                  |
-|-----------|-----------------------------|
-| UI        | React 18                    |
-| Bundler   | Vite 5                      |
-| Auth      | Google Identity Services + Apple Sign In JS SDK |
-| Fonts     | Poppins via Google Fonts    |
-| Hosting   | Any static host (Netlify / Vercel / Nginx) |
+Static **HTML / CSS / JavaScript** — no build step, no bundler.
 
----
+| Dependency | Use |
+|------------|-----|
+| [Google Fonts](https://fonts.google.com/) | Fraunces + Roboto |
+| [Leaflet](https://leafletjs.com/) | Neighborhood picker on profile step 1 |
+| [html2canvas](https://html2canvas.hertzen.com/) | Export share / compare story cards as PNG |
 
-## Quick Start
+## Documentation
 
-```bash
-# 1. Install dependencies
-npm install
+Product and engineering notes live in [`docs/`](docs/):
 
-# 2. Set up environment variables
-cp .env.example .env
-# → Edit .env and add your Google and Apple OAuth credentials
+| Doc | What it covers |
+|-----|----------------|
+| [result page.md](docs/result%20page.md) | Quiz flow, results UI, share/compare modals, profile — aligned with `quiz.html` |
+| [quiz-scoring-logic-en.md](docs/quiz-scoring-logic-en.md) | Type assignment algorithm and full vote mapping |
 
-# 3. Start local dev server
-npm run dev
-# → Opens at http://localhost:5173
-```
+UI copy and layout source of truth: [`index.html`](index.html) and [`quiz.html`](quiz.html).
 
----
+## Asset layout
 
-## Build for Production
+| Path | Contents |
+|------|----------|
+| `assets/brand/` | `logo02.svg` (nav), `logo.svg` |
+| `assets/site/` | Landing imagery, trust backgrounds, share QR placeholder |
+| `assets/quiz/questions/` | `quiz cover.png`, `q1.png`–`q12` (q4, q10 are `.jpg`) |
+| `assets/characters/` | Type avatars: `beaver.png` … `turtle.png` |
+| `assets/result-hero/` | Result hero mascots per type (transparent PNG) |
+| `assets/roommate-type-cards/` | Six illustrated cards on landing `#types` |
+| `assets/journal-props/` | Result-page folder sticker SVGs (`deco-folder-1` … `6`) |
+| `assets/figma-quiz-final/` | Legacy Figma export vectors |
+| `assets/quiz-result-1-0/` | Legacy result SVG assets |
+| `docs/` | Product + design Markdown (not loaded by pages) |
 
-```bash
-npm run build
-# Output goes to /dist — upload this folder to your server
-```
+## Repository access
 
-To preview the production build locally:
-```bash
-npm run preview
-```
+This GitHub repository is **private**. Invite collaborators under **Settings → Collaborators** (or **Manage access**).
 
----
+## Contributing
 
-## Environment Variables
-
-Copy `.env.example` → `.env` and fill in your credentials.
-
-| Variable                | Description                              |
-|-------------------------|------------------------------------------|
-| `VITE_GOOGLE_CLIENT_ID` | Google OAuth 2.0 Web Client ID           |
-| `VITE_APPLE_CLIENT_ID`  | Apple Sign In Services ID                |
-
-> ⚠️ Never commit `.env` to git. It's already in `.gitignore`.
-
-### Getting Google Client ID
-1. Go to [console.cloud.google.com](https://console.cloud.google.com)
-2. APIs & Services → Credentials → **Create OAuth 2.0 Client ID**
-3. Application type: **Web Application**
-4. Add your domain to **Authorized JavaScript Origins**
-5. Copy the Client ID into `VITE_GOOGLE_CLIENT_ID`
-
-### Getting Apple Service ID
-1. Go to [developer.apple.com](https://developer.apple.com)
-2. Certificates, Identifiers & Profiles → **Identifiers** → Services IDs
-3. Create a new Service ID and enable **Sign In with Apple**
-4. Add your domain and redirect URI (`https://yourdomain.com`)
-5. Copy the Service ID into `VITE_APPLE_CLIENT_ID`
-
----
-
-## Deployment
-
-### Netlify
-Drag and drop the `/dist` folder to [app.netlify.com](https://app.netlify.com), or connect your repo. `netlify.toml` is already configured.
-
-Set environment variables in Netlify:
-**Site Settings → Environment Variables** → add `VITE_GOOGLE_CLIENT_ID` and `VITE_APPLE_CLIENT_ID`.
-
-### Vercel
-```bash
-npm i -g vercel
-vercel
-```
-`vercel.json` is already configured. Set env vars in the Vercel dashboard.
-
-### Nginx / VPS
-```bash
-# Build
-npm run build
-
-# Upload dist/ to your server
-scp -r dist/ user@yourserver:/var/www/roomeo/
-
-# Use the included nginx.conf
-# Edit it to replace yourdomain.com, then:
-sudo cp nginx.conf /etc/nginx/sites-available/roomeo
-sudo ln -s /etc/nginx/sites-available/roomeo /etc/nginx/sites-enabled/
-sudo nginx -t && sudo systemctl reload nginx
-
-# Add HTTPS with Let's Encrypt
-sudo certbot --nginx -d yourdomain.com
-```
-
----
-
-## App Screens
-
-| Screen               | Route trigger     | Description                              |
-|----------------------|-------------------|------------------------------------------|
-| Login                | Initial load      | Email + Google + Apple sign in           |
-| Sign Up              | "Sign up" link    | Registration with email verification     |
-| Forgot Password      | "Forgot Password" | Send reset link                          |
-| Check Email          | After forgot pw   | Confirm reset email sent                 |
-| Reset Password       | From email link   | Set new password with strength checker   |
-| Welcome              | After auth        | Survey intro with stats                  |
-| Survey (12 Qs)       | "Start Survey"    | Personality assessment                   |
-| Loading              | After Q12         | Animated analysis screen                 |
-| Result               | After loading     | Type reveal + radar chart + match cards  |
-
----
-
-## Personality Types
-
-| Type      | Structure | Directness | Description                          |
-|-----------|-----------|------------|--------------------------------------|
-| Beaver 🦫 | High      | High       | Organized, direct, keeps house running |
-| Bunny 🐰  | High      | Low        | Tidy, considerate, avoids conflict   |
-| Retriever 🐕 | Low    | High       | Flexible on chores, open communicator |
-| Turtle 🐢 | Low       | Low        | Independent, low-pressure, easygoing |
-
----
-
-## Replacing the Mock Auth
-
-The app ships with an in-memory mock auth store for demo purposes. To connect a real backend:
-
-1. Replace `mockRegister()` and `mockLogin()` in `src/App.jsx` with real API calls
-2. Store the returned JWT/session token (localStorage or httpOnly cookie)
-3. Add a route guard to check auth state on app load
-
----
-
-## License
-MIT — free to use and modify.
+1. Clone the repo and run a local static server (see above).  
+2. Edit `index.html` and/or `quiz.html` directly.  
+3. Push to `main` or open a PR — there is no CI or build step to run locally.
