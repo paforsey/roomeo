@@ -5528,6 +5528,8 @@
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/12.0.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore-compat.js"></script>
   <script>
     // Roomie Test v2 — source: Figma page "Roomie test", node 434:972.
     const QUIZ = [
@@ -5691,8 +5693,63 @@
       p2: 'roomeo_profile_step2',
       p3: 'roomeo_profile_step3_trust',
       compareInvite: 'roomeo_compare_invite',
-      waitlistJoined: 'roomeo_waitlist_joined'
+      waitlistJoined: 'roomeo_waitlist_joined',
+      sessionId: 'roomeo_session_id',
+      submitted: 'roomeo_quiz_submitted'
     };
+
+    const FIREBASE_CONFIG = {
+      apiKey: "AIzaSyAKgDFi9B8Sd4wXz3q9u-w1jR6oByHB_yM",
+      authDomain: "myroomeo-7a9cc.firebaseapp.com",
+      projectId: "myroomeo-7a9cc",
+      storageBucket: "myroomeo-7a9cc.firebasestorage.app",
+      messagingSenderId: "12645114821",
+      appId: "1:12645114821:web:142d69e810da46285fa1ac",
+      measurementId: "G-673TG19TX0"
+    };
+    if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
+    const db = firebase.firestore();
+
+    function getSessionId() {
+      let id = null;
+      try { id = sessionStorage.getItem(STORAGE.sessionId); } catch (_) {}
+      if (!id) {
+        id = (crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(16).slice(2)}`);
+        try { sessionStorage.setItem(STORAGE.sessionId, id); } catch (_) {}
+      }
+      return id;
+    }
+
+    let quizResultSubmission = null;
+
+    function submitQuizResult(resultType, answersArr) {
+      if (sessionStorage.getItem(STORAGE.submitted) === '1') return quizResultSubmission;
+      if (quizResultSubmission) return quizResultSubmission;
+      if (!Array.isArray(answersArr) || answersArr.length !== QUIZ.length || answersArr.some((v) => v === null || v === undefined)) return;
+
+      const answersList = answersArr.map((v) => Number(v));
+      const answersMap = {};
+      answersList.forEach((v, i) => { answersMap[String(i)] = v; });
+
+      quizResultSubmission = db.collection('survey_sessions').add({
+        session_id: getSessionId(),
+        result_type: String(resultType || '').toLowerCase(),
+        answers: answersMap,
+        answers_list: answersList,
+        source: 'quiz',
+        submitted_at_client: new Date().toISOString(),
+        submitted_at: firebase.firestore.FieldValue.serverTimestamp(),
+        created_at: firebase.firestore.FieldValue.serverTimestamp(),
+        updated_at: firebase.firestore.FieldValue.serverTimestamp()
+      }).then(() => {
+        try { sessionStorage.setItem(STORAGE.submitted, '1'); } catch (_) {}
+      }).catch((error) => {
+        console.error('Failed to submit quiz result', error);
+        quizResultSubmission = null;
+      });
+
+      return quizResultSubmission;
+    }
 
     function setQuizView(view) {
       try {
@@ -8619,6 +8676,7 @@
       const key = resolveType(answers);
       lastResultKey = key;
       saveSession();
+      submitQuizResult(key, answers);
       scheduleResultsReveal(key, answers, false);
       setQuizFlowFooterVisible(false);
       setQuizView('results');
