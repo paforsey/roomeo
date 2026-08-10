@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>MyRoomeo Users Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=PT+Serif:wght@400;700&family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #fdf6ee;
+      --surface: #fffdf9;
+      --surface-strong: #ffffff;
+      --text: #1a1209;
+      --muted: #9c8878;
+      --line: rgba(26, 18, 9, 0.12);
+      --accent: #e86c2c;
+      --accent-dark: #cf5a1f;
+      --shadow: 0 14px 32px rgba(63, 43, 31, 0.1);
+      --radius: 20px;
+      --font-serif: "PT Serif", Georgia, serif;
+      --font-sans: "DM Sans", Arial, sans-serif;
+      --font-label: 'Space Grotesk', Arial, sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: var(--font-sans);
+      background:
+        radial-gradient(circle at top left, rgba(232,108,44,0.10), transparent 28%),
+        linear-gradient(180deg, #fdf9f2 0%, var(--bg) 100%);
+      color: var(--text);
+    }
+
+    .page {
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 40px 20px 64px;
+    }
+
+    .hero {
+      display: grid;
+      gap: 18px;
+      margin-bottom: 28px;
+    }
+
+    .eyebrow {
+      font-family: var(--font-label);
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+
+    h1 {
+      margin: 0;
+      font-family: var(--font-serif);
+      font-size: clamp(34px, 5vw, 56px);
+      line-height: 0.98;
+      max-width: 11ch;
+    }
+
+    .hero-copy {
+      max-width: 700px;
+      font-size: 17px;
+      line-height: 1.65;
+      color: var(--muted);
+    }
+
+    .readonly-note {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--accent-dark);
+      background: rgba(232,108,44,0.1);
+      border: 1px solid rgba(232,108,44,0.25);
+      border-radius: 999px;
+      padding: 6px 14px;
+      width: fit-content;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 14px;
+      margin-bottom: 22px;
+      margin-top: 18px;
+    }
+
+    .stat-card {
+      background: rgba(255,255,255,0.7);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 18px 18px 16px;
+      box-shadow: var(--shadow);
+    }
+
+    .stat-label {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+
+    .stat-value {
+      font-size: 30px;
+      font-weight: 700;
+    }
+
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 28px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .panel-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 22px 24px;
+      border-bottom: 1px solid var(--line);
+      flex-wrap: wrap;
+    }
+
+    .panel-top h2 {
+      margin: 0;
+      font-size: 22px;
+    }
+
+    .panel-actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .filter-input,
+    .refresh-btn {
+      font: inherit;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: var(--surface-strong);
+      min-height: 44px;
+    }
+
+    .filter-input {
+      width: min(320px, 100%);
+      padding: 0 16px;
+      color: var(--text);
+    }
+
+    .refresh-btn {
+      padding: 0 18px;
+      cursor: pointer;
+      font-weight: 700;
+      background: var(--accent);
+      color: white;
+      border-color: transparent;
+    }
+
+    .refresh-btn:hover {
+      background: var(--accent-dark);
+    }
+
+    .status-row {
+      padding: 14px 24px 0;
+      font-size: 14px;
+      color: var(--muted);
+    }
+
+    .status-row.error {
+      color: #a63722;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      padding: 18px 18px 22px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 860px;
+    }
+
+    th,
+    td {
+      text-align: left;
+      padding: 14px 12px;
+      border-bottom: 1px solid var(--line);
+      vertical-align: top;
+      font-size: 14px;
+    }
+
+    th {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      background: rgba(255,255,255,0.75);
+      position: sticky;
+      top: 0;
+    }
+
+    tbody tr:hover {
+      background: rgba(217,108,75,0.05);
+    }
+
+    .mono {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 12px;
+      line-height: 1.55;
+      word-break: break-word;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 76px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-weight: 700;
+    }
+
+    .badge.verified {
+      background: rgba(47,125,81,0.12);
+      color: #2f7d51;
+    }
+
+    .badge.unverified {
+      background: rgba(217,108,75,0.12);
+      color: var(--accent-dark);
+    }
+
+    .empty-state {
+      padding: 42px 24px 48px;
+      text-align: center;
+      color: var(--muted);
+    }
+
+    .empty-state strong {
+      display: block;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+
+    @media (max-width: 720px) {
+      .page {
+        padding: 24px 14px 48px;
+      }
+
+      .panel-top {
+        padding: 18px;
+      }
+
+      .status-row {
+        padding: 12px 18px 0;
+      }
+
+      .table-wrap {
+        padding: 14px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <section class="hero">
+      <span class="eyebrow">Private Admin</span>
+      <h1>Signed-up users</h1>
+      <p class="hero-copy">
+        Read-only view of accounts created via the sign-up flow, reading directly from Firestore.
+      </p>
+      <span class="readonly-note">🔒 Read-only — no editing</span>
+    </section>
+
+    <section class="stats" aria-label="Summary">
+      <article class="stat-card">
+        <div class="stat-label">Total users</div>
+        <div class="stat-value" id="stat-total">0</div>
+      </article>
+      <article class="stat-card">
+        <div class="stat-label">Verified</div>
+        <div class="stat-value" id="stat-verified">0</div>
+      </article>
+      <article class="stat-card">
+        <div class="stat-label">Latest sign-up</div>
+        <div class="stat-value" id="stat-latest-time" style="font-size:18px;">-</div>
+      </article>
+    </section>
+
+    <section class="panel" aria-labelledby="records-heading">
+      <div class="panel-top">
+        <h2 id="records-heading">Firestore records</h2>
+        <div class="panel-actions">
+          <input id="filter-input" class="filter-input" type="search" placeholder="Filter by email or session id" />
+          <button id="refresh-btn" class="refresh-btn" type="button">Refresh data</button>
+        </div>
+      </div>
+      <div id="status-row" class="status-row">Loading records...</div>
+      <div class="table-wrap">
+        <table aria-describedby="status-row">
+          <thead>
+            <tr>
+              <th>Email</th>
+              <th>Session ID</th>
+              <th>Signed Up</th>
+              <th>Verified</th>
+              <th>Verified At</th>
+            </tr>
+          </thead>
+          <tbody id="records-body"></tbody>
+        </table>
+        <div id="empty-state" class="empty-state" hidden>
+          <strong>No users found.</strong>
+          Sign up once via the header menu, then refresh this page.
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="https://www.gstatic.com/firebasejs/12.0.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/12.0.0/firebase-analytics-compat.js"></script>
+  <script>
+    const FIREBASE_CONFIG = {
+      apiKey: "AIzaSyAKgDFi9B8Sd4wXz3q9u-w1jR6oByHB_yM",
+      authDomain: "myroomeo-7a9cc.firebaseapp.com",
+      projectId: "myroomeo-7a9cc",
+      storageBucket: "myroomeo-7a9cc.firebasestorage.app",
+      messagingSenderId: "12645114821",
+      appId: "1:12645114821:web:142d69e810da46285fa1ac",
+      measurementId: "G-673TG19TX0"
+    };
+    const FIREBASE_USERS_COLLECTION = 'users';
+
+    if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
+    firebase.analytics();
+    const db = firebase.firestore();
+
+    const recordsBody = document.getElementById('records-body');
+    const emptyState = document.getElementById('empty-state');
+    const statusRow = document.getElementById('status-row');
+    const filterInput = document.getElementById('filter-input');
+    const refreshBtn = document.getElementById('refresh-btn');
+    const statTotal = document.getElementById('stat-total');
+    const statVerified = document.getElementById('stat-verified');
+    const statLatestTime = document.getElementById('stat-latest-time');
+
+    let allRecords = [];
+
+    function formatServerTimestamp(value) {
+      if (!value) return '-';
+      if (typeof value.toDate === 'function') {
+        return value.toDate().toLocaleString();
+      }
+      return String(value);
+    }
+
+    function renderStats(records) {
+      statTotal.textContent = String(records.length);
+      statVerified.textContent = String(records.filter((r) => r.email_verified).length);
+      if (!records.length) {
+        statLatestTime.textContent = '-';
+        return;
+      }
+      statLatestTime.textContent = formatServerTimestamp(records[0].created_at);
+    }
+
+    function renderRows(records) {
+      recordsBody.innerHTML = '';
+      emptyState.hidden = records.length > 0;
+
+      records.forEach((record) => {
+        const tr = document.createElement('tr');
+        const verified = !!record.email_verified;
+        tr.innerHTML = `
+          <td>${escHtml(record.email || '-')}</td>
+          <td class="mono">${escHtml(record.session_id || '-')}</td>
+          <td>${formatServerTimestamp(record.created_at)}</td>
+          <td><span class="badge ${verified ? 'verified' : 'unverified'}">${verified ? 'Verified' : 'Not verified'}</span></td>
+          <td>${formatServerTimestamp(record.email_verified_at)}</td>
+        `;
+        recordsBody.appendChild(tr);
+      });
+    }
+
+    function escHtml(s) {
+      return String(s)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function applyFilter() {
+      const query = filterInput.value.trim().toLowerCase();
+      if (!query) {
+        renderRows(allRecords);
+        renderStats(allRecords);
+        statusRow.textContent = `Showing ${allRecords.length} record${allRecords.length === 1 ? '' : 's'}.`;
+        statusRow.classList.remove('error');
+        return;
+      }
+
+      const filtered = allRecords.filter((record) => {
+        const haystack = [record.email, record.session_id, record.uid].join(' ').toLowerCase();
+        return haystack.includes(query);
+      });
+
+      renderRows(filtered);
+      renderStats(filtered);
+      statusRow.textContent = `Showing ${filtered.length} filtered record${filtered.length === 1 ? '' : 's'}.`;
+      statusRow.classList.remove('error');
+    }
+
+    async function loadRecords() {
+      statusRow.textContent = 'Loading records...';
+      statusRow.classList.remove('error');
+
+      try {
+        const snapshot = await db
+          .collection(FIREBASE_USERS_COLLECTION)
+          .orderBy('created_at', 'desc')
+          .get();
+
+        allRecords = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+        applyFilter();
+      } catch (error) {
+        console.error('Failed to load Firestore records', error);
+        allRecords = [];
+        renderRows([]);
+        renderStats([]);
+        statusRow.textContent = 'Could not load records. Check Firestore rules and make sure reporting reads are allowed.';
+        statusRow.classList.add('error');
+      }
+    }
+
+    filterInput.addEventListener('input', applyFilter);
+    refreshBtn.addEventListener('click', loadRecords);
+    loadRecords();
+  </script>
+</body>
+</html>

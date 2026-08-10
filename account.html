@@ -65,6 +65,7 @@
         <div class="account-rows">
           <div class="account-row"><span class="account-row-label">Email</span><span class="account-row-value" id="row-email"></span></div>
           <div class="account-row"><span class="account-row-label">Member since</span><span class="account-row-value" id="row-created">—</span></div>
+          <div class="account-row"><span class="account-row-label">Verified on</span><span class="account-row-value" id="row-verified-at">—</span></div>
           <div class="account-row"><span class="account-row-label">Last login</span><span class="account-row-value" id="row-last-login">—</span></div>
         </div>
 
@@ -132,6 +133,16 @@
     firebase.analytics();
     const db = firebase.firestore();
 
+    function getSessionId() {
+      let id = null;
+      try { id = sessionStorage.getItem('roomeo_session_id'); } catch (_) {}
+      if (!id) {
+        id = (crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(16).slice(2)}`);
+        try { sessionStorage.setItem('roomeo_session_id', id); } catch (_) {}
+      }
+      return id;
+    }
+
     /* ---------- Account menu: sign up / log in / log out ---------- */
     (function () {
       const modal = document.getElementById('account-modal');
@@ -193,26 +204,35 @@
         return (err && map[err.code]) || 'Something went wrong. Please try again.';
       }
 
-      /* users/{uid}: account metadata only — email, verification status, timestamps.
+      /* users/{uid}: account metadata only — email, session_id, verification status/timestamp.
          The password itself is never duplicated here; Firebase Auth is its sole owner. */
       function createUserDoc(user) {
         const now = firebase.firestore.FieldValue.serverTimestamp();
         return db.collection('users').doc(user.uid).set({
           uid: user.uid,
           email: user.email,
+          session_id: getSessionId(),
           email_verified: user.emailVerified,
           created_at: now,
           updated_at: now
         }).catch((err) => console.error('Failed to create user doc', err));
       }
       function refreshUserDoc(user) {
-        return db.collection('users').doc(user.uid).set({
-          uid: user.uid,
-          email: user.email,
-          email_verified: user.emailVerified,
-          updated_at: firebase.firestore.FieldValue.serverTimestamp(),
-          last_login_at: firebase.firestore.FieldValue.serverTimestamp()
-        }, { merge: true }).catch((err) => console.error('Failed to refresh user doc', err));
+        const ref = db.collection('users').doc(user.uid);
+        return ref.get().then((doc) => {
+          const wasVerified = doc.exists && !!doc.data().email_verified;
+          const patch = {
+            uid: user.uid,
+            email: user.email,
+            email_verified: user.emailVerified,
+            updated_at: firebase.firestore.FieldValue.serverTimestamp(),
+            last_login_at: firebase.firestore.FieldValue.serverTimestamp()
+          };
+          if (user.emailVerified && !wasVerified) {
+            patch.email_verified_at = firebase.firestore.FieldValue.serverTimestamp();
+          }
+          return ref.set(patch, { merge: true });
+        }).catch((err) => console.error('Failed to refresh user doc', err));
       }
 
       formLogin.addEventListener('submit', (e) => {
@@ -277,6 +297,8 @@
           signedIn.hidden = true;
         }
       });
+
+      window.__refreshUserDoc = refreshUserDoc;
     })();
 
     /* ---------- Account page content ---------- */
@@ -287,6 +309,7 @@
       const statusBadge = document.getElementById('account-status-badge');
       const rowEmail = document.getElementById('row-email');
       const rowCreated = document.getElementById('row-created');
+      const rowVerifiedAt = document.getElementById('row-verified-at');
       const rowLastLogin = document.getElementById('row-last-login');
       const resendBtn = document.getElementById('btn-resend-verify');
       const resendSuccess = document.getElementById('resend-success');
@@ -322,6 +345,7 @@
           if (doc.exists) {
             const data = doc.data();
             rowCreated.textContent = formatTimestamp(data.created_at);
+            rowVerifiedAt.textContent = data.email_verified_at ? formatTimestampFull(data.email_verified_at) : '—';
             rowLastLogin.textContent = formatTimestampFull(data.last_login_at || data.created_at);
           }
         }).catch((err) => console.error('Failed to load account details', err));
@@ -334,8 +358,18 @@
       }
 
       firebase.auth().onAuthStateChanged((user) => {
-        if (user) renderAccount(user);
-        else renderGuest();
+        if (!user) { renderGuest(); return; }
+        /* Reload to catch a verification click that happened in another tab, then
+           let refreshUserDoc stamp email_verified_at on the first true transition. */
+        user.reload()
+          .then(() => {
+            const freshUser = firebase.auth().currentUser;
+            return window.__refreshUserDoc(freshUser).then(() => renderAccount(freshUser));
+          })
+          .catch((err) => {
+            console.error('Failed to reload user', err);
+            renderAccount(user);
+          });
       });
 
       resendBtn.addEventListener('click', () => {

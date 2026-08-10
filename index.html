@@ -208,6 +208,16 @@
     firebase.analytics();
     const db = firebase.firestore();
 
+    function getSessionId() {
+      let id = null;
+      try { id = sessionStorage.getItem('roomeo_session_id'); } catch (_) {}
+      if (!id) {
+        id = (crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(16).slice(2)}`);
+        try { sessionStorage.setItem('roomeo_session_id', id); } catch (_) {}
+      }
+      return id;
+    }
+
     /* ---------- Account menu: sign up / log in / log out ---------- */
     (function () {
       const modal = document.getElementById('account-modal');
@@ -269,26 +279,35 @@
         return (err && map[err.code]) || 'Something went wrong. Please try again.';
       }
 
-      /* users/{uid}: account metadata only — email, verification status, timestamps.
+      /* users/{uid}: account metadata only — email, session_id, verification status/timestamp.
          The password itself is never duplicated here; Firebase Auth is its sole owner. */
       function createUserDoc(user) {
         const now = firebase.firestore.FieldValue.serverTimestamp();
         return db.collection('users').doc(user.uid).set({
           uid: user.uid,
           email: user.email,
+          session_id: getSessionId(),
           email_verified: user.emailVerified,
           created_at: now,
           updated_at: now
         }).catch((err) => console.error('Failed to create user doc', err));
       }
       function refreshUserDoc(user) {
-        return db.collection('users').doc(user.uid).set({
-          uid: user.uid,
-          email: user.email,
-          email_verified: user.emailVerified,
-          updated_at: firebase.firestore.FieldValue.serverTimestamp(),
-          last_login_at: firebase.firestore.FieldValue.serverTimestamp()
-        }, { merge: true }).catch((err) => console.error('Failed to refresh user doc', err));
+        const ref = db.collection('users').doc(user.uid);
+        return ref.get().then((doc) => {
+          const wasVerified = doc.exists && !!doc.data().email_verified;
+          const patch = {
+            uid: user.uid,
+            email: user.email,
+            email_verified: user.emailVerified,
+            updated_at: firebase.firestore.FieldValue.serverTimestamp(),
+            last_login_at: firebase.firestore.FieldValue.serverTimestamp()
+          };
+          if (user.emailVerified && !wasVerified) {
+            patch.email_verified_at = firebase.firestore.FieldValue.serverTimestamp();
+          }
+          return ref.set(patch, { merge: true });
+        }).catch((err) => console.error('Failed to refresh user doc', err));
       }
 
       formLogin.addEventListener('submit', (e) => {
