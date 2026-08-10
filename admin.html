@@ -202,7 +202,13 @@
   </style>
 </head>
 <body>
-  <div id="admin-gate" class="admin-gate">
+  <div id="admin-loading" class="admin-gate">
+    <div class="admin-gate-card" style="text-align:center;">
+      <p style="margin:0;">Checking access…</p>
+    </div>
+  </div>
+
+  <div id="admin-gate" class="admin-gate" hidden>
     <div class="admin-gate-card">
       <h1>Contributor sign-in</h1>
       <p>Log in with your MyRoomeo contributor account to access the admin tools.</p>
@@ -868,6 +874,7 @@
     /* ========================================================
        Admin login gate
        ======================================================== */
+    const loadingEl = document.getElementById('admin-loading');
     const gateEl = document.getElementById('admin-gate');
     const deniedEl = document.getElementById('admin-denied');
     const contentEl = document.getElementById('admin-content');
@@ -921,9 +928,10 @@
     deniedLogoutBtn.addEventListener('click', () => firebase.auth().signOut());
     portalLogoutBtn.addEventListener('click', () => firebase.auth().signOut());
 
-    function showGate() { gateEl.hidden = false; deniedEl.hidden = true; contentEl.hidden = true; }
-    function showDenied(email) { gateEl.hidden = true; deniedEl.hidden = false; contentEl.hidden = true; deniedEmailEl.textContent = email; }
+    function showGate() { loadingEl.hidden = true; gateEl.hidden = false; deniedEl.hidden = true; contentEl.hidden = true; }
+    function showDenied(email) { loadingEl.hidden = true; gateEl.hidden = true; deniedEl.hidden = false; contentEl.hidden = true; deniedEmailEl.textContent = email; }
     function showContent(email, role) {
+      loadingEl.hidden = true;
       gateEl.hidden = true;
       deniedEl.hidden = true;
       contentEl.hidden = false;
