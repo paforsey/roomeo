@@ -6861,6 +6861,73 @@
         return (err && map[err.code]) || 'Something went wrong. Please try again.';
       }
 
+      /* Pulls quiz result + profile-setup data already sitting in THIS browser's own
+         sessionStorage (from taking the quiz / joining the waitlist before creating an
+         account, in the same tab session) so it can be linked onto the account being
+         signed up or logged into. Never reads another account's or another session's
+         data — only this session's own local state, which is why this is safe without
+         any new Firestore read permissions. */
+      function readSessionQuizAndProfile() {
+        const result = {};
+        try {
+          const type = sessionStorage.getItem('roomeo_type');
+          if (type) result.result_type = type;
+        } catch (_) {}
+
+        let logistics = null, habits = null;
+        try { logistics = JSON.parse(sessionStorage.getItem('roomeo_profile_step1') || 'null'); } catch (_) {}
+        try { habits = JSON.parse(sessionStorage.getItem('roomeo_profile_step2') || 'null'); } catch (_) {}
+
+        /* Quiz-flow pref-chip values -> account page's curated dropdown options.
+           Only mapped where the meanings genuinely align; anything without a clean
+           match (e.g. conflictStyle "avoid") is left unset rather than guessed. */
+        const SLEEP_MAP = { early: 'Early bird', flex: 'Flexible', night: 'Night owl' };
+        const GUESTS_MAP = { rarely: 'Rarely', sometimes: 'Sometimes', often: 'Often' };
+        const CLEANING_MAP = { weekly: 'Very tidy', split: 'Balanced', casual: 'Relaxed', relaxed: 'Relaxed' };
+        const CONFLICT_MAP = { talk: 'Talk it out right away', space: 'Need space first, then talk' };
+        const ROOMMATE_PREF_MAP = { any: 'No preference', women: 'Same gender', men: 'Same gender', mixed: 'No preference' };
+        const SOCIAL_MAP = { 1: 'Need quiet time', 2: 'Balanced', 3: 'Love company' };
+
+        const profile = {};
+        if (logistics) {
+          if (logistics.targetCity) profile.targetCity = logistics.targetCity;
+          if (logistics.budget) profile.budget = String(logistics.budget);
+          if (logistics.moveIn) profile.moveIn = logistics.moveIn;
+          if (logistics.roommatePref && ROOMMATE_PREF_MAP[logistics.roommatePref]) {
+            profile.roommatePref = ROOMMATE_PREF_MAP[logistics.roommatePref];
+          }
+        }
+        if (habits) {
+          if (habits.sleep && SLEEP_MAP[habits.sleep]) profile.sleep = SLEEP_MAP[habits.sleep];
+          if (habits.cleaning && CLEANING_MAP[habits.cleaning]) profile.cleaning = CLEANING_MAP[habits.cleaning];
+          if (habits.guests && GUESTS_MAP[habits.guests]) profile.guests = GUESTS_MAP[habits.guests];
+          if (habits.conflictStyle && CONFLICT_MAP[habits.conflictStyle]) profile.conflictStyle = CONFLICT_MAP[habits.conflictStyle];
+          if (habits.socialBattery && SOCIAL_MAP[habits.socialBattery]) profile.socialBattery = SOCIAL_MAP[habits.socialBattery];
+        }
+        if (Object.keys(profile).length) result.profile = profile;
+        return result;
+      }
+
+      function linkSessionDataToAccount(user) {
+        const linked = readSessionQuizAndProfile();
+        const writes = [];
+        if (linked.result_type) {
+          writes.push(db.collection('users').doc(user.uid).set({
+            uid: user.uid,
+            result_type: linked.result_type,
+            updated_at: firebase.firestore.FieldValue.serverTimestamp()
+          }, { merge: true }));
+        }
+        if (linked.profile) {
+          writes.push(db.collection('user_profiles').doc(user.uid).set(Object.assign(
+            { uid: user.uid, updated_at: firebase.firestore.FieldValue.serverTimestamp() },
+            linked.profile
+          ), { merge: true }));
+        }
+        if (!writes.length) return Promise.resolve();
+        return Promise.all(writes).catch((err) => console.error('Failed to link session data to account', err));
+      }
+
       /* users/{uid}: account metadata only — email, session_id, verification status/timestamp.
          The password itself is never duplicated here; Firebase Auth is its sole owner. */
       function createUserDoc(user) {
@@ -6909,7 +6976,7 @@
         const btn = document.getElementById('login-submit');
         btn.disabled = true;
         firebase.auth().signInWithEmailAndPassword(email, password)
-          .then((cred) => { refreshUserDoc(cred.user); modal.close(); formLogin.reset(); })
+          .then((cred) => { refreshUserDoc(cred.user); linkSessionDataToAccount(cred.user); modal.close(); formLogin.reset(); })
           .catch((err) => { errEl.textContent = authErrorMessage(err); errEl.hidden = false; })
           .finally(() => { btn.disabled = false; });
       });
@@ -6925,7 +6992,7 @@
         const btn = document.getElementById('signup-submit');
         btn.disabled = true;
         firebase.auth().createUserWithEmailAndPassword(email, password)
-          .then((cred) => Promise.all([cred.user.sendEmailVerification(), createUserDoc(cred.user)]))
+          .then((cred) => Promise.all([cred.user.sendEmailVerification(), createUserDoc(cred.user), linkSessionDataToAccount(cred.user)]))
           .then(() => {
             okEl.hidden = false;
             formSignup.reset();
