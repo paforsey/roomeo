@@ -6520,6 +6520,7 @@
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <script src="https://www.gstatic.com/firebasejs/12.0.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/12.0.0/firebase-analytics-compat.js"></script>
   <script>
     // Roomie Test v2 — source: Figma page "Roomie test", node 434:972.
     const QUIZ = [
@@ -6699,6 +6700,7 @@
       measurementId: "G-673TG19TX0"
     };
     if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
+    firebase.analytics();
     const db = firebase.firestore();
 
     function getSessionId() {

@@ -406,6 +406,7 @@
 
   <script src="https://www.gstatic.com/firebasejs/12.0.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/12.0.0/firebase-analytics-compat.js"></script>
   <script>
     const FIREBASE_CONFIG = {
       apiKey: "AIzaSyAKgDFi9B8Sd4wXz3q9u-w1jR6oByHB_yM",
@@ -419,6 +420,7 @@
     const FIREBASE_PROFILE_COLLECTION = 'profile_sessions';
 
     if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
+    firebase.analytics();
     const db = firebase.firestore();
 
     const listWrap = document.getElementById('list-wrap');

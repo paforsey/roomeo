@@ -135,5 +135,21 @@
     </main>
     <section class="match" id="match"><div class="match-lawn"></div><img class="footer-house" src="assets/figma-home/footer-house-clean.png" alt=""><img class="footer-people" src="assets/figma-home/footer-people-clean.png" alt=""><div class="match-content"><h2>Join the first match pool</h2><p>The right roommate makes all the difference.<br>Discover your roommate type in under 5 minutes and prepare for smarter matching in Phase 2.</p><form class="email"><input type="email" placeholder="Enter your email" aria-label="Email address"><button type="submit">Join beta →</button></form></div><div class="footer-row"><div class="footer-brand"><img class="footer-logo" src="assets/brand/logo02.svg" alt="MyRoomeo"><span class="footer-copy">© 2026 MyRoomeo. All rights reserved.</span></div><div class="social"><img src="assets/figma-home/tiktok.svg" alt="TikTok"><img src="assets/figma-home/x.svg" alt="X"><img src="assets/figma-home/instagram.svg" alt="Instagram"></div></div></section>
   </div>
+
+  <script src="https://www.gstatic.com/firebasejs/12.0.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/12.0.0/firebase-analytics-compat.js"></script>
+  <script>
+    const FIREBASE_CONFIG = {
+      apiKey: "AIzaSyAKgDFi9B8Sd4wXz3q9u-w1jR6oByHB_yM",
+      authDomain: "myroomeo-7a9cc.firebaseapp.com",
+      projectId: "myroomeo-7a9cc",
+      storageBucket: "myroomeo-7a9cc.firebasestorage.app",
+      messagingSenderId: "12645114821",
+      appId: "1:12645114821:web:142d69e810da46285fa1ac",
+      measurementId: "G-673TG19TX0"
+    };
+    if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
+    firebase.analytics();
+  </script>
 </body>
 </html>
