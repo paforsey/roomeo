@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>MyRoomeo Admin Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=PT+Serif:wght@400;700&family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #fdf6ee;
+      --surface: #fffdf9;
+      --surface-strong: #ffffff;
+      --text: #1a1209;
+      --muted: #9c8878;
+      --line: rgba(26, 18, 9, 0.12);
+      --accent: #e86c2c;
+      --accent-dark: #cf5a1f;
+      --shadow: 0 14px 32px rgba(63, 43, 31, 0.1);
+      --radius: 20px;
+      --font-serif: "PT Serif", Georgia, serif;
+      --font-sans: "DM Sans", Arial, sans-serif;
+      --font-label: 'Space Grotesk', Arial, sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: var(--font-sans);
+      background:
+        radial-gradient(circle at top left, rgba(232,108,44,0.10), transparent 28%),
+        linear-gradient(180deg, #fdf9f2 0%, var(--bg) 100%);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    .page { max-width: 900px; margin: 0 auto; padding: 60px 20px 64px; }
+
+    .eyebrow {
+      font-family: var(--font-label);
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+
+    h1 {
+      margin: 8px 0 0;
+      font-family: var(--font-serif);
+      font-size: clamp(30px, 4.5vw, 44px);
+      line-height: 1.1;
+    }
+
+    .portal-tools {
+      margin-top: 36px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+    }
+
+    .tool-card {
+      display: block;
+      text-decoration: none;
+      color: inherit;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 24px;
+      transition: transform .15s ease, box-shadow .15s ease;
+    }
+    .tool-card:hover { transform: translateY(-2px); box-shadow: 0 18px 38px rgba(63,43,31,.16); }
+    .tool-card h2 { margin: 0 0 8px; font: 700 18px var(--font-sans); color: var(--text); }
+    .tool-card p { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.5; }
+
+    .portal-footer { margin-top: 40px; display: flex; align-items: center; gap: 14px; }
+    .signed-in-as { color: var(--muted); font-size: 14px; }
+
+    /* ---------- Admin login gate ---------- */
+    .admin-gate { min-height: 70vh; display: flex; align-items: center; justify-content: center; padding: 40px 20px; }
+    .admin-gate[hidden] { display: none; }
+    .admin-gate-card { width: 100%; max-width: 380px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); padding: 32px; }
+    .admin-gate-card h1 { margin: 0 0 8px; font: 400 28px/1.2 var(--font-serif); color: var(--text); }
+    .admin-gate-card p { margin: 0 0 20px; color: var(--muted); font-size: 14px; line-height: 1.5; }
+    .admin-form { display: flex; flex-direction: column; gap: 14px; }
+    .admin-form label { display: flex; flex-direction: column; gap: 6px; font: 600 13px var(--font-sans); color: var(--text); }
+    .admin-form input { font: 400 14px var(--font-sans); padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line); background: #fff; color: var(--text); }
+    .admin-form input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+    .admin-password-field { position: relative; display: flex; }
+    .admin-password-field input { flex: 1; min-width: 0; padding-right: 42px; }
+    .admin-password-toggle { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border: none; background: none; color: var(--muted); cursor: pointer; border-radius: 6px; }
+    .admin-password-toggle:hover { color: var(--text); background: var(--bg); }
+    .admin-form-error { color: #a63722; font: 600 13px var(--font-sans); margin: 0; }
+    .admin-submit-btn { height: 44px; border-radius: 22px; border: none; background: var(--accent); color: #fff; font: 700 14px var(--font-sans); cursor: pointer; transition: background-color .2s ease; }
+    .admin-submit-btn:hover { background: var(--accent-dark); }
+    .admin-submit-btn:disabled { opacity: .6; cursor: default; }
+    .admin-logout-link { margin-top: 16px; background: none; border: none; color: var(--accent-dark); font: 600 14px var(--font-sans); cursor: pointer; padding: 0; }
+  </style>
+</head>
+<body>
+  <div id="admin-gate" class="admin-gate">
+    <div class="admin-gate-card">
+      <h1>Contributor sign-in</h1>
+      <p>Log in with your MyRoomeo contributor account to access the admin tools.</p>
+      <form id="admin-login-form" class="admin-form">
+        <label>Email<input type="email" id="admin-login-email" required autocomplete="email" /></label>
+        <label>Password
+          <div class="admin-password-field">
+            <input type="password" id="admin-login-password" required autocomplete="current-password" />
+            <button type="button" class="admin-password-toggle" id="admin-toggle-password" aria-label="Show password" aria-pressed="false"></button>
+          </div>
+        </label>
+        <p class="admin-form-error" id="admin-login-error" hidden></p>
+        <button type="submit" class="admin-submit-btn" id="admin-login-submit">Log in</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="admin-denied" class="admin-gate" hidden>
+    <div class="admin-gate-card">
+      <h1>Access denied</h1>
+      <p>Signed in as <strong id="admin-denied-email"></strong>, but this account doesn't have contributor access.</p>
+      <button type="button" class="admin-logout-link" id="admin-denied-logout">Log out and try another account</button>
+    </div>
+  </div>
+
+  <main id="admin-content" class="page" hidden>
+    <span class="eyebrow">Private Admin</span>
+    <h1>Admin portal</h1>
+    <div class="portal-tools">
+      <a class="tool-card" href="survey_tracking.html">
+        <h2>Survey tracking</h2>
+        <p>Quiz submissions and answers from the roomie-type flow.</p>
+      </a>
+      <a class="tool-card" href="profile_admin.html">
+        <h2>Profile submissions</h2>
+        <p>Profile setup data — logistics, habits, trust — from the waitlist flow.</p>
+      </a>
+      <a class="tool-card" href="users_admin.html">
+        <h2>Signed-up users</h2>
+        <p>Accounts created via the sign-up flow, with verification status.</p>
+      </a>
+    </div>
+    <div class="portal-footer">
+      <span class="signed-in-as">Signed in as <strong id="portal-user-email"></strong></span>
+      <button type="button" class="admin-logout-link" id="portal-logout">Log out</button>
+    </div>
+  </main>
+
+  <script src="https://www.gstatic.com/firebasejs/12.0.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/12.0.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore-compat.js"></script>
+  <script>
+    const FIREBASE_CONFIG = {
+      apiKey: "AIzaSyAKgDFi9B8Sd4wXz3q9u-w1jR6oByHB_yM",
+      authDomain: "myroomeo-7a9cc.firebaseapp.com",
+      projectId: "myroomeo-7a9cc",
+      storageBucket: "myroomeo-7a9cc.firebasestorage.app",
+      messagingSenderId: "12645114821",
+      appId: "1:12645114821:web:142d69e810da46285fa1ac",
+      measurementId: "G-673TG19TX0"
+    };
+    if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
+    const db = firebase.firestore();
+
+    const gateEl = document.getElementById('admin-gate');
+    const deniedEl = document.getElementById('admin-denied');
+    const contentEl = document.getElementById('admin-content');
+    const loginForm = document.getElementById('admin-login-form');
+    const loginError = document.getElementById('admin-login-error');
+    const loginSubmit = document.getElementById('admin-login-submit');
+    const deniedEmailEl = document.getElementById('admin-denied-email');
+    const deniedLogoutBtn = document.getElementById('admin-denied-logout');
+    const portalUserEmail = document.getElementById('portal-user-email');
+    const portalLogoutBtn = document.getElementById('portal-logout');
+
+    function wirePasswordToggle(inputId, buttonId) {
+      const input = document.getElementById(inputId);
+      const btn = document.getElementById(buttonId);
+      const EYE = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
+      const EYE_OFF = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.94 10.94 0 0112 20c-7 0-11-8-11-8a21.27 21.27 0 015.06-5.94M9.9 4.24A10.94 10.94 0 0112 4c7 0 11 8 11 8a21.27 21.27 0 01-2.16 3.19M14.12 14.12a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
+      btn.innerHTML = EYE;
+      btn.addEventListener('click', () => {
+        const showing = input.type === 'text';
+        input.type = showing ? 'password' : 'text';
+        btn.innerHTML = showing ? EYE : EYE_OFF;
+        btn.setAttribute('aria-label', showing ? 'Show password' : 'Hide password');
+        btn.setAttribute('aria-pressed', String(!showing));
+      });
+    }
+    wirePasswordToggle('admin-login-password', 'admin-toggle-password');
+
+    function authErrorMessage(err) {
+      const map = {
+        'auth/invalid-email': 'Enter a valid email address.',
+        'auth/wrong-password': 'Incorrect email or password.',
+        'auth/invalid-credential': 'Incorrect email or password.',
+        'auth/invalid-login-credentials': 'Incorrect email or password.',
+        'auth/user-not-found': 'No account found with that email.',
+        'auth/too-many-requests': 'Too many attempts. Please wait a moment and try again.'
+      };
+      return (err && map[err.code]) || 'Something went wrong. Please try again.';
+    }
+
+    loginForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const email = document.getElementById('admin-login-email').value.trim();
+      const password = document.getElementById('admin-login-password').value;
+      loginError.hidden = true;
+      loginSubmit.disabled = true;
+      firebase.auth().signInWithEmailAndPassword(email, password)
+        .catch((err) => { loginError.textContent = authErrorMessage(err); loginError.hidden = false; })
+        .finally(() => { loginSubmit.disabled = false; });
+    });
+
+    deniedLogoutBtn.addEventListener('click', () => firebase.auth().signOut());
+    portalLogoutBtn.addEventListener('click', () => firebase.auth().signOut());
+
+    function showGate() { gateEl.hidden = false; deniedEl.hidden = true; contentEl.hidden = true; }
+    function showDenied(email) { gateEl.hidden = true; deniedEl.hidden = false; contentEl.hidden = true; deniedEmailEl.textContent = email; }
+    function showContent(email) { gateEl.hidden = true; deniedEl.hidden = true; contentEl.hidden = false; portalUserEmail.textContent = email; }
+
+    firebase.auth().onAuthStateChanged((user) => {
+      if (!user) { showGate(); return; }
+      db.collection('survey_sessions').limit(1).get()
+        .then(() => showContent(user.email))
+        .catch(() => showDenied(user.email));
+    });
+  </script>
+</body>
+</html>
