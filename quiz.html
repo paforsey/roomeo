@@ -4500,18 +4500,6 @@
         0 8px 16px -8px rgba(31, 24, 16, 0.14) !important;
     }
 
-    /* Decorative scribble between sections (every 3rd folder, drawn in title corner) */
-    .results-page.rfinal-page .rfinal-body .rfinal-sec:nth-of-type(3n+2) .rfinal-sec-intro::after {
-      content: '';
-      display: block;
-      width: 120px;
-      height: 18px;
-      margin-top: 10px;
-      background:
-        url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 18'><path d='M2 9 Q 12 2 24 9 T 48 9 T 72 9 T 96 9 T 118 9' fill='none' stroke='%231F2A44' stroke-width='1.6' stroke-linecap='round'/></svg>") no-repeat left center / contain;
-      opacity: 0.5;
-    }
-
     @media (max-width: 640px) {
       .results-page.rfinal-page .rfinal-body {
         padding-inline: 16px !important;
@@ -4549,6 +4537,924 @@
         transform: none !important;
         animation: none !important;
         transition: none !important;
+      }
+    }
+
+    /* Result hero refinement: quiet backdrop, stronger reading order, no ticker. */
+    .results-page.rfinal-page .rfinal-hero-panel {
+      background: #F3E6D8;
+      padding-inline: clamp(38px, 6vw, 88px);
+    }
+    .results-page.rfinal-page .rfinal-hero-panel-inner {
+      max-width: 27rem;
+    }
+    .results-page.rfinal-page .rfinal-hero-kicker {
+      margin-bottom: 18px;
+      color: #765E50;
+      opacity: 1;
+    }
+    .results-page.rfinal-page .rfinal-hero-type {
+      font-size: clamp(58px, 7vw, 92px);
+      line-height: .92;
+      letter-spacing: -.055em;
+    }
+    .results-page.rfinal-page .rfinal-hero-subtitle {
+      max-width: 25rem;
+      margin-top: 24px;
+      color: #533E34;
+      font-size: clamp(18px, 1.8vw, 23px);
+      line-height: 1.42;
+    }
+    .rfinal-hero-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 34px;
+    }
+    .rfinal-hero-action {
+      min-height: 48px;
+      border: 0;
+      border-radius: 13px;
+      padding: 0 20px;
+      font-family: var(--font-rfinal-body);
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform .2s ease, background-color .2s ease, color .2s ease;
+    }
+    .rfinal-hero-action--primary {
+      background: var(--rfinal-accent);
+      color: #FFF9F2;
+      box-shadow: 0 10px 22px rgba(99, 49, 29, .15);
+    }
+    .rfinal-hero-action--secondary {
+      background: transparent;
+      color: var(--rfinal-espresso);
+    }
+    .rfinal-hero-action:hover { transform: translateY(-2px); }
+    .rfinal-hero-action--primary:hover { background: #A94527; }
+    .rfinal-hero-action--secondary:hover { color: var(--rfinal-accent); }
+    .results-page.rfinal-page .rfinal-body {
+      background: var(--sb-paper-bg) !important;
+      padding-top: clamp(48px, 6vw, 72px) !important;
+    }
+    .results-page.rfinal-page .rfinal-body::before {
+      opacity: .025;
+    }
+    .results-page.rfinal-page .rfinal-summary-row {
+      display: grid;
+      grid-template-columns: .95fr .95fr 1.25fr;
+      align-items: stretch;
+      gap: clamp(18px, 2.2vw, 32px);
+      width: min(100%, 1480px);
+      margin: 0 auto;
+    }
+    .results-page.rfinal-page .rfinal-summary-row > .rfinal-quote,
+    .results-page.rfinal-page .rfinal-summary-row > .rfinal-roast,
+    .results-page.rfinal-page .rfinal-summary-row > .rfinal-stats-list {
+      width: 100%;
+      max-width: none;
+      height: 100%;
+      min-height: 290px;
+      margin: 0 !important;
+      transform: none;
+      box-sizing: border-box;
+    }
+    .results-page.rfinal-page .rfinal-summary-row > .rfinal-quote {
+      display: flex;
+      align-items: center;
+      padding: 38px 32px !important;
+      font-size: clamp(17px, 1.55vw, 21px) !important;
+      line-height: 1.45 !important;
+    }
+    .results-page.rfinal-page .rfinal-summary-row > .rfinal-quote::before {
+      display: none;
+    }
+    .results-page.rfinal-page .rfinal-summary-row > .rfinal-quote::after {
+      width: 38px;
+      height: 74px;
+      top: -24px;
+      right: 24px;
+    }
+    .results-page.rfinal-page .rfinal-summary-row > .rfinal-roast {
+      display: flex;
+      align-items: center;
+      padding: 48px 30px 30px !important;
+      font-size: clamp(15px, 1.3vw, 18px) !important;
+      line-height: 1.55 !important;
+    }
+    .results-page.rfinal-page .rfinal-summary-row > .rfinal-stats-list {
+      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+      align-content: center;
+      gap: 22px 24px !important;
+      padding: 28px !important;
+    }
+    .results-page.rfinal-page .rfinal-folder-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      align-items: stretch;
+      gap: clamp(64px, 7vw, 92px) clamp(28px, 3.5vw, 52px);
+      width: min(100%, 1480px);
+      margin: 0 auto;
+    }
+    .results-page.rfinal-page .rfinal-folder-grid .rfinal-sec {
+      width: 100%;
+      max-width: none;
+      height: 100%;
+      margin: 0 !important;
+      padding: clamp(70px, 6vw, 88px) clamp(26px, 3vw, 42px) clamp(36px, 4vw, 48px) !important;
+    }
+    .results-page.rfinal-page .rfinal-folder-grid .rfinal-sec-title {
+      padding-right: clamp(54px, 7vw, 90px);
+      font-size: clamp(25px, 2.6vw, 34px) !important;
+    }
+    .results-page.rfinal-page .rfinal-folder-grid .rfinal-folder-deco {
+      width: clamp(58px, 7vw, 88px);
+    }
+    .results-page.rfinal-page .rfinal-folder-grid .rfinal-matches-stack {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: clamp(12px, 1.5vw, 20px) !important;
+    }
+    .results-page.rfinal-page .rfinal-body .rfinal-next-card {
+      display: grid;
+      grid-template-areas:
+        "intro share"
+        "cta share";
+      grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr);
+      grid-template-rows: auto auto;
+      align-items: start;
+      gap: 22px clamp(40px, 5vw, 72px);
+      width: min(100%, 1120px);
+      max-width: none;
+      padding: clamp(34px, 4vw, 48px) clamp(34px, 4.5vw, 56px) !important;
+      transform: none;
+    }
+    .results-page.rfinal-page .rfinal-body .rfinal-next-card::before {
+      display: none;
+    }
+    .results-page.rfinal-page .rfinal-body .rfinal-next-card .rfinal-next {
+      grid-area: intro;
+    }
+    .results-page.rfinal-page .rfinal-body .rfinal-next-card .rfinal-share {
+      grid-area: share;
+      align-self: center;
+      padding-top: 0 !important;
+      border-top: 0 !important;
+    }
+    .results-page.rfinal-page .rfinal-body .rfinal-next-card .rfinal-cta-block {
+      grid-area: cta;
+      width: min(100%, 330px);
+      align-items: flex-start;
+    }
+    .results-page.rfinal-page .rfinal-body .rfinal-next-card .card-btn {
+      width: 100%;
+    }
+    .results-page.rfinal-page .rfinal-body .rfinal-next-card .share-pills {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px !important;
+    }
+    .results-page.rfinal-page .rfinal-body .rfinal-next-card .share-pill {
+      width: 100%;
+      min-height: 86px;
+      padding: 14px 10px;
+      font-size: 12px;
+      white-space: normal;
+      flex-direction: column;
+      justify-content: center;
+      text-align: center;
+    }
+    .results-page.rfinal-page .rfinal-body .rfinal-next-card .share-pill--wide {
+      grid-column: auto;
+    }
+
+    /* Profile setup uses the same quiet, direct language as the quiz. */
+    .profile-logistics-form,
+    .profile-step2-form,
+    .profile-trust-form {
+      max-width: 760px;
+      gap: 20px;
+      padding-top: 4px;
+    }
+    .profile-logistics-form .logistics-group,
+    .profile-step2-form .logistics-group,
+    .profile-trust-form .logistics-group {
+      gap: 22px;
+      padding: clamp(24px, 3vw, 32px) !important;
+      border: 1px solid #E7E0D7 !important;
+      border-radius: 18px !important;
+      background: #FFFCF7 !important;
+      background-image: none !important;
+      box-shadow: none !important;
+      transform: none !important;
+    }
+    .profile-logistics-form .logistics-group::before,
+    .profile-logistics-form .logistics-group::after,
+    .profile-step2-form .logistics-group::before,
+    .profile-step2-form .logistics-group::after,
+    .profile-trust-form .logistics-group::before,
+    .profile-trust-form .logistics-group::after,
+    .profile-logistics-form .logistics-group-title::before,
+    .profile-step2-form .logistics-group-title::before,
+    .profile-trust-form .logistics-group-title::before {
+      display: none !important;
+      content: none !important;
+    }
+    .profile-logistics-form .logistics-group-title,
+    .profile-step2-form .logistics-group-title,
+    .profile-trust-form .logistics-group-title {
+      font-family: inherit !important;
+      font-size: clamp(19px, 2vw, 22px) !important;
+      font-weight: 700 !important;
+      font-style: normal !important;
+      line-height: 1.25 !important;
+      letter-spacing: -.02em !important;
+      color: var(--text-1) !important;
+    }
+    .profile-logistics-form .pref-chip,
+    .profile-step2-form .pref-chip,
+    .profile-trust-form .pref-chip {
+      background: #FFFFFF;
+      border-color: #DED7CF;
+      border-radius: 12px;
+    }
+    .profile-logistics-form .pref-chip.selected,
+    .profile-step2-form .pref-chip.selected,
+    .profile-trust-form .pref-chip.selected {
+      background: #FFF0E8;
+      border-color: #D86A43;
+      color: #7A321D;
+    }
+    .identity-self-describe {
+      margin-top: 4px;
+    }
+    .identity-self-describe .hint {
+      display: inline;
+      font-weight: 500;
+      color: var(--text-3);
+    }
+    .profile-question-progress {
+      width: 100%;
+      max-width: 680px;
+      margin: -8px auto 26px;
+    }
+    .profile-question-progress > span {
+      display: block;
+      margin-bottom: 10px;
+      color: var(--text-3);
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .profile-question-segments {
+      display: grid;
+      grid-template-columns: repeat(var(--profile-question-count, 5), minmax(0, 1fr));
+      gap: 6px;
+    }
+    .profile-question-segments span {
+      height: 4px;
+      border-radius: 999px;
+      background: #E5DED5;
+      transition: background-color .2s ease;
+    }
+    .profile-question-segments span.is-complete,
+    .profile-question-segments span.is-current {
+      background: #D7653F;
+    }
+    .profile-logistics-form .logistics-group:not(.profile-question-active) {
+      display: none !important;
+    }
+    .profile-logistics-form.is-question-mode .logistics-group-title {
+      position: absolute !important;
+      width: 1px !important;
+      height: 1px !important;
+      padding: 0 !important;
+      margin: -1px !important;
+      overflow: hidden !important;
+      clip: rect(0, 0, 0, 0) !important;
+      white-space: nowrap !important;
+      border: 0 !important;
+    }
+    .profile-logistics-form > .quiz-actions-stack {
+      width: 100%;
+      max-width: 760px;
+      margin: 4px auto 0;
+    }
+    @media (max-width: 720px) {
+      .results-page.rfinal-page .rfinal-hero-panel {
+        padding: 42px 24px 48px;
+      }
+      .rfinal-hero-actions { align-items: stretch; flex-direction: column; }
+      .rfinal-hero-action { width: 100%; }
+      .results-page.rfinal-page .rfinal-summary-row {
+        grid-template-columns: 1fr;
+      }
+      .results-page.rfinal-page .rfinal-summary-row > .rfinal-quote,
+      .results-page.rfinal-page .rfinal-summary-row > .rfinal-roast,
+      .results-page.rfinal-page .rfinal-summary-row > .rfinal-stats-list {
+        min-height: 0;
+      }
+      .results-page.rfinal-page .rfinal-folder-grid {
+        grid-template-columns: 1fr;
+        gap: 58px;
+      }
+      .results-page.rfinal-page .rfinal-folder-grid .rfinal-matches-stack {
+        grid-template-columns: 1fr;
+      }
+      .results-page.rfinal-page .rfinal-body .rfinal-next-card {
+        grid-template-areas:
+          "intro"
+          "cta"
+          "share";
+        grid-template-columns: 1fr;
+      }
+      .results-page.rfinal-page .rfinal-body .rfinal-next-card .share-pills {
+        grid-template-columns: 1fr;
+      }
+      .results-page.rfinal-page .rfinal-body .rfinal-next-card .share-pill {
+        min-height: 52px;
+        flex-direction: row;
+      }
+    }
+
+    /* Result report: MBTI-style clarity without folder silhouettes. */
+    .results-page.rfinal-page .rfinal-body {
+      background: #FAF7F1 !important;
+      background-image: none !important;
+      gap: clamp(28px, 4vw, 52px) !important;
+    }
+    .results-page.rfinal-page .rfinal-folder-grid {
+      gap: clamp(20px, 2.5vw, 32px) !important;
+    }
+    .results-page.rfinal-page .rfinal-body .rfinal-sec {
+      position: relative;
+      min-height: 0 !important;
+      padding: clamp(30px, 3.5vw, 46px) !important;
+      border: 1px solid rgba(75, 57, 45, .12) !important;
+      border-radius: 20px !important;
+      background: rgba(255, 253, 249, .94) !important;
+      background-image: none !important;
+      box-shadow: none !important;
+      transform: none !important;
+      overflow: visible !important;
+    }
+    .results-page.rfinal-page .rfinal-body .rfinal-sec::before,
+    .results-page.rfinal-page .rfinal-body .rfinal-sec::after,
+    .results-page.rfinal-page .rfinal-body .rfinal-sec .rfinal-badge {
+      display: none !important;
+      content: none !important;
+    }
+    .results-page.rfinal-page .rfinal-body .rfinal-folder-deco {
+      display: block !important;
+      top: 22px !important;
+      right: 22px !important;
+      width: clamp(54px, 5.5vw, 76px) !important;
+      max-height: 76px;
+      object-fit: contain;
+      transform: rotate(2deg) !important;
+      filter: none !important;
+    }
+    .results-page.rfinal-page .rfinal-folder-grid .rfinal-sec-title {
+      padding-right: 88px !important;
+      margin-top: 0 !important;
+      font-size: clamp(24px, 2.5vw, 32px) !important;
+      line-height: 1.1 !important;
+    }
+    .results-page.rfinal-page .rfinal-body .rfinal-sec:hover {
+      animation: none !important;
+      transform: translateY(-2px) !important;
+      box-shadow: 0 14px 30px -24px rgba(75, 57, 45, .35) !important;
+    }
+    .results-page.rfinal-page .rfinal-body .rfinal-sec .result-list {
+      margin-top: 24px !important;
+    }
+    .results-page.rfinal-page .rfinal-body .rfinal-sec .result-list li {
+      padding: 13px 0 13px 30px !important;
+      border-bottom: 1px solid rgba(75, 57, 45, .09);
+    }
+    .results-page.rfinal-page .rfinal-body .rfinal-sec .result-list li:last-child {
+      border-bottom: 0;
+    }
+    .results-page.rfinal-page .rfinal-body .rfinal-sec .result-list li::after {
+      display: none !important;
+    }
+
+    /* Open identity fields and a dual-ended rent range. */
+    .profile-open-fields { margin-top: 2px; }
+    .profile-open-text {
+      min-height: 106px;
+      resize: vertical;
+      line-height: 1.5;
+    }
+    .profile-identity-form {
+      display: grid;
+      gap: 28px;
+    }
+    .identity-writing-card {
+      padding: clamp(34px, 5vw, 56px) !important;
+    }
+    .profile-bio-text {
+      min-height: 150px;
+      font-size: 17px;
+      line-height: 1.55;
+    }
+    .profile-character-count {
+      margin: 8px 2px 0;
+      color: rgba(72, 64, 58, .58);
+      font-size: 13px;
+      text-align: right;
+    }
+    #flow-profile-photo .profile-identity-body {
+      display: grid;
+      gap: 28px;
+    }
+    .budget-range-control {
+      position: relative;
+      height: 34px;
+      margin: 12px 2px 6px;
+    }
+    .budget-range-track {
+      position: absolute;
+      inset: 14px 0 auto;
+      height: 6px;
+      border-radius: 999px;
+      background: #E4DDD4;
+      overflow: hidden;
+    }
+    .budget-range-track span {
+      position: absolute;
+      inset-block: 0;
+      border-radius: inherit;
+      background: #D7653F;
+    }
+    .budget-range-input {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 34px;
+      margin: 0;
+      appearance: none;
+      pointer-events: none;
+      background: transparent;
+    }
+    .budget-range-input::-webkit-slider-thumb {
+      appearance: none;
+      width: 24px;
+      height: 24px;
+      border: 3px solid #D7653F;
+      border-radius: 50%;
+      background: #FFFDF9;
+      box-shadow: 0 3px 9px rgba(74, 48, 36, .16);
+      pointer-events: auto;
+      cursor: grab;
+    }
+    .budget-range-input::-moz-range-thumb {
+      width: 19px;
+      height: 19px;
+      border: 3px solid #D7653F;
+      border-radius: 50%;
+      background: #FFFDF9;
+      pointer-events: auto;
+      cursor: grab;
+    }
+    .budget-manual-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+    .budget-manual-grid > label {
+      display: grid;
+      gap: 8px;
+      color: var(--text-2);
+      font-size: 13px;
+      font-weight: 650;
+    }
+    .budget-money-input {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      align-items: center;
+      gap: 8px;
+      padding-left: 14px;
+      border: 1px solid #DED7CF;
+      border-radius: 12px;
+      background: #FFF;
+    }
+    .budget-money-input:focus-within {
+      border-color: #D7653F;
+      box-shadow: 0 0 0 3px rgba(215, 101, 63, .14);
+    }
+    .budget-money-input .form-input {
+      min-width: 0;
+      border: 0 !important;
+      box-shadow: none !important;
+      padding-left: 0;
+    }
+    @media (max-width: 640px) {
+      .budget-manual-grid { grid-template-columns: 1fr; }
+      .results-page.rfinal-page .rfinal-body .rfinal-sec {
+        padding: 28px 22px !important;
+      }
+      .results-page.rfinal-page .rfinal-folder-grid .rfinal-sec-title {
+        padding-right: 68px !important;
+      }
+    }
+
+    /* Final color pass: one neutral surface, one brand accent. */
+    .results-page.rfinal-page .rfinal-summary-row > .rfinal-quote,
+    .results-page.rfinal-page .rfinal-summary-row > .rfinal-roast,
+    .results-page.rfinal-page .rfinal-summary-row > .rfinal-stats-list,
+    .results-page.rfinal-page .rfinal-folder-grid .rfinal-sec,
+    .results-page.rfinal-page .rfinal-body .rfinal-next-card {
+      background-color: #FFFDF9 !important;
+      background-image: none !important;
+      border: 1px solid rgba(75, 57, 45, .12) !important;
+      box-shadow: none !important;
+      transform: none !important;
+    }
+    .results-page.rfinal-page .rfinal-body .rfinal-sec:nth-of-type(6n+1),
+    .results-page.rfinal-page .rfinal-body .rfinal-sec:nth-of-type(6n+2),
+    .results-page.rfinal-page .rfinal-body .rfinal-sec:nth-of-type(6n+3),
+    .results-page.rfinal-page .rfinal-body .rfinal-sec:nth-of-type(6n+4),
+    .results-page.rfinal-page .rfinal-body .rfinal-sec:nth-of-type(6n+5),
+    .results-page.rfinal-page .rfinal-body .rfinal-sec:nth-of-type(6n) {
+      background-color: #FFFDF9 !important;
+      background-image: none !important;
+    }
+    .results-page.rfinal-page .rfinal-summary-row > .rfinal-quote::before,
+    .results-page.rfinal-page .rfinal-summary-row > .rfinal-quote::after,
+    .results-page.rfinal-page .rfinal-summary-row > .rfinal-roast::before,
+    .results-page.rfinal-page .rfinal-summary-row > .rfinal-roast::after {
+      display: none !important;
+      content: none !important;
+    }
+    .results-page.rfinal-page .rfinal-body .rfinal-matches-stack > * {
+      margin-top: 0 !important;
+      background: #FFFFFF !important;
+      border: 1px solid rgba(75, 57, 45, .12) !important;
+      box-shadow: none !important;
+      transform: none !important;
+    }
+    .results-page.rfinal-page .rfinal-body .rfinal-matches-stack > *::before {
+      display: none !important;
+      content: none !important;
+    }
+    .results-page.rfinal-page .rfinal-stat-fill,
+    .results-page.rfinal-page .progress-fill {
+      background: #D7653F !important;
+    }
+    .school-search-section {
+      padding: 20px;
+      border: 1px solid #E7E0D7;
+      border-radius: 14px;
+      background: #FFFDF9;
+    }
+  </style>
+  <style id="result-single-column-refinement">
+    /* Result page: one confident editorial reading column. */
+    .results-page.rfinal-page .rfinal-body {
+      width: min(1120px, calc(100% - 48px));
+      margin-inline: auto;
+      padding: clamp(72px, 8vw, 120px) 0 88px;
+    }
+
+    .results-page.rfinal-page .rfinal-summary-row,
+    .results-page.rfinal-page .rfinal-folder-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 24px;
+      width: 100%;
+      margin: 0 0 24px;
+    }
+
+    .results-page.rfinal-page .rfinal-summary-row > .rfinal-quote,
+    .results-page.rfinal-page .rfinal-summary-row > .rfinal-roast,
+    .results-page.rfinal-page .rfinal-summary-row > .rfinal-stats-list,
+    .results-page.rfinal-page .rfinal-folder-grid > .rfinal-sec,
+    .results-page.rfinal-page .rfinal-body > .rfinal-next-card {
+      grid-column: 1 / -1;
+      width: 100%;
+      max-width: none;
+      min-height: 0;
+      margin: 0;
+      transform: none;
+    }
+
+    .results-page.rfinal-page .rfinal-summary-row > .rfinal-quote,
+    .results-page.rfinal-page .rfinal-summary-row > .rfinal-roast,
+    .results-page.rfinal-page .rfinal-summary-row > .rfinal-stats-list,
+    .results-page.rfinal-page .rfinal-folder-grid > .rfinal-sec {
+      padding: clamp(36px, 5vw, 64px) clamp(32px, 6vw, 76px);
+      border-radius: 24px;
+      background: rgba(255, 253, 248, .9);
+      border: 1px solid rgba(92, 65, 52, .09);
+      box-shadow: 0 18px 48px rgba(83, 57, 42, .08);
+    }
+
+    .results-page.rfinal-page .rfinal-summary-row > .rfinal-quote,
+    .results-page.rfinal-page .rfinal-summary-row > .rfinal-roast {
+      max-width: none;
+      text-align: left;
+    }
+
+    .results-page.rfinal-page .rfinal-summary-row > .rfinal-quote {
+      font-size: clamp(30px, 4vw, 52px);
+      line-height: 1.1;
+    }
+
+    .results-page.rfinal-page .rfinal-summary-row > .rfinal-roast {
+      font-size: clamp(20px, 2.4vw, 29px);
+      line-height: 1.45;
+    }
+
+    .results-page.rfinal-page .rfinal-folder-grid > .rfinal-sec {
+      display: grid;
+      grid-template-columns: minmax(220px, .42fr) minmax(0, 1fr);
+      column-gap: clamp(44px, 7vw, 96px);
+      align-items: start;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .results-page.rfinal-page .rfinal-folder-grid .rfinal-sec-title,
+    .results-page.rfinal-page .rfinal-folder-grid .rfinal-sec-intro {
+      grid-column: 1;
+    }
+
+    .results-page.rfinal-page .rfinal-folder-grid .result-list,
+    .results-page.rfinal-page .rfinal-folder-grid .rfinal-matches-stack,
+    .results-page.rfinal-page .rfinal-folder-grid .rfinal-survival-tip {
+      grid-column: 2;
+      grid-row: 1 / span 3;
+      width: 100%;
+      margin-top: 0;
+    }
+
+    .results-page.rfinal-page .rfinal-folder-grid .rfinal-sec-title {
+      margin: 0 0 14px;
+      font-size: clamp(30px, 3.5vw, 46px);
+      line-height: 1.05;
+    }
+
+    .results-page.rfinal-page .rfinal-folder-grid .rfinal-sec-intro {
+      max-width: 28ch;
+      margin: 0;
+      font-size: 17px;
+      line-height: 1.55;
+    }
+
+    .results-page.rfinal-page .rfinal-folder-grid .rfinal-sec .rfinal-badge,
+    .results-page.rfinal-page .rfinal-folder-grid .rfinal-sec::before,
+    .results-page.rfinal-page .rfinal-folder-grid .rfinal-sec::after {
+      display: none !important;
+    }
+
+    .results-page.rfinal-page .rfinal-folder-grid .rfinal-sec .rfinal-folder-deco {
+      display: block !important;
+      position: absolute;
+      z-index: 0;
+      top: 24px;
+      right: 28px;
+      width: clamp(58px, 7vw, 88px);
+      height: auto;
+      max-height: 88px;
+      object-fit: contain;
+      opacity: .82;
+      transform: rotate(4deg);
+      pointer-events: none;
+      filter: saturate(.78) contrast(.96);
+    }
+
+    .results-page.rfinal-page .rfinal-folder-grid .rfinal-sec:nth-child(even) .rfinal-folder-deco {
+      transform: rotate(-4deg);
+    }
+
+    .results-page.rfinal-page .rfinal-folder-grid .rfinal-sec > :not(.rfinal-folder-deco) {
+      position: relative;
+      z-index: 1;
+    }
+
+    /* These are observations, not interactive checklist items. */
+    .results-page.rfinal-page .rfinal-folder-grid .result-list {
+      gap: 20px;
+    }
+
+    .results-page.rfinal-page .rfinal-folder-grid .result-list li {
+      padding: 0 0 20px !important;
+      border: 0 !important;
+      border-bottom: 1px solid rgba(83, 61, 49, .11) !important;
+      font-size: clamp(16px, 1.6vw, 19px) !important;
+      line-height: 1.55 !important;
+    }
+
+    .results-page.rfinal-page .rfinal-folder-grid .result-list li:last-child {
+      padding-bottom: 0 !important;
+      border-bottom: 0 !important;
+    }
+
+    .results-page.rfinal-page .rfinal-folder-grid .result-list li::before,
+    .results-page.rfinal-page .rfinal-folder-grid .result-list li::after {
+      display: none !important;
+      content: none !important;
+    }
+
+    .results-page.rfinal-page .rfinal-folder-grid .rfinal-sec:hover,
+    .results-page.rfinal-page .rfinal-summary-row > *:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 24px 56px rgba(83, 57, 42, .11);
+    }
+
+    .results-page.rfinal-page .rfinal-body > .rfinal-next-card {
+      margin-top: 56px;
+      border-radius: 24px;
+    }
+
+    /* Survival card: keep the highlighted tip and checklist in separate rows. */
+    .results-page.rfinal-page .rfinal-sec[aria-labelledby="res-ideal-heading"] .rfinal-survival-tip {
+      grid-column: 2;
+      grid-row: 1;
+      position: relative;
+      width: 100%;
+      margin: 0 0 28px;
+      padding: 28px 30px;
+      font-size: clamp(22px, 2.2vw, 30px);
+      line-height: 1.35;
+    }
+
+    .results-page.rfinal-page .rfinal-sec[aria-labelledby="res-ideal-heading"] .result-list {
+      grid-column: 2;
+      grid-row: 2;
+      margin: 0;
+    }
+
+    /* Final action: one primary decision, followed by quiet utility actions. */
+    .results-page.rfinal-page .rfinal-body .rfinal-next-card {
+      display: block;
+      padding: clamp(44px, 6vw, 72px) clamp(36px, 7vw, 88px) !important;
+    }
+
+    .results-page.rfinal-page .rfinal-body .rfinal-next-card .rfinal-next {
+      max-width: 660px;
+    }
+
+    .results-page.rfinal-page .rfinal-body .rfinal-next-card .rfinal-next h2 {
+      margin-bottom: 24px;
+      font-size: clamp(34px, 4.2vw, 52px);
+      line-height: 1.05;
+    }
+
+    .results-page.rfinal-page .rfinal-body .rfinal-next-card .rfinal-next p {
+      max-width: 54ch;
+      margin: 0;
+      font-size: 18px;
+      line-height: 1.55;
+    }
+
+    .results-page.rfinal-page .rfinal-body .rfinal-next-card .rfinal-cta-block {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: wrap;
+      width: 100%;
+      margin: 48px 0 76px !important;
+      padding: 0 !important;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 14px 22px;
+      text-align: left;
+    }
+
+    .results-page.rfinal-page .rfinal-body .rfinal-next-card .card-btn {
+      width: auto;
+      min-width: 0;
+      max-width: none;
+      min-height: 52px;
+      padding: 0 24px;
+      border-radius: 999px;
+      color: #bd4929;
+      border: 1.5px solid rgba(197, 73, 40, .72);
+      background: rgba(255, 250, 244, .58);
+      box-shadow: none;
+    }
+
+    .results-page.rfinal-page .rfinal-body .rfinal-next-card .card-btn:hover {
+      color: #fffaf4;
+      background: #c94f2d;
+      transform: translateY(-2px);
+    }
+
+    .results-page.rfinal-page .rfinal-body .rfinal-next-card .card-btn-tail {
+      display: none;
+    }
+
+    .results-page.rfinal-page .rfinal-body .rfinal-next-card .btn-skip {
+      align-self: flex-start;
+      width: auto;
+      margin: 0;
+      padding: 13px 4px;
+      text-align: left;
+      font-size: 15px;
+      opacity: .68;
+    }
+
+    .results-page.rfinal-page .rfinal-body .rfinal-next-card .rfinal-share {
+      max-width: none;
+      margin: 0 !important;
+      padding: 0 !important;
+      border: 0 !important;
+    }
+
+    .results-page.rfinal-page .rfinal-body .rfinal-next-card .rfinal-share h2 {
+      margin-bottom: 14px;
+      font-size: clamp(24px, 2.8vw, 34px);
+    }
+
+    .results-page.rfinal-page .rfinal-body .rfinal-next-card .rfinal-share .hint {
+      max-width: 62ch;
+      margin-bottom: 30px;
+    }
+
+    .results-page.rfinal-page .rfinal-body .rfinal-next-card .share-pills {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-start;
+      align-items: center;
+      gap: 12px !important;
+      width: 100%;
+      margin-left: 0;
+      margin-right: 0;
+    }
+
+    .results-page.rfinal-page .rfinal-body .rfinal-next-card .share-pill,
+    .results-page.rfinal-page .rfinal-body .rfinal-next-card .share-pill--wide {
+      display: inline-flex;
+      width: auto;
+      min-height: 48px;
+      padding: 0 18px;
+      border: 1px solid rgba(82, 59, 48, .13);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, .72);
+      flex-direction: row;
+      justify-content: center;
+      gap: 9px;
+      font-size: 14px;
+      white-space: nowrap;
+    }
+
+    @media (max-width: 760px) {
+      .results-page.rfinal-page .rfinal-body {
+        width: min(100% - 28px, 1120px);
+        padding-top: 48px;
+      }
+
+      .results-page.rfinal-page .rfinal-folder-grid > .rfinal-sec {
+        display: block;
+        padding: 34px 26px;
+      }
+
+      .results-page.rfinal-page .rfinal-folder-grid .rfinal-sec .rfinal-folder-deco {
+        top: 20px;
+        right: 20px;
+        width: 58px;
+        opacity: .7;
+      }
+
+      .results-page.rfinal-page .rfinal-folder-grid .rfinal-sec-title {
+        padding-right: 68px;
+      }
+
+      .results-page.rfinal-page .rfinal-folder-grid .result-list,
+      .results-page.rfinal-page .rfinal-folder-grid .rfinal-matches-stack,
+      .results-page.rfinal-page .rfinal-folder-grid .rfinal-survival-tip {
+        margin-top: 28px;
+      }
+
+      .results-page.rfinal-page .rfinal-sec[aria-labelledby="res-ideal-heading"] .rfinal-survival-tip,
+      .results-page.rfinal-page .rfinal-sec[aria-labelledby="res-ideal-heading"] .result-list {
+        margin-top: 24px;
+      }
+
+      .results-page.rfinal-page .rfinal-body .rfinal-next-card .card-btn {
+        width: 100%;
+        min-width: 0;
+      }
+
+      .results-page.rfinal-page .rfinal-body .rfinal-next-card .rfinal-cta-block {
+        align-items: flex-start;
+      }
+
+      .results-page.rfinal-page .rfinal-body .rfinal-next-card .share-pills {
+        display: grid;
+        grid-template-columns: 1fr;
+      }
+
+      .results-page.rfinal-page .rfinal-body .rfinal-next-card .share-pill,
+      .results-page.rfinal-page .rfinal-body .rfinal-next-card .share-pill--wide {
+        width: 100%;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .results-page.rfinal-page .rfinal-folder-grid .rfinal-sec,
+      .results-page.rfinal-page .rfinal-summary-row > * {
+        transition: none;
       }
     }
   </style>
@@ -4625,6 +5531,10 @@
                       <span id="res-rfinal-type-name"></span>
                     </p>
                     <p class="rfinal-hero-subtitle" id="res-rfinal-subtitle"></p>
+                    <div class="rfinal-hero-actions">
+                      <button type="button" class="rfinal-hero-action rfinal-hero-action--primary" id="btn-hero-share">Share my type</button>
+                      <button type="button" class="rfinal-hero-action rfinal-hero-action--secondary" id="btn-hero-explore">Explore my result →</button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -4655,25 +5565,15 @@
             </div>
           </section>
 
-          <div class="rfinal-ticker" aria-hidden="true">
-            <div class="rfinal-ticker-track">
-              <span>Roomie type quiz</span><span class="rfinal-ticker-dot">✦</span>
-              <span>6 animal types</span><span class="rfinal-ticker-dot">✦</span>
-              <span>Share your result</span><span class="rfinal-ticker-dot">✦</span>
-              <span>Find your match</span><span class="rfinal-ticker-dot">✦</span>
-              <span>Roomie type quiz</span><span class="rfinal-ticker-dot">✦</span>
-              <span>6 animal types</span><span class="rfinal-ticker-dot">✦</span>
-              <span>Share your result</span><span class="rfinal-ticker-dot">✦</span>
-              <span>Find your match</span><span class="rfinal-ticker-dot">✦</span>
-            </div>
-          </div>
-
           <div class="rfinal-body">
-            <p class="rfinal-quote" id="res-rfinal-quote"></p>
             <p id="res-tagline" class="sr-only"></p>
-            <p class="rfinal-roast" id="res-roast"></p>
-            <ul class="rfinal-stats-list" id="res-stats"></ul>
+            <div class="rfinal-summary-row">
+              <p class="rfinal-quote" id="res-rfinal-quote"></p>
+              <p class="rfinal-roast" id="res-roast"></p>
+              <ul class="rfinal-stats-list" id="res-stats"></ul>
+            </div>
 
+            <div class="rfinal-folder-grid">
             <section class="rfinal-sec" aria-labelledby="res-why-heading">
               <img class="rfinal-folder-deco" src="assets/journal-props/deco-folder-1.svg" alt="" aria-hidden="true" decoding="async" width="91" height="107" />
               <div class="rfinal-badge" aria-hidden="true">
@@ -4684,10 +5584,22 @@
               <ul class="result-list" id="res-why-list"></ul>
             </section>
 
+            <section class="rfinal-sec" aria-labelledby="res-matches-heading">
+              <img class="rfinal-folder-deco" src="assets/journal-props/deco-folder-5.svg" alt="" aria-hidden="true" decoding="async" width="107" height="111" />
+              <div class="rfinal-badge" aria-hidden="true">
+                <span class="rfinal-badge-digit">2</span>
+              </div>
+              <h2 class="rfinal-sec-title" id="res-matches-heading">Compatibility radar</h2>
+              <div id="res-compat" class="rfinal-matches-stack"></div>
+            </section>
+            </div>
+
+            <div class="rfinal-folder-grid">
+
             <section class="rfinal-sec" aria-labelledby="res-live-heading">
               <img class="rfinal-folder-deco" src="assets/journal-props/deco-folder-2.svg" alt="" aria-hidden="true" decoding="async" width="100" height="81" />
               <div class="rfinal-badge" aria-hidden="true">
-                <span class="rfinal-badge-digit">2</span>
+                <span class="rfinal-badge-digit">3</span>
               </div>
               <h2 class="rfinal-sec-title" id="res-live-heading">Living habits</h2>
               <p class="rfinal-sec-intro">The good, the bad, and the ugly.</p>
@@ -4697,7 +5609,7 @@
             <section class="rfinal-sec" aria-labelledby="res-scenarios-heading">
               <img class="rfinal-folder-deco" src="assets/journal-props/deco-folder-3.svg" alt="" aria-hidden="true" decoding="async" width="137" height="100" />
               <div class="rfinal-badge" aria-hidden="true">
-                <span class="rfinal-badge-digit">3</span>
+                <span class="rfinal-badge-digit">4</span>
               </div>
               <h2 class="rfinal-sec-title" id="res-scenarios-heading">Main-character moments</h2>
               <p class="rfinal-sec-intro">Stuff that probably happens at your place:</p>
@@ -4707,20 +5619,11 @@
             <section class="rfinal-sec" aria-labelledby="res-others-heading">
               <img class="rfinal-folder-deco" src="assets/journal-props/deco-folder-4.svg" alt="" aria-hidden="true" decoding="async" width="107" height="114" />
               <div class="rfinal-badge" aria-hidden="true">
-                <span class="rfinal-badge-digit">4</span>
+                <span class="rfinal-badge-digit">5</span>
               </div>
               <h2 class="rfinal-sec-title" id="res-others-heading">The vibe check</h2>
               <p class="rfinal-sec-intro">People who live with you often feel:</p>
               <ul class="result-list" id="res-others"></ul>
-            </section>
-
-            <section class="rfinal-sec" aria-labelledby="res-matches-heading">
-              <img class="rfinal-folder-deco" src="assets/journal-props/deco-folder-5.svg" alt="" aria-hidden="true" decoding="async" width="107" height="111" />
-              <div class="rfinal-badge" aria-hidden="true">
-                <span class="rfinal-badge-digit">5</span>
-              </div>
-              <h2 class="rfinal-sec-title" id="res-matches-heading">Compatibility radar</h2>
-              <div id="res-compat" class="rfinal-matches-stack"></div>
             </section>
 
             <section class="rfinal-sec" aria-labelledby="res-ideal-heading">
@@ -4733,6 +5636,7 @@
               <p class="rfinal-survival-tip" id="res-survival"></p>
               <ul class="result-list" id="res-ideal"></ul>
             </section>
+            </div>
 
             <div class="rfinal-next-card">
               <div class="rfinal-next" aria-labelledby="res-next-heading">
@@ -4788,7 +5692,11 @@
       <div class="flow-panel-inner wide">
         <p class="flow-step-label" id="pf-step1-label">Setup · 1 of 5 · Housing &amp; logistics</p>
         <h1 id="pf-logistics-title">Where do you want to live?</h1>
-        <p class="flow-lede" id="pf-logistics-lede">Zillow-style basics for search, filtering, and move-in feasibility.</p>
+        <p class="flow-lede" id="pf-logistics-lede">A few practical details to help us find roomies who fit your plans.</p>
+        <div class="profile-question-progress" aria-live="polite">
+          <span id="pf-question-progress-label">Question 1 of 5</span>
+          <div class="profile-question-segments" id="pf-question-segments" aria-hidden="true"></div>
+        </div>
         <form id="form-profile-1" class="profile-logistics-form">
           <section class="logistics-group">
             <h2 class="logistics-group-title">Location</h2>
@@ -4829,6 +5737,33 @@
               <p class="place-location-status hidden" id="pf-place-location-status" aria-live="polite"></p>
               <p class="place-location-error hidden" id="pf-place-location-error" role="alert"></p>
             </div>
+            <div class="pref-section logistics-search-only school-search-section" id="pf-school-section">
+              <p class="pref-section-label">School area <span class="hint">(optional)</span></p>
+              <p class="pref-section-hint">Choose a specific school if you want us to prioritize housing around its campus.</p>
+              <div class="form-field">
+                <label for="pf-school">School or university</label>
+                <input class="form-input" type="text" id="pf-school" list="pf-school-options" autocomplete="off" placeholder="Start typing a school…" />
+                <datalist id="pf-school-options">
+                  <option value="University of Washington"></option>
+                  <option value="Seattle University"></option>
+                  <option value="Bellevue College"></option>
+                  <option value="New York University"></option>
+                  <option value="Columbia University"></option>
+                  <option value="The University of Texas at Austin"></option>
+                  <option value="University of California, Berkeley"></option>
+                  <option value="University of California, Los Angeles"></option>
+                  <option value="University of Southern California"></option>
+                  <option value="University of Chicago"></option>
+                  <option value="DePaul University"></option>
+                </datalist>
+              </div>
+              <div class="pref-chip-grid" role="group" aria-label="Preferred distance from school">
+                <button type="button" class="pref-chip" data-pref="schoolDistance" data-value="walkable">Walkable</button>
+                <button type="button" class="pref-chip" data-pref="schoolDistance" data-value="2mi">Within 2 miles</button>
+                <button type="button" class="pref-chip" data-pref="schoolDistance" data-value="5mi">Within 5 miles</button>
+                <button type="button" class="pref-chip" data-pref="schoolDistance" data-value="flexible">Flexible</button>
+              </div>
+            </div>
             <div class="pref-section neighborhoods-section logistics-search-only is-hidden" id="pf-neighborhoods-section">
               <p class="pref-section-label">Preferred neighborhoods</p>
               <p class="pref-section-hint" id="pf-neighborhoods-hint">Search the map or tap quick picks for your target city.</p>
@@ -4866,11 +5801,16 @@
             <h2 class="logistics-group-title">You &amp; roommate match</h2>
             <div class="logistics-grid">
               <div class="pref-section">
-                <p class="pref-section-label">About you</p>
+                <p class="pref-section-label">Gender identity</p>
+                <p class="pref-section-hint">Choose the option that feels most accurate to you.</p>
                 <div class="pref-chip-grid" role="group" aria-label="Gender identity">
                   <button type="button" class="pref-chip" data-pref="gender" data-value="woman">Woman</button>
                   <button type="button" class="pref-chip" data-pref="gender" data-value="man">Man</button>
                   <button type="button" class="pref-chip" data-pref="gender" data-value="nonbinary">Non-binary</button>
+                  <button type="button" class="pref-chip" data-pref="gender" data-value="genderqueer-fluid">Genderqueer / Genderfluid</button>
+                  <button type="button" class="pref-chip" data-pref="gender" data-value="agender">Agender</button>
+                  <button type="button" class="pref-chip" data-pref="gender" data-value="questioning">Questioning</button>
+                  <button type="button" class="pref-chip" data-pref="gender" data-value="self-describe">Prefer to self-describe</button>
                   <button type="button" class="pref-chip" data-pref="gender" data-value="prefer-not">Prefer not to say</button>
                 </div>
               </div>
@@ -4882,6 +5822,22 @@
                   <button type="button" class="pref-chip" data-pref="roommatePref" data-value="mixed">Mixed</button>
                   <button type="button" class="pref-chip" data-pref="roommatePref" data-value="any">Any</button>
                 </div>
+              </div>
+            </div>
+            <div class="pref-section">
+              <p class="pref-section-label">Race and ethnicity</p>
+              <p class="pref-section-hint">Select all that apply. This helps you represent yourself and is not used to rank your matches.</p>
+              <div class="pref-chip-grid" role="group" aria-label="Race and ethnicity">
+                <button type="button" class="pref-chip" data-pref="ethnicity" data-value="asian" data-multi="1">Asian</button>
+                <button type="button" class="pref-chip" data-pref="ethnicity" data-value="black" data-multi="1">Black or African American</button>
+                <button type="button" class="pref-chip" data-pref="ethnicity" data-value="hispanic-latino" data-multi="1">Hispanic or Latino/a/x</button>
+                <button type="button" class="pref-chip" data-pref="ethnicity" data-value="mena" data-multi="1">Middle Eastern or North African</button>
+                <button type="button" class="pref-chip" data-pref="ethnicity" data-value="native-american" data-multi="1">Native American or Alaska Native</button>
+                <button type="button" class="pref-chip" data-pref="ethnicity" data-value="pacific-islander" data-multi="1">Native Hawaiian or Pacific Islander</button>
+                <button type="button" class="pref-chip" data-pref="ethnicity" data-value="white" data-multi="1">White</button>
+                <button type="button" class="pref-chip" data-pref="ethnicity" data-value="multiracial" data-multi="1">Multiracial</button>
+                <button type="button" class="pref-chip" data-pref="ethnicity" data-value="another" data-multi="1">Another identity</button>
+                <button type="button" class="pref-chip" data-pref="ethnicity" data-value="prefer-not" data-multi="1">Prefer not to say</button>
               </div>
             </div>
             <div class="logistics-grid">
@@ -4910,12 +5866,19 @@
             <h2 class="logistics-group-title">Budget &amp; timing</h2>
             <div class="pref-section" id="pf-budget-section">
               <p class="pref-section-label" id="pf-budget-label">Base rent budget (monthly)</p>
-              <div class="pref-chip-grid" role="group" aria-label="Budget">
-                <button type="button" class="pref-chip" data-pref="budget" data-value="under800">Under $800</button>
-                <button type="button" class="pref-chip" data-pref="budget" data-value="800-1200">$800–1.2k</button>
-                <button type="button" class="pref-chip" data-pref="budget" data-value="1200-1800">$1.2–1.8k</button>
-                <button type="button" class="pref-chip" data-pref="budget" data-value="1800plus">$1.8k+</button>
-                <button type="button" class="pref-chip" data-pref="budget" data-value="flex">Flexible</button>
+              <p class="pref-section-hint">Drag either end of the range or enter exact amounts.</p>
+              <div class="budget-range-control" id="pf-budget-range-control">
+                <div class="budget-range-track" aria-hidden="true"><span id="pf-budget-range-fill"></span></div>
+                <input class="budget-range-input" type="range" id="pf-budget-min-range" min="400" max="5000" step="50" value="900" aria-label="Minimum monthly rent" />
+                <input class="budget-range-input" type="range" id="pf-budget-max-range" min="400" max="5000" step="50" value="1800" aria-label="Maximum monthly rent" />
+              </div>
+              <div class="budget-manual-grid">
+                <label for="pf-budget-min">Minimum
+                  <span class="budget-money-input"><span>$</span><input class="form-input" type="number" id="pf-budget-min" min="400" max="5000" step="50" value="900" inputmode="numeric" /></span>
+                </label>
+                <label for="pf-budget-max">Maximum
+                  <span class="budget-money-input"><span>$</span><input class="form-input" type="number" id="pf-budget-max" min="400" max="5000" step="50" value="1800" inputmode="numeric" /></span>
+                </label>
               </div>
               <p class="pref-section-hint logistics-search-only" id="pf-budget-extras-hint">Include extras that affect your real monthly cost:</p>
               <div class="budget-breakdown-grid logistics-search-only" id="pf-budget-extras">
@@ -4967,6 +5930,8 @@
                   <button type="button" class="pref-chip" data-pref="roomPreference" data-value="entire">Entire place</button>
                   <button type="button" class="pref-chip" data-pref="roomPreference" data-value="private">Private bedroom</button>
                   <button type="button" class="pref-chip" data-pref="roomPreference" data-value="private-bath">Bedroom + private bath</button>
+                  <button type="button" class="pref-chip" data-pref="roomPreference" data-value="shared-bedroom">Shared bedroom</button>
+                  <button type="button" class="pref-chip" data-pref="roomPreference" data-value="couch">Couch / living-room setup</button>
                 </div>
               </div>
             </div>
@@ -5038,7 +6003,7 @@
           </section>
 
           <div class="quiz-actions-stack intro-stack">
-            <button type="submit" class="btn btn-continue" id="btn-profile1-continue">Continue →</button>
+            <button type="button" class="btn btn-continue" id="btn-profile1-continue">Continue →</button>
             <button type="button" class="btn-skip" id="btn-profile1-back">Back to results</button>
           </div>
         </form>
@@ -5170,9 +6135,9 @@
     <div id="flow-profile-3" class="flow-panel hidden" aria-live="polite">
       <div class="flow-panel-inner wide profile-identity-shell">
         <header class="profile-identity-header">
-          <p class="flow-step-label">Setup · 3 of 5 · Identity</p>
-          <h1>Your roommate identity</h1>
-          <p class="flow-lede">Your quiz type, living habits, and swipe card — built for sharing, not a compatibility score.</p>
+          <p class="flow-step-label">Setup · 3 of 6 · About you</p>
+          <h1>Tell your future roomies about you</h1>
+          <p class="flow-lede">Your quiz explains your habits. This part should sound like you.</p>
         </header>
         <div class="profile-identity-body">
           <section class="logistics-group identity-type-folder">
@@ -5180,9 +6145,55 @@
             <div class="identity-reveal" id="identity-reveal" aria-live="polite"></div>
           </section>
 
+          <form id="form-profile-3" class="profile-identity-form">
+            <section class="logistics-group identity-writing-card">
+              <h2 class="logistics-group-title">Introduce yourself</h2>
+              <p class="identity-section-hint">Write the part a quiz cannot capture. Keep it natural — two or three sentences is enough.</p>
+              <div class="form-field profile-name-field">
+                <label for="pf-name">First name <span aria-hidden="true">*</span></label>
+                <input class="form-input" type="text" id="pf-name" required autocomplete="name" placeholder="What should your future roomies call you?" />
+              </div>
+              <div class="form-field">
+                <label for="pf-bio">About me</label>
+                <textarea class="form-input profile-open-text profile-bio-text" id="pf-bio" rows="5" maxlength="420" placeholder="What are you like to live with? What makes a place feel like home to you?"></textarea>
+                <p class="profile-character-count"><span id="pf-bio-count">0</span>/420</p>
+              </div>
+              <div class="logistics-grid profile-open-fields">
+                <div class="form-field">
+                  <label for="pf-ethnicity-self">Identity in your own words <span class="hint">(optional)</span></label>
+                  <input class="form-input" type="text" id="pf-ethnicity-self" autocomplete="off" placeholder="Anything about your identity you would like roomies to know?" />
+                </div>
+                <div class="form-field">
+                  <label for="pf-religion">Religion or spiritual practice <span class="hint">(optional)</span></label>
+                  <textarea class="form-input profile-open-text" id="pf-religion" rows="3" placeholder="Prayer time, holidays, practices, or no religion — share only what matters at home."></textarea>
+                </div>
+                <div class="form-field">
+                  <label for="pf-dietary-needs">Dietary needs &amp; household boundaries <span class="hint">(optional)</span></label>
+                  <textarea class="form-input profile-open-text" id="pf-dietary-needs" rows="3" placeholder="Allergies, shared cookware, food preferences, or anything roomies should know."></textarea>
+                </div>
+              </div>
+            </section>
+
+            <div class="quiz-actions-stack intro-stack profile-identity-actions">
+              <button type="submit" class="btn btn-continue" id="btn-profile3-continue">Continue to photos →</button>
+              <button type="button" class="btn-skip" id="btn-profile3-back">Back</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div id="flow-profile-photo" class="flow-panel hidden" aria-live="polite">
+      <div class="flow-panel-inner wide profile-identity-shell">
+        <header class="profile-identity-header">
+          <p class="flow-step-label">Setup · 4 of 6 · Photos</p>
+          <h1>Add photos that feel like you</h1>
+          <p class="flow-lede">Use a clear, recent photo. You can add more later.</p>
+        </header>
+        <div class="profile-identity-body">
           <section class="logistics-group identity-photo-folder">
             <h2 class="logistics-group-title">Profile photo</h2>
-            <p class="identity-section-hint">Optional — shows on your swipe card and helps people recognize you.</p>
+            <p class="identity-section-hint">This appears on your roomie profile and helps people recognize you.</p>
             <div class="identity-photo-drop" id="identity-photo-drop">
               <label for="pf-photo" class="identity-photo-label" id="identity-photo-label">
                 <span class="identity-photo-thumb hidden" id="identity-photo-thumb" aria-hidden="true"></span>
@@ -5198,17 +6209,9 @@
             </div>
           </section>
 
-          <section class="logistics-group identity-card-folder">
-            <h2 class="logistics-group-title">Swipe card preview</h2>
-            <p class="identity-section-hint">What potential roommates see when deciding to match.</p>
-            <div class="roommate-card-stage">
-              <article class="swipe-roommate-card" id="roommate-card-step3" aria-label="Roommate decision card preview"></article>
-            </div>
-          </section>
-
           <div class="quiz-actions-stack intro-stack profile-identity-actions">
-            <button type="button" class="btn btn-continue" id="btn-profile3-continue">Continue →</button>
-            <button type="button" class="btn-skip" id="btn-profile3-back">Back</button>
+            <button type="button" class="btn btn-continue" id="btn-profile-photo-continue">Continue →</button>
+            <button type="button" class="btn-skip" id="btn-profile-photo-back">Back</button>
           </div>
         </div>
       </div>
@@ -5216,7 +6219,7 @@
 
     <div id="flow-profile-4" class="flow-panel hidden" aria-live="polite">
       <div class="flow-panel-inner wide">
-        <p class="flow-step-label">Setup · 4 of 5 · Trust signals</p>
+        <p class="flow-step-label">Setup · 5 of 6 · Trust signals</p>
         <h1>Build trust</h1>
         <p class="flow-lede">Reduce rental anxiety — the signals people use before saying yes to a roommate.</p>
         <form id="form-profile-4" class="profile-trust-form">
@@ -5262,15 +6265,6 @@
                 </div>
               </div>
             </div>
-            <div class="trust-future-panel" aria-label="Coming soon trust signals">
-              <p class="pref-section-label">Coming soon</p>
-              <div class="trust-badge-grid">
-                <span class="trust-badge is-future">Government ID verification</span>
-                <span class="trust-badge is-future">Social account verification</span>
-                <span class="trust-badge is-future">Background check</span>
-                <span class="trust-badge is-future">Roommate reviews</span>
-              </div>
-            </div>
           </section>
           <div class="quiz-actions-stack intro-stack">
             <button type="submit" class="btn btn-continue" id="btn-profile4-continue">Preview final profile →</button>
@@ -5293,10 +6287,6 @@
               <article class="swipe-roommate-card" id="roommate-card-final"></article>
             </aside>
             <form id="form-waitlist" class="waitlist-form">
-              <div class="form-field">
-                <label for="pf-name">Name <span aria-hidden="true">*</span></label>
-                <input class="form-input" type="text" id="pf-name" required autocomplete="name" placeholder="Your first name" />
-              </div>
               <div class="form-field">
                 <label for="waitlist-email">Email <span aria-hidden="true">*</span></label>
                 <input class="form-input" type="email" id="waitlist-email" autocomplete="email" required placeholder="you@example.com" />
@@ -6214,7 +7204,7 @@
       return qs ? `${base}#compare?${qs}` : `${base}#compare`;
     }
 
-    /** A=4 … D=1 — used for trait grid / copy heuristics and for type resolution. */
+    /** A=4 … D=1 — used for trait grid / copy heuristics (not final type). */
     function answerScores(ans) {
       return ans.map((i) => (i === null || i === undefined ? 0 : 4 - i));
     }
@@ -6237,41 +7227,28 @@
       return 'Moderate';
     }
 
-    /** Type centroids across the 4 axes (cleanliness, social, structure, presence). */
-    const TYPE_CENTROIDS = {
-      beaver: { cleanliness: 4.0, social: 2.5, structure: 4.0, presence: 3.25 },
-      owl: { cleanliness: 3.25, social: 1.0, structure: 4.0, presence: 2.5 },
-      turtle: { cleanliness: 3.25, social: 1.75, structure: 2.5, presence: 4.0 },
-      fox: { cleanliness: 1.75, social: 3.25, structure: 1.75, presence: 2.5 },
-      bunny: { cleanliness: 2.5, social: 4.0, structure: 1.75, presence: 2.5 },
-      cat: { cleanliness: 1.0, social: 2.5, structure: 1.0, presence: 1.0 }
-    };
-
-    /** Average the 4 axes (Q1-3, Q4-6, Q7-9, Q10-12), assign whichever type centroid is nearest. */
+    /** Each mapped type receives one full point; multi-type answers award one point to every mapped type. */
     function resolveType(ans) {
+      const tally = { beaver: 0, cat: 0, owl: 0, fox: 0, bunny: 0, turtle: 0 };
+      for (let qi = 0; qi < QUIZ.length; qi++) {
+        const ch = ans[qi];
+        const row = QUIZ[qi];
+        if (ch == null || ch === undefined || !row.votes || !row.votes[ch]) continue;
+        const tags = row.votes[ch];
+        for (let ti = 0; ti < tags.length; ti++) {
+          const t = tags[ti];
+          if (Object.prototype.hasOwnProperty.call(tally, t)) tally[t] += 1;
+        }
+      }
       const tieOrder = ['beaver', 'owl', 'turtle', 'fox', 'bunny', 'cat'];
-      if (!ans || ans.some((x) => x === null || x === undefined)) return 'owl';
-
-      const s = answerScores(ans);
-      const cleanliness = (s[0] + s[1] + s[2]) / 3;
-      const social = (ans[3] + ans[4] + ans[5] + 3) / 3; // inverted axis: A=1 … D=4
-      const structure = (s[6] + s[7] + s[8]) / 3;
-      const presence = (s[9] + s[10] + s[11]) / 3;
-
-      let best = tieOrder[0];
-      let bestDist = Infinity;
+      let best = 'owl';
+      let bestV = -1;
       for (let i = 0; i < tieOrder.length; i++) {
-        const t = tieOrder[i];
-        const c = TYPE_CENTROIDS[t];
-        const dist = Math.sqrt(
-          (cleanliness - c.cleanliness) ** 2 +
-          (social - c.social) ** 2 +
-          (structure - c.structure) ** 2 +
-          (presence - c.presence) ** 2
-        );
-        if (dist < bestDist) {
-          bestDist = dist;
-          best = t;
+        const k = tieOrder[i];
+        const v = tally[k];
+        if (v > bestV) {
+          bestV = v;
+          best = k;
         }
       }
       return best;
@@ -6397,13 +7374,13 @@
       const s = answerScores(ans);
       const cl = s[0] + s[1] + s[2];
       const soc = s[3] + s[4] + s[5];
-      const st = s[6] + s[7] + s[8];
-      const en = s[9] + s[10] + s[11];
+      const st = s[6] + s[7] + s[8] + s[9];
+      const en = s[10] + s[11];
       const rows = [
         { dim: 'Cleanliness', val: traitLevel(cl, false, 3) },
         { dim: 'Social energy', val: traitLevel(soc, true, 3) },
-        { dim: 'Structure', val: traitLevel(st, false, 3) },
-        { dim: 'Engagement', val: traitLevel(en, false, 3) }
+        { dim: 'Structure', val: traitLevel(st, false, 4) },
+        { dim: 'Engagement', val: traitLevel(en, false, 2) }
       ];
       return rows
         .map(
@@ -6417,12 +7394,12 @@
       const s = answerScores(ans);
       const cl = s[0] + s[1] + s[2];
       const soc = s[3] + s[4] + s[5];
-      const st = s[6] + s[7] + s[8];
-      const en = s[9] + s[10] + s[11];
+      const st = s[6] + s[7] + s[8] + s[9];
+      const en = s[10] + s[11];
       const cleanLv = traitLevel(cl, false, 3);
       const socLv = traitLevel(soc, true, 3);
-      const stLv = traitLevel(st, false, 3);
-      const enLv = traitLevel(en, false, 3);
+      const stLv = traitLevel(st, false, 4);
+      const enLv = traitLevel(en, false, 2);
       const rhythm =
         stLv === 'High'
           ? 'Steady routine most days — you like predictability at home.'
@@ -6454,17 +7431,17 @@
       const s = answerScores(ans);
       const cl = s[0] + s[1] + s[2];
       const soc = s[3] + s[4] + s[5];
-      const st = s[6] + s[7] + s[8];
-      const en = s[9] + s[10] + s[11];
+      const st = s[6] + s[7] + s[8] + s[9];
+      const en = s[10] + s[11];
       const pool = [];
-      if (st >= 9) pool.push('prefer clear expectations when everyone shares a space');
-      if (cl >= 9 || en >= 9) pool.push('step in when shared areas clearly need attention');
-      if (st >= 8) pool.push('like day-to-day living to feel consistent, not improvised');
+      if (st >= 12) pool.push('prefer clear expectations when everyone shares a space');
+      if (cl >= 9 || en >= 6) pool.push('step in when shared areas clearly need attention');
+      if (st >= 11) pool.push('like day-to-day living to feel consistent, not improvised');
       if (soc >= 9) pool.push('recharge in calmer, lower-traffic home time');
       if (soc <= 5) pool.push('enjoy more guests, shared moments, and activity at home');
-      if (st <= 5) pool.push('adapt when house norms need to flex with real life');
+      if (st <= 7) pool.push('adapt when house norms need to flex with real life');
       if (cl <= 5) pool.push('keep cleaning expectations realistic, not constant');
-      if (en <= 6) pool.push('focus your energy mostly where it affects your space');
+      if (en <= 4) pool.push('focus your energy mostly where it affects your space');
       const seen = new Set();
       const out = [];
       for (const p of pool) {
@@ -6877,7 +7854,7 @@
     }
 
     const ROOMMATE_FILTER_SCHEMA = {
-      hard: ['targetCity', 'budget', 'estimatedMonthlyTotal', 'moveIn', 'gender', 'roommatePref', 'ageRange', 'lifeStage', 'housingType', 'roomPreference', 'kitchenAccess', 'searchIntent', 'hasPets', 'petFriendly', 'smoking', 'neighborhoods'],
+      hard: ['targetCity', 'school', 'schoolDistance', 'budget', 'estimatedMonthlyTotal', 'moveIn', 'gender', 'roommatePref', 'ageRange', 'lifeStage', 'housingType', 'roomPreference', 'kitchenAccess', 'searchIntent', 'hasPets', 'petFriendly', 'smoking', 'neighborhoods'],
       lifestyle: ['sleep', 'guests', 'overnightGuests', 'noiseTolerance', 'cleaning', 'cooking', 'wfhFreq', 'socialBattery', 'conflictStyle', 'sharedSpace'],
       trust: ['schoolVerified', 'workVerified', 'linkedinVerified', 'moveInReady', 'profileComplete', 'activeRecently'],
       identity: ['roomieType', 'homeVibe']
@@ -6885,8 +7862,8 @@
 
     const COMPAT_FIELDS = ['sleep', 'guests', 'overnightGuests', 'noiseTolerance', 'cleaning', 'socialBattery', 'conflictStyle', 'cooking', 'wfhFreq', 'sharedSpace'];
 
-    const LOGISTICS_MULTI = ['neighborhoods'];
-    const LOGISTICS_SINGLE = ['searchIntent', 'gender', 'roommatePref', 'ageRange', 'lifeStage', 'moveIn', 'leaseDuration', 'budget', 'housingType', 'roomPreference', 'kitchenAccess', 'hasPlace', 'furnished', 'parking', 'hasPets', 'petFriendly', 'utilitiesIncluded', 'inUnitLaundry'];
+    const LOGISTICS_MULTI = ['neighborhoods', 'ethnicity'];
+    const LOGISTICS_SINGLE = ['searchIntent', 'gender', 'roommatePref', 'ageRange', 'lifeStage', 'moveIn', 'leaseDuration', 'budget', 'housingType', 'roomPreference', 'kitchenAccess', 'hasPlace', 'schoolDistance', 'furnished', 'parking', 'hasPets', 'petFriendly', 'utilitiesIncluded', 'inUnitLaundry'];
 
     const BUDGET_BASE_MID = {
       under800: 700,
@@ -7193,7 +8170,9 @@
       roomPreference: {
         entire: { search: 'Entire place', listing: 'Entire unit available' },
         private: { search: 'Private bedroom', listing: 'Private bedroom' },
-        'private-bath': { search: 'Bedroom + private bath', listing: 'Bedroom + private bath' }
+        'private-bath': { search: 'Bedroom + private bath', listing: 'Bedroom + private bath' },
+        'shared-bedroom': { search: 'Shared bedroom', listing: 'Shared bedroom available' },
+        couch: { search: 'Couch / living-room setup', listing: 'Couch / living-room setup' }
       },
       kitchenAccess: {
         'must-cook': { search: 'Need full kitchen', listing: 'Full kitchen access' },
@@ -7252,6 +8231,61 @@
       });
     }
 
+    var profileLogisticsQuestion = 0;
+
+    function getProfileLogisticsGroups() {
+      const listing = isListingMode();
+      return Array.from(document.querySelectorAll('#form-profile-1 > .logistics-group')).filter((group) => {
+        if (listing && group.classList.contains('logistics-search-only')) return false;
+        if (!listing && group.classList.contains('logistics-listing-only')) return false;
+        return true;
+      });
+    }
+
+    function renderProfileLogisticsQuestion() {
+      const form = el('form-profile-1');
+      if (!form) return;
+      form.classList.add('is-question-mode');
+      const groups = getProfileLogisticsGroups();
+      if (!groups.length) return;
+      profileLogisticsQuestion = Math.max(0, Math.min(profileLogisticsQuestion, groups.length - 1));
+      document.querySelectorAll('#form-profile-1 > .logistics-group').forEach((group) => {
+        group.classList.toggle('profile-question-active', group === groups[profileLogisticsQuestion]);
+      });
+
+      const titles = isListingMode()
+        ? [
+            ['Where is your place?', 'Start with the location so roomies know where they would be living.'],
+            ['Who would fit your home?', 'Tell us about you and the roomie you would feel comfortable living with.'],
+            ['What are the rent and timing?', 'Set the practical details people need before they reach out.'],
+            ['What is the home like?', 'A few essentials help us show your place to the right people.'],
+            ['What else should roomies know?', 'Add pet and amenity details that can affect everyday living.']
+          ]
+        : [
+            ['Where do you want to live?', 'Start with the place you are moving from and the city you want next.'],
+            ['What are you looking for?', 'Choose the housing setup that best matches your current plan.'],
+            ['Tell us about you', 'Share only what feels comfortable. You can update these details later.'],
+            ['What works for your budget?', 'Set a realistic range and move-in timeline.'],
+            ['What kind of home works for you?', 'Choose the practical home details that matter most.'],
+            ['Any pets or must-have amenities?', 'Choose the details that could make or break a shared home.']
+          ];
+      const copy = titles[profileLogisticsQuestion] || titles[titles.length - 1];
+      setLabelText('pf-logistics-title', copy[0]);
+      setLabelText('pf-logistics-lede', copy[1]);
+      setLabelText('pf-step1-label', 'Profile setup');
+      setLabelText('pf-question-progress-label', `Question ${profileLogisticsQuestion + 1} of ${groups.length}`);
+
+      const segments = el('pf-question-segments');
+      if (segments) {
+        segments.style.setProperty('--profile-question-count', String(groups.length));
+        segments.innerHTML = groups.map((_, i) => `<span class="${i < profileLogisticsQuestion ? 'is-complete' : i === profileLogisticsQuestion ? 'is-current' : ''}"></span>`).join('');
+      }
+      const next = el('btn-profile1-continue');
+      const back = el('btn-profile1-back');
+      if (next) next.textContent = profileLogisticsQuestion === groups.length - 1 ? 'Save and continue →' : 'Continue →';
+      if (back) back.textContent = profileLogisticsQuestion === 0 ? 'Back to results' : 'Back';
+    }
+
     function updateLogisticsMode() {
       const listing = isListingMode();
       const form = el('form-profile-1');
@@ -7261,7 +8295,7 @@
       setLabelText('pf-step1-label', listing ? 'Setup · 1 of 5 · List your place' : 'Setup · 1 of 5 · Housing & logistics');
       setLabelText('pf-logistics-lede', listing
         ? 'You already have a home — list it and tell us who you want as a roommate.'
-        : 'Zillow-style basics for search, filtering, and move-in feasibility.');
+        : 'A few practical details to help us find roomies who fit your plans.');
       setLabelHtml('pf-target-city-label', listing ? 'City <span aria-hidden="true">*</span>' : 'Target city <span aria-hidden="true">*</span>');
       setLabelText('pf-budget-label', listing ? "Monthly rent you're asking" : 'Base rent budget (monthly)');
       setLabelText('pf-movein-label', listing ? 'Room available from' : 'Move-in timeline');
@@ -7301,6 +8335,7 @@
       }
       updateBudgetEstimate();
       updatePlaceLocationStatus();
+      if (!el('flow-profile-1').classList.contains('hidden')) renderProfileLogisticsQuestion();
     }
 
     function updatePlaceLocationStatus() {
@@ -7638,19 +8673,74 @@
       });
     }
 
-    function computeEstimatedMonthlyTotal(budgetKey, costs) {
+    function computeEstimatedMonthlyTotal(budgetKey, costs, range) {
       if (!budgetKey || budgetKey === 'flex') return null;
-      const base = BUDGET_BASE_MID[budgetKey] || 0;
+      const rangeMin = Number(range && range.min);
+      const rangeMax = Number(range && range.max);
+      const base = Number.isFinite(rangeMin) && Number.isFinite(rangeMax)
+        ? Math.round((rangeMin + rangeMax) / 2)
+        : (BUDGET_BASE_MID[budgetKey] || 0);
       let extras = 0;
       Object.keys(costs || {}).forEach((k) => { extras += Number(costs[k] || 0); });
       return base + extras;
     }
 
+    function clampBudgetValue(value) {
+      return Math.min(5000, Math.max(400, Math.round(Number(value || 0) / 50) * 50));
+    }
+
+    function readBudgetRange() {
+      const minInput = el('pf-budget-min');
+      const maxInput = el('pf-budget-max');
+      if (!minInput || !maxInput) return null;
+      let min = clampBudgetValue(minInput.value || 900);
+      let max = clampBudgetValue(maxInput.value || 1800);
+      if (min > max - 100) {
+        if (document.activeElement === minInput) min = Math.max(400, max - 100);
+        else max = Math.min(5000, min + 100);
+      }
+      minInput.value = min;
+      maxInput.value = max;
+      return { min, max };
+    }
+
+    function syncBudgetRangeUI(source) {
+      const minRange = el('pf-budget-min-range');
+      const maxRange = el('pf-budget-max-range');
+      const minInput = el('pf-budget-min');
+      const maxInput = el('pf-budget-max');
+      if (!minRange || !maxRange || !minInput || !maxInput) return;
+      if (source === minRange || source === maxRange) {
+        let min = clampBudgetValue(minRange.value);
+        let max = clampBudgetValue(maxRange.value);
+        if (min > max - 100) {
+          if (source === minRange) min = max - 100;
+          else max = min + 100;
+        }
+        minRange.value = min;
+        maxRange.value = max;
+        minInput.value = min;
+        maxInput.value = max;
+      } else {
+        const range = readBudgetRange();
+        minRange.value = range.min;
+        maxRange.value = range.max;
+      }
+      const min = Number(minRange.value);
+      const max = Number(maxRange.value);
+      const fill = el('pf-budget-range-fill');
+      if (fill) {
+        fill.style.left = ((min - 400) / 4600 * 100) + '%';
+        fill.style.right = (100 - ((max - 400) / 4600 * 100)) + '%';
+      }
+      updateBudgetEstimate();
+    }
+
     function updateBudgetEstimate() {
       const node = el('pf-budget-total');
       if (!node) return;
-      const selected = document.querySelector('#form-profile-1 .pref-chip[data-pref="budget"].selected');
-      const budgetKey = selected ? selected.dataset.value : '';
+      const range = readBudgetRange();
+      const budgetKey = range ? `${range.min}-${range.max}` : '';
       const listing = isListingMode();
       if (!budgetKey) {
         node.textContent = listing ? 'Listed rent: select a range' : 'Estimated monthly total: select base rent to calculate';
@@ -7660,14 +8750,14 @@
         node.innerHTML = listing ? 'Listed rent: <strong>Flexible</strong>' : 'Estimated monthly total: <strong>Flexible</strong> (extras tracked separately)';
         return;
       }
-      const base = BUDGET_BASE_MID[budgetKey] || 0;
+      const base = Math.round((range.min + range.max) / 2);
       if (listing) {
-        node.innerHTML = `Listed rent: <strong>~$${base.toLocaleString()}/mo</strong>`;
+        node.innerHTML = `Listed rent range: <strong>$${range.min.toLocaleString()}–$${range.max.toLocaleString()}/mo</strong>`;
         return;
       }
       const costs = collectBudgetCosts();
-      const total = computeEstimatedMonthlyTotal(budgetKey, costs);
-      node.innerHTML = `Estimated monthly total: <strong>~$${total.toLocaleString()}/mo</strong> (rent + selected extras)`;
+      const total = computeEstimatedMonthlyTotal(budgetKey, costs, range);
+      node.innerHTML = `Budget range: <strong>$${range.min.toLocaleString()}–$${range.max.toLocaleString()}/mo</strong> · estimated midpoint with extras <strong>~$${total.toLocaleString()}</strong>`;
     }
 
     function initBudgetEstimateListeners() {
@@ -7677,6 +8767,14 @@
         node.dataset.costBound = '1';
         node.addEventListener('change', updateBudgetEstimate);
       });
+      ['pf-budget-min-range', 'pf-budget-max-range', 'pf-budget-min', 'pf-budget-max'].forEach((id) => {
+        const node = el(id);
+        if (!node || node.dataset.budgetBound) return;
+        node.dataset.budgetBound = '1';
+        node.addEventListener('input', () => syncBudgetRangeUI(node));
+        node.addEventListener('change', () => syncBudgetRangeUI(node));
+      });
+      syncBudgetRangeUI();
     }
 
     const EDU_ORG_MAP = {
@@ -7784,8 +8882,19 @@
       data.neighborhoodPins = neighborhoodMapPins.map((p) => ({ id: p.id, label: p.label, lat: p.lat, lng: p.lng }));
       data.placeAddress = el('pf-place-address') ? el('pf-place-address').value.trim() : '';
       data.placePin = placePin ? { label: placePin.label, lat: placePin.lat, lng: placePin.lng } : null;
+      data.school = el('pf-school') ? el('pf-school').value.trim() : '';
+      data.ethnicitySelfDescribe = el('pf-ethnicity-self') ? el('pf-ethnicity-self').value.trim() : '';
+      data.religion = el('pf-religion') ? el('pf-religion').value.trim() : '';
+      data.dietaryNeeds = el('pf-dietary-needs') ? el('pf-dietary-needs').value.trim() : '';
+      const budgetRange = readBudgetRange();
+      if (budgetRange) {
+        data.budgetMin = budgetRange.min;
+        data.budgetMax = budgetRange.max;
+        data.budget = `${budgetRange.min}-${budgetRange.max}`;
+        data.budgetRangeLabel = `$${budgetRange.min.toLocaleString()}–$${budgetRange.max.toLocaleString()}/mo`;
+      }
       if (data.hasPlace === 'yes') data.searchIntent = 'roommate';
-      data.estimatedMonthlyTotal = computeEstimatedMonthlyTotal(data.budget, data.budgetCosts);
+      data.estimatedMonthlyTotal = computeEstimatedMonthlyTotal(data.budget, data.budgetCosts, budgetRange);
       return data;
     }
 
@@ -7807,6 +8916,16 @@
         const btn = document.querySelector(`#form-profile-1 .pref-chip[data-pref="${key}"][data-value="${CSS.escape(val)}"]`);
         if (btn) btn.classList.add('selected');
       });
+      (data.ethnicity || []).forEach((val) => {
+        const btn = document.querySelector(`#form-profile-1 .pref-chip[data-pref="ethnicity"][data-value="${CSS.escape(String(val))}"]`);
+        if (btn) btn.classList.add('selected');
+      });
+      if (el('pf-ethnicity-self')) el('pf-ethnicity-self').value = data.ethnicitySelfDescribe || '';
+      if (el('pf-school')) el('pf-school').value = data.school || '';
+      if (el('pf-religion')) el('pf-religion').value = data.religion || '';
+      if (el('pf-dietary-needs')) el('pf-dietary-needs').value = data.dietaryNeeds || '';
+      if (Number.isFinite(Number(data.budgetMin)) && el('pf-budget-min')) el('pf-budget-min').value = Number(data.budgetMin);
+      if (Number.isFinite(Number(data.budgetMax)) && el('pf-budget-max')) el('pf-budget-max').value = Number(data.budgetMax);
       if (data.placeAddress && el('pf-place-address')) el('pf-place-address').value = data.placeAddress;
       if (data.placePin && Number.isFinite(Number(data.placePin.lat))) {
         placePin = {
@@ -7836,6 +8955,7 @@
       }
 
       restoreBudgetCosts(data);
+      syncBudgetRangeUI();
       updateBudgetEstimate();
       updateLogisticsMode();
       initPlaceMapSearch();
@@ -8395,7 +9515,9 @@
       } else if (hoodLabels.length) {
         lines.push({ text: hoodLabels.slice(0, 2).join(', ') + (hoodLabels.length > 2 ? ' +' + (hoodLabels.length - 2) : '') });
       }
-      if (logistics.estimatedMonthlyTotal) {
+      if (logistics.budgetRangeLabel) {
+        lines.push({ text: logistics.budgetRangeLabel, budget: true });
+      } else if (logistics.estimatedMonthlyTotal) {
         lines.push({ text: '~$' + logistics.estimatedMonthlyTotal.toLocaleString() + '/mo', budget: true });
       } else if (logistics.budget && BUDGET_LABELS[logistics.budget]) {
         lines.push({ text: BUDGET_LABELS[logistics.budget], budget: true });
@@ -8558,7 +9680,7 @@
       el('quiz-split-wrap').classList.add('hidden');
       el('quiz-results').classList.add('hidden');
       resetResultsPrintAnimation();
-      ['flow-profile-2', 'flow-profile-3', 'flow-profile-4', 'flow-waitlist'].forEach((id) => el(id).classList.add('hidden'));
+      ['flow-profile-2', 'flow-profile-3', 'flow-profile-photo', 'flow-profile-4', 'flow-waitlist'].forEach((id) => el(id).classList.add('hidden'));
       el('flow-profile-1').classList.remove('hidden');
       try { restoreLogistics(JSON.parse(sessionStorage.getItem(STORAGE.p1) || 'null')); } catch (_) {}
       initCityAutocomplete();
@@ -8584,7 +9706,7 @@
       const savedA = loadSessionAnswers();
       if (savedA) for (let i = 0; i < savedA.length; i++) answers[i] = savedA[i];
       el('flow-profile-1').classList.add('hidden');
-      ['flow-profile-3', 'flow-profile-4', 'flow-waitlist'].forEach((id) => el(id).classList.add('hidden'));
+      ['flow-profile-3', 'flow-profile-photo', 'flow-profile-4', 'flow-waitlist'].forEach((id) => el(id).classList.add('hidden'));
       el('flow-profile-2').classList.remove('hidden');
       bindProfilePrefInteractions();
       fillProfileStep2Defaults();
@@ -8596,14 +9718,54 @@
     function showProfileStep3() {
       el('flow-profile-1').classList.add('hidden');
       el('flow-profile-2').classList.add('hidden');
+      el('flow-profile-photo').classList.add('hidden');
       el('flow-profile-4').classList.add('hidden');
       el('flow-waitlist').classList.add('hidden');
       el('flow-profile-3').classList.remove('hidden');
       renderIdentityReveal();
+      try {
+        const p1 = JSON.parse(sessionStorage.getItem(STORAGE.p1) || '{}');
+        if (el('pf-name')) el('pf-name').value = p1.name || '';
+        if (el('pf-bio')) el('pf-bio').value = p1.bio || '';
+        if (el('pf-ethnicity-self')) el('pf-ethnicity-self').value = p1.ethnicitySelf || '';
+        if (el('pf-religion')) el('pf-religion').value = p1.religion || '';
+        if (el('pf-dietary-needs')) el('pf-dietary-needs').value = p1.dietaryNeeds || '';
+      } catch (_) {}
+      updateProfileBioCount();
+      setQuizFlowFooterVisible(false);
+      setQuizView('profile-3');
+      window.scrollTo(0, 0);
+    }
+
+    function updateProfileBioCount() {
+      const bio = el('pf-bio');
+      const count = el('pf-bio-count');
+      if (bio && count) count.textContent = String(bio.value.length);
+    }
+
+    function saveProfileWriting() {
+      try {
+        const p1 = JSON.parse(sessionStorage.getItem(STORAGE.p1) || '{}');
+        p1.name = el('pf-name') ? el('pf-name').value.trim() : '';
+        p1.bio = el('pf-bio') ? el('pf-bio').value.trim() : '';
+        p1.ethnicitySelf = el('pf-ethnicity-self') ? el('pf-ethnicity-self').value.trim() : '';
+        p1.religion = el('pf-religion') ? el('pf-religion').value.trim() : '';
+        p1.dietaryNeeds = el('pf-dietary-needs') ? el('pf-dietary-needs').value.trim() : '';
+        sessionStorage.setItem(STORAGE.p1, JSON.stringify(p1));
+      } catch (_) {}
+    }
+
+    function showProfilePhotoStep() {
+      el('flow-profile-1').classList.add('hidden');
+      el('flow-profile-2').classList.add('hidden');
+      el('flow-profile-3').classList.add('hidden');
+      el('flow-profile-4').classList.add('hidden');
+      el('flow-waitlist').classList.add('hidden');
+      el('flow-profile-photo').classList.remove('hidden');
       renderRoommateCard('roommate-card-step3');
       updateIdentityPhotoUI();
       setQuizFlowFooterVisible(false);
-      setQuizView('profile-3');
+      setQuizView('profile-photo');
       window.scrollTo(0, 0);
     }
 
@@ -8611,6 +9773,7 @@
       el('flow-profile-1').classList.add('hidden');
       el('flow-profile-2').classList.add('hidden');
       el('flow-profile-3').classList.add('hidden');
+      el('flow-profile-photo').classList.add('hidden');
       el('flow-waitlist').classList.add('hidden');
       el('flow-profile-4').classList.remove('hidden');
       try { restoreTrust(JSON.parse(sessionStorage.getItem(STORAGE.p3) || 'null')); } catch (_) { renderTrustVerificationUI({}); }
@@ -8659,7 +9822,7 @@
       el('quiz-split-wrap').classList.add('hidden');
       el('quiz-results').classList.add('hidden');
       resetResultsPrintAnimation();
-      ['flow-profile-1', 'flow-profile-2', 'flow-profile-3', 'flow-profile-4'].forEach((id) => el(id).classList.add('hidden'));
+      ['flow-profile-1', 'flow-profile-2', 'flow-profile-3', 'flow-profile-photo', 'flow-profile-4'].forEach((id) => el(id).classList.add('hidden'));
       el('flow-waitlist').classList.remove('hidden');
       let joined = false;
       let savedEmail = '';
@@ -8727,6 +9890,7 @@
         if (view === 'profile-1') { showProfileStep1(); return; }
         if (view === 'profile-2') { showProfileStep2(); return; }
         if (view === 'profile-3') { showProfileStep3(); return; }
+        if (view === 'profile-photo') { showProfilePhotoStep(); return; }
         if (view === 'profile-4') { showProfileStep4(); return; }
         if (view === 'waitlist') { showWaitlist(); return; }
       } catch (_) {}
@@ -9198,13 +10362,59 @@
 
     el('btn-results-back').addEventListener('click', showIntro);
 
-    el('btn-build-profile').addEventListener('click', () => showProfileStep1());
+    el('btn-hero-explore').addEventListener('click', () => {
+      el('res-rfinal-quote').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+    el('btn-hero-share').addEventListener('click', () => {
+      openShareResultsModal(el('btn-hero-share'));
+    });
+
+    el('btn-build-profile').addEventListener('click', () => {
+      profileLogisticsQuestion = 0;
+      showProfileStep1();
+    });
     el('btn-skip-profile').addEventListener('click', () => {
       if (!showResultsFromMemory()) showIntro();
     });
 
     el('btn-profile1-back').addEventListener('click', () => {
+      if (profileLogisticsQuestion > 0) {
+        profileLogisticsQuestion--;
+        renderProfileLogisticsQuestion();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        return;
+      }
       if (!showResultsFromMemory()) showIntro();
+    });
+
+    el('btn-profile1-continue').addEventListener('click', () => {
+      const groups = getProfileLogisticsGroups();
+      if (profileLogisticsQuestion === 0) {
+        const cityInput = el('pf-target-city');
+        if (cityInput && !cityInput.value.trim()) {
+          cityInput.reportValidity();
+          return;
+        }
+        if (isListingMode()) {
+          const addressInput = el('pf-place-address');
+          if (addressInput && !addressInput.value.trim()) {
+            showPlaceLocationError('Enter your property street address or building.');
+            addressInput.focus();
+            return;
+          }
+          if (!placePin) {
+            showPlaceLocationError('Pin your property on the map — search the address or tap the map.');
+            return;
+          }
+        }
+      }
+      if (profileLogisticsQuestion < groups.length - 1) {
+        profileLogisticsQuestion++;
+        renderProfileLogisticsQuestion();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        return;
+      }
+      advanceFromLogistics();
     });
 
     el('form-profile-1').addEventListener('submit', (e) => {
@@ -9212,10 +10422,20 @@
       advanceFromLogistics();
     });
 
-    el('btn-profile2-back').addEventListener('click', () => showProfileStep1());
+    el('btn-profile2-back').addEventListener('click', () => {
+      profileLogisticsQuestion = Number.MAX_SAFE_INTEGER;
+      showProfileStep1();
+    });
 
-    el('btn-profile3-continue').addEventListener('click', () => showProfileStep4());
+    el('form-profile-3').addEventListener('submit', (e) => {
+      e.preventDefault();
+      saveProfileWriting();
+      showProfilePhotoStep();
+    });
     el('btn-profile3-back').addEventListener('click', () => profileBackFromStep3());
+    el('pf-bio').addEventListener('input', updateProfileBioCount);
+    el('btn-profile-photo-continue').addEventListener('click', () => showProfileStep4());
+    el('btn-profile-photo-back').addEventListener('click', () => showProfileStep3());
 
     el('pf-photo').addEventListener('change', (e) => {
       const f = e.target.files && e.target.files[0];
@@ -9237,7 +10457,7 @@
       showProfileStep3();
     });
 
-    el('btn-profile4-back').addEventListener('click', () => showProfileStep3());
+    el('btn-profile4-back').addEventListener('click', () => showProfilePhotoStep());
     el('btn-profile4-skip').addEventListener('click', () => skipTrustStep());
     el('btn-verify-school').addEventListener('click', () => verifySchoolEmail());
     el('btn-verify-work').addEventListener('click', () => verifyWorkEmail());

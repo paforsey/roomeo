@@ -1,0 +1,3 @@
+[submodule "Roomeo"]
+	path = Roomeo
+	url = git@github.com:c4han-star/Roomeo.git
