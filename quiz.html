@@ -6685,7 +6685,8 @@
       compareInvite: 'roomeo_compare_invite',
       waitlistJoined: 'roomeo_waitlist_joined',
       sessionId: 'roomeo_session_id',
-      submitted: 'roomeo_quiz_submitted'
+      submitted: 'roomeo_quiz_submitted',
+      profileSubmitted: 'roomeo_profile_submitted'
     };
 
     const FIREBASE_CONFIG = {
@@ -6739,6 +6740,43 @@
       });
 
       return quizResultSubmission;
+    }
+
+    let profileResultSubmission = null;
+
+    /** Writes the session_id + full profile bundle (logistics/habits/trust) to Firestore at waitlist submission. */
+    function submitProfileResult() {
+      if (sessionStorage.getItem(STORAGE.profileSubmitted) === '1') return profileResultSubmission;
+      if (profileResultSubmission) return profileResultSubmission;
+
+      const { logistics, habits, trust } = loadProfileBundle();
+      const name = (logistics && logistics.name) || '';
+      const email = (logistics && logistics.email) || '';
+      if (!name || !email) return;
+
+      const resultType = lastResultKey || sessionStorage.getItem(STORAGE.type) || '';
+
+      profileResultSubmission = db.collection('profile_sessions').add({
+        session_id: getSessionId(),
+        result_type: String(resultType || '').toLowerCase(),
+        name: name,
+        email: email,
+        logistics: logistics || {},
+        habits: habits || {},
+        trust: trust || {},
+        source: 'profile',
+        submitted_at_client: new Date().toISOString(),
+        submitted_at: firebase.firestore.FieldValue.serverTimestamp(),
+        created_at: firebase.firestore.FieldValue.serverTimestamp(),
+        updated_at: firebase.firestore.FieldValue.serverTimestamp()
+      }).then(() => {
+        try { sessionStorage.setItem(STORAGE.profileSubmitted, '1'); } catch (_) {}
+      }).catch((error) => {
+        console.error('Failed to submit profile result', error);
+        profileResultSubmission = null;
+      });
+
+      return profileResultSubmission;
     }
 
     function setQuizView(view) {
@@ -7227,28 +7265,37 @@
       return 'Moderate';
     }
 
-    /** Each mapped type receives one full point; multi-type answers award one point to every mapped type. */
+    /** 4-axis centroid model: average each axis (0-3 answers), then nearest-centroid by Euclidean distance. */
+    const TYPE_CENTROIDS = {
+      beaver: { cleanliness: 4.0, social: 2.5, structure: 4.0, presence: 3.25 },
+      owl: { cleanliness: 3.25, social: 1.0, structure: 4.0, presence: 2.5 },
+      turtle: { cleanliness: 3.25, social: 1.75, structure: 2.5, presence: 4.0 },
+      fox: { cleanliness: 1.75, social: 3.25, structure: 1.75, presence: 2.5 },
+      bunny: { cleanliness: 2.5, social: 4.0, structure: 1.75, presence: 2.5 },
+      cat: { cleanliness: 1.0, social: 2.5, structure: 1.0, presence: 1.0 }
+    };
     function resolveType(ans) {
-      const tally = { beaver: 0, cat: 0, owl: 0, fox: 0, bunny: 0, turtle: 0 };
-      for (let qi = 0; qi < QUIZ.length; qi++) {
-        const ch = ans[qi];
-        const row = QUIZ[qi];
-        if (ch == null || ch === undefined || !row.votes || !row.votes[ch]) continue;
-        const tags = row.votes[ch];
-        for (let ti = 0; ti < tags.length; ti++) {
-          const t = tags[ti];
-          if (Object.prototype.hasOwnProperty.call(tally, t)) tally[t] += 1;
-        }
-      }
       const tieOrder = ['beaver', 'owl', 'turtle', 'fox', 'bunny', 'cat'];
-      let best = 'owl';
-      let bestV = -1;
+      if (!ans || ans.some((x) => x === null || x === undefined)) return 'owl';
+      const s = answerScores(ans);
+      const cleanliness = (s[0] + s[1] + s[2]) / 3;
+      const social = (ans[3] + ans[4] + ans[5] + 3) / 3; // inverted axis: A=1 … D=4
+      const structure = (s[6] + s[7] + s[8]) / 3;
+      const presence = (s[9] + s[10] + s[11]) / 3;
+      let best = tieOrder[0];
+      let bestDist = Infinity;
       for (let i = 0; i < tieOrder.length; i++) {
-        const k = tieOrder[i];
-        const v = tally[k];
-        if (v > bestV) {
-          bestV = v;
-          best = k;
+        const t = tieOrder[i];
+        const c = TYPE_CENTROIDS[t];
+        const dist = Math.sqrt(
+          (cleanliness - c.cleanliness) ** 2 +
+          (social - c.social) ** 2 +
+          (structure - c.structure) ** 2 +
+          (presence - c.presence) ** 2
+        );
+        if (dist < bestDist) {
+          bestDist = dist;
+          best = t;
         }
       }
       return best;
@@ -7374,13 +7421,13 @@
       const s = answerScores(ans);
       const cl = s[0] + s[1] + s[2];
       const soc = s[3] + s[4] + s[5];
-      const st = s[6] + s[7] + s[8] + s[9];
-      const en = s[10] + s[11];
+      const st = s[6] + s[7] + s[8];
+      const en = s[9] + s[10] + s[11];
       const rows = [
         { dim: 'Cleanliness', val: traitLevel(cl, false, 3) },
         { dim: 'Social energy', val: traitLevel(soc, true, 3) },
-        { dim: 'Structure', val: traitLevel(st, false, 4) },
-        { dim: 'Engagement', val: traitLevel(en, false, 2) }
+        { dim: 'Structure', val: traitLevel(st, false, 3) },
+        { dim: 'Engagement', val: traitLevel(en, false, 3) }
       ];
       return rows
         .map(
@@ -7394,12 +7441,12 @@
       const s = answerScores(ans);
       const cl = s[0] + s[1] + s[2];
       const soc = s[3] + s[4] + s[5];
-      const st = s[6] + s[7] + s[8] + s[9];
-      const en = s[10] + s[11];
+      const st = s[6] + s[7] + s[8];
+      const en = s[9] + s[10] + s[11];
       const cleanLv = traitLevel(cl, false, 3);
       const socLv = traitLevel(soc, true, 3);
-      const stLv = traitLevel(st, false, 4);
-      const enLv = traitLevel(en, false, 2);
+      const stLv = traitLevel(st, false, 3);
+      const enLv = traitLevel(en, false, 3);
       const rhythm =
         stLv === 'High'
           ? 'Steady routine most days — you like predictability at home.'
@@ -7431,17 +7478,17 @@
       const s = answerScores(ans);
       const cl = s[0] + s[1] + s[2];
       const soc = s[3] + s[4] + s[5];
-      const st = s[6] + s[7] + s[8] + s[9];
-      const en = s[10] + s[11];
+      const st = s[6] + s[7] + s[8];
+      const en = s[9] + s[10] + s[11];
       const pool = [];
-      if (st >= 12) pool.push('prefer clear expectations when everyone shares a space');
-      if (cl >= 9 || en >= 6) pool.push('step in when shared areas clearly need attention');
-      if (st >= 11) pool.push('like day-to-day living to feel consistent, not improvised');
+      if (st >= 9) pool.push('prefer clear expectations when everyone shares a space');
+      if (cl >= 9 || en >= 9) pool.push('step in when shared areas clearly need attention');
+      if (st >= 8) pool.push('like day-to-day living to feel consistent, not improvised');
       if (soc >= 9) pool.push('recharge in calmer, lower-traffic home time');
       if (soc <= 5) pool.push('enjoy more guests, shared moments, and activity at home');
-      if (st <= 7) pool.push('adapt when house norms need to flex with real life');
+      if (st <= 5) pool.push('adapt when house norms need to flex with real life');
       if (cl <= 5) pool.push('keep cleaning expectations realistic, not constant');
-      if (en <= 4) pool.push('focus your energy mostly where it affects your space');
+      if (en <= 6) pool.push('focus your energy mostly where it affects your space');
       const seen = new Set();
       const out = [];
       for (const p of pool) {
@@ -10481,6 +10528,7 @@
         p1.email = email;
         sessionStorage.setItem(STORAGE.p1, JSON.stringify(p1));
       } catch (_) {}
+      submitProfileResult();
       applyWaitlistSuccessState(email);
       window.scrollTo(0, 0);
     });
