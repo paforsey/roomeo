@@ -303,6 +303,14 @@
             updated_at: firebase.firestore.FieldValue.serverTimestamp(),
             last_login_at: firebase.firestore.FieldValue.serverTimestamp()
           };
+          if (!doc.exists) {
+            /* Account predates our Firestore tracking (created before this feature
+               existed, or via the Firebase console/API directly) — backfill created_at
+               from Firebase Auth's own record rather than "whenever they first logged in". */
+            patch.created_at = (user.metadata && user.metadata.creationTime)
+              ? firebase.firestore.Timestamp.fromDate(new Date(user.metadata.creationTime))
+              : firebase.firestore.FieldValue.serverTimestamp();
+          }
           if (user.emailVerified && !wasVerified) {
             patch.email_verified_at = firebase.firestore.FieldValue.serverTimestamp();
           }
