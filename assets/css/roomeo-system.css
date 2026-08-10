@@ -63,8 +63,8 @@
 .account-chip span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .account-chip .icon{width:12px;height:12px;flex:none;color:var(--muted)}
 .account-dropdown{position:absolute;right:0;top:calc(100% + 8px);min-width:160px;background:#fff;border:1px solid var(--border);border-radius:14px;box-shadow:0 14px 32px rgba(63,43,31,.14);padding:6px;z-index:60}
-.account-dropdown button{display:block;width:100%;text-align:left;padding:10px 12px;border-radius:10px;border:none;background:none;font:600 var(--fs-sm)/var(--lh-tight) var(--font-sans);color:var(--body);cursor:pointer}
-.account-dropdown button:hover{background:var(--paper);color:var(--ink)}
+.account-dropdown a,.account-dropdown button{display:block;width:100%;text-align:left;padding:10px 12px;border-radius:10px;border:none;background:none;font:600 var(--fs-sm)/var(--lh-tight) var(--font-sans);color:var(--body);cursor:pointer;text-decoration:none}
+.account-dropdown a:hover,.account-dropdown button:hover{background:var(--paper);color:var(--ink)}
 .account-actions[hidden],.account-signedin[hidden]{display:none}
 
 /* ---------- Account modal (log in / sign up) ---------- */

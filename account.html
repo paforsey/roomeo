@@ -1,0 +1,363 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>My Account — MyRoomeo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=PT+Serif:wght@400;700&family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/roomeo-system.css" />
+  <style>
+    .account-page{max-width:640px;margin:0 auto;padding:60px 20px 80px}
+    .account-card{background:#fffdf9;border:1px solid var(--border);border-radius:20px;box-shadow:0 14px 32px rgba(63,43,31,.1);padding:32px}
+    .account-card h1{margin:0 0 12px;font:400 32px/1.2 var(--font-serif);color:var(--ink)}
+    .account-status{display:inline-flex;align-items:center;gap:6px;font:600 var(--fs-sm) var(--font-sans);padding:5px 12px;border-radius:999px}
+    .account-status.verified{background:rgba(47,125,81,.12);color:#2f7d51}
+    .account-status.unverified{background:rgba(232,108,44,.12);color:var(--orange)}
+    .account-rows{margin-top:26px;display:grid;gap:0}
+    .account-row{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:14px 0;border-bottom:1px solid var(--border)}
+    .account-row:last-child{border-bottom:none;padding-bottom:0}
+    .account-row-label{color:var(--muted);font:400 var(--fs-sm) var(--font-sans)}
+    .account-row-value{color:var(--ink);font:600 var(--fs-base) var(--font-sans);text-align:right}
+    .account-actions-row{margin-top:28px;display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+    .account-note{margin-top:14px}
+    .account-loading,.account-guest{text-align:center;padding:70px 20px;color:var(--muted);font:400 var(--fs-lg) var(--font-sans)}
+    .account-guest a{color:var(--orange);font-weight:600}
+  </style>
+</head>
+<body>
+  <svg style="display:none" aria-hidden="true"><defs>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></symbol>
+  </defs></svg>
+  <div class="page">
+    <header class="header">
+      <a href="index.html" aria-label="MyRoomeo home"><img src="assets/brand/logo02.svg" alt="MyRoomeo" /></a>
+      <div class="header-account">
+        <div class="account-actions" id="account-actions">
+          <button type="button" class="account-link" id="btn-open-login">Log in</button>
+          <button type="button" class="account-btn-primary" id="btn-open-signup">Sign up</button>
+        </div>
+        <div class="account-signedin" id="account-signedin" hidden>
+          <button type="button" class="account-chip" id="account-chip-btn" aria-haspopup="true" aria-expanded="false">
+            <span id="account-email-label"></span>
+            <svg class="icon" width="12" height="12" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="account-dropdown" id="account-dropdown" hidden>
+            <a href="account.html">My account</a>
+            <button type="button" id="btn-logout">Log out</button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="account-page">
+      <div id="account-loading" class="account-loading">Loading your account…</div>
+
+      <div id="account-guest" class="account-guest" hidden>
+        You're not signed in. <a href="index.html">Go home to log in or sign up</a>.
+      </div>
+
+      <div id="account-card" class="account-card" hidden>
+        <h1>My account</h1>
+        <span class="account-status" id="account-status-badge"></span>
+
+        <div class="account-rows">
+          <div class="account-row"><span class="account-row-label">Email</span><span class="account-row-value" id="row-email"></span></div>
+          <div class="account-row"><span class="account-row-label">Member since</span><span class="account-row-value" id="row-created">—</span></div>
+          <div class="account-row"><span class="account-row-label">Last login</span><span class="account-row-value" id="row-last-login">—</span></div>
+        </div>
+
+        <div class="account-actions-row">
+          <button type="button" class="account-btn-primary" id="btn-resend-verify" hidden>Resend verification email</button>
+          <button type="button" class="account-link" id="btn-page-logout">Log out</button>
+        </div>
+        <p class="account-form-success account-note" id="resend-success" hidden>Verification email sent — check your inbox.</p>
+        <p class="account-form-error account-note" id="resend-error" hidden></p>
+      </div>
+    </main>
+  </div>
+
+  <dialog id="account-modal" class="account-modal">
+    <div class="account-modal-inner">
+      <button type="button" class="account-modal-close" id="account-modal-close" aria-label="Close">&times;</button>
+      <h2>Welcome to MyRoomeo</h2>
+      <div class="account-modal-tabs" role="tablist">
+        <button type="button" class="account-tab" id="tab-login" role="tab" aria-selected="true">Log in</button>
+        <button type="button" class="account-tab" id="tab-signup" role="tab" aria-selected="false">Sign up</button>
+      </div>
+
+      <form id="form-login" class="account-form">
+        <label>Email<input type="email" id="login-email" required autocomplete="email" /></label>
+        <label>Password
+          <div class="password-field">
+            <input type="password" id="login-password" required autocomplete="current-password" />
+            <button type="button" class="password-toggle" id="toggle-login-password" aria-label="Show password" aria-pressed="false"></button>
+          </div>
+        </label>
+        <p class="account-form-error" id="login-error" hidden></p>
+        <button type="submit" class="account-submit-btn" id="login-submit">Log in</button>
+      </form>
+
+      <form id="form-signup" class="account-form" hidden>
+        <label>Email<input type="email" id="signup-email" required autocomplete="email" /></label>
+        <label>Password
+          <div class="password-field">
+            <input type="password" id="signup-password" required autocomplete="new-password" minlength="6" />
+            <button type="button" class="password-toggle" id="toggle-signup-password" aria-label="Show password" aria-pressed="false"></button>
+          </div>
+        </label>
+        <p class="account-form-error" id="signup-error" hidden></p>
+        <p class="account-form-success" id="signup-success" hidden>Account created! Check your email to verify your address.</p>
+        <button type="submit" class="account-submit-btn" id="signup-submit">Sign up</button>
+      </form>
+    </div>
+  </dialog>
+
+  <script src="https://www.gstatic.com/firebasejs/12.0.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/12.0.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/12.0.0/firebase-analytics-compat.js"></script>
+  <script>
+    const FIREBASE_CONFIG = {
+      apiKey: "AIzaSyAKgDFi9B8Sd4wXz3q9u-w1jR6oByHB_yM",
+      authDomain: "myroomeo-7a9cc.firebaseapp.com",
+      projectId: "myroomeo-7a9cc",
+      storageBucket: "myroomeo-7a9cc.firebasestorage.app",
+      messagingSenderId: "12645114821",
+      appId: "1:12645114821:web:142d69e810da46285fa1ac",
+      measurementId: "G-673TG19TX0"
+    };
+    if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
+    firebase.analytics();
+    const db = firebase.firestore();
+
+    /* ---------- Account menu: sign up / log in / log out ---------- */
+    (function () {
+      const modal = document.getElementById('account-modal');
+      const tabLogin = document.getElementById('tab-login');
+      const tabSignup = document.getElementById('tab-signup');
+      const formLogin = document.getElementById('form-login');
+      const formSignup = document.getElementById('form-signup');
+      const actions = document.getElementById('account-actions');
+      const signedIn = document.getElementById('account-signedin');
+      const emailLabel = document.getElementById('account-email-label');
+      const chipBtn = document.getElementById('account-chip-btn');
+      const dropdown = document.getElementById('account-dropdown');
+
+      function showTab(which) {
+        const isLogin = which === 'login';
+        tabLogin.setAttribute('aria-selected', String(isLogin));
+        tabSignup.setAttribute('aria-selected', String(!isLogin));
+        formLogin.hidden = !isLogin;
+        formSignup.hidden = isLogin;
+      }
+      function openModal(which) {
+        showTab(which || 'login');
+        modal.showModal();
+      }
+      tabLogin.addEventListener('click', () => showTab('login'));
+      tabSignup.addEventListener('click', () => showTab('signup'));
+      document.getElementById('btn-open-login').addEventListener('click', () => openModal('login'));
+      document.getElementById('btn-open-signup').addEventListener('click', () => openModal('signup'));
+      document.getElementById('account-modal-close').addEventListener('click', () => modal.close());
+
+      function wirePasswordToggle(inputId, buttonId) {
+        const input = document.getElementById(inputId);
+        const btn = document.getElementById(buttonId);
+        const EYE = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
+        const EYE_OFF = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.94 10.94 0 0112 20c-7 0-11-8-11-8a21.27 21.27 0 015.06-5.94M9.9 4.24A10.94 10.94 0 0112 4c7 0 11 8 11 8a21.27 21.27 0 01-2.16 3.19M14.12 14.12a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
+        btn.innerHTML = EYE;
+        btn.addEventListener('click', () => {
+          const showing = input.type === 'text';
+          input.type = showing ? 'password' : 'text';
+          btn.innerHTML = showing ? EYE : EYE_OFF;
+          btn.setAttribute('aria-label', showing ? 'Show password' : 'Hide password');
+          btn.setAttribute('aria-pressed', String(!showing));
+        });
+      }
+      wirePasswordToggle('login-password', 'toggle-login-password');
+      wirePasswordToggle('signup-password', 'toggle-signup-password');
+
+      function authErrorMessage(err) {
+        const map = {
+          'auth/email-already-in-use': 'An account with this email already exists. Try logging in instead.',
+          'auth/invalid-email': 'Enter a valid email address.',
+          'auth/weak-password': 'Password must be at least 6 characters.',
+          'auth/wrong-password': 'Incorrect email or password.',
+          'auth/invalid-credential': 'Incorrect email or password.',
+          'auth/invalid-login-credentials': 'Incorrect email or password.',
+          'auth/user-not-found': 'No account found with that email.',
+          'auth/too-many-requests': 'Too many attempts. Please wait a moment and try again.'
+        };
+        return (err && map[err.code]) || 'Something went wrong. Please try again.';
+      }
+
+      /* users/{uid}: account metadata only — email, verification status, timestamps.
+         The password itself is never duplicated here; Firebase Auth is its sole owner. */
+      function createUserDoc(user) {
+        const now = firebase.firestore.FieldValue.serverTimestamp();
+        return db.collection('users').doc(user.uid).set({
+          uid: user.uid,
+          email: user.email,
+          email_verified: user.emailVerified,
+          created_at: now,
+          updated_at: now
+        }).catch((err) => console.error('Failed to create user doc', err));
+      }
+      function refreshUserDoc(user) {
+        return db.collection('users').doc(user.uid).set({
+          uid: user.uid,
+          email: user.email,
+          email_verified: user.emailVerified,
+          updated_at: firebase.firestore.FieldValue.serverTimestamp(),
+          last_login_at: firebase.firestore.FieldValue.serverTimestamp()
+        }, { merge: true }).catch((err) => console.error('Failed to refresh user doc', err));
+      }
+
+      formLogin.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const email = document.getElementById('login-email').value.trim();
+        const password = document.getElementById('login-password').value;
+        const errEl = document.getElementById('login-error');
+        errEl.hidden = true;
+        const btn = document.getElementById('login-submit');
+        btn.disabled = true;
+        firebase.auth().signInWithEmailAndPassword(email, password)
+          .then((cred) => { refreshUserDoc(cred.user); modal.close(); formLogin.reset(); })
+          .catch((err) => { errEl.textContent = authErrorMessage(err); errEl.hidden = false; })
+          .finally(() => { btn.disabled = false; });
+      });
+
+      formSignup.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const email = document.getElementById('signup-email').value.trim();
+        const password = document.getElementById('signup-password').value;
+        const errEl = document.getElementById('signup-error');
+        const okEl = document.getElementById('signup-success');
+        errEl.hidden = true;
+        okEl.hidden = true;
+        const btn = document.getElementById('signup-submit');
+        btn.disabled = true;
+        firebase.auth().createUserWithEmailAndPassword(email, password)
+          .then((cred) => Promise.all([cred.user.sendEmailVerification(), createUserDoc(cred.user)]))
+          .then(() => {
+            okEl.hidden = false;
+            formSignup.reset();
+            setTimeout(() => modal.close(), 2500);
+          })
+          .catch((err) => { errEl.textContent = authErrorMessage(err); errEl.hidden = false; })
+          .finally(() => { btn.disabled = false; });
+      });
+
+      document.getElementById('btn-logout').addEventListener('click', () => {
+        firebase.auth().signOut();
+        dropdown.hidden = true;
+      });
+
+      chipBtn.addEventListener('click', () => {
+        const willOpen = dropdown.hidden;
+        dropdown.hidden = !willOpen;
+        chipBtn.setAttribute('aria-expanded', String(willOpen));
+      });
+      document.addEventListener('click', (e) => {
+        if (!dropdown.hidden && !dropdown.contains(e.target) && !chipBtn.contains(e.target)) {
+          dropdown.hidden = true;
+          chipBtn.setAttribute('aria-expanded', 'false');
+        }
+      });
+
+      firebase.auth().onAuthStateChanged((user) => {
+        if (user) {
+          actions.hidden = true;
+          signedIn.hidden = false;
+          emailLabel.textContent = user.email;
+        } else {
+          actions.hidden = false;
+          signedIn.hidden = true;
+        }
+      });
+    })();
+
+    /* ---------- Account page content ---------- */
+    (function () {
+      const loadingEl = document.getElementById('account-loading');
+      const guestEl = document.getElementById('account-guest');
+      const cardEl = document.getElementById('account-card');
+      const statusBadge = document.getElementById('account-status-badge');
+      const rowEmail = document.getElementById('row-email');
+      const rowCreated = document.getElementById('row-created');
+      const rowLastLogin = document.getElementById('row-last-login');
+      const resendBtn = document.getElementById('btn-resend-verify');
+      const resendSuccess = document.getElementById('resend-success');
+      const resendError = document.getElementById('resend-error');
+      const pageLogoutBtn = document.getElementById('btn-page-logout');
+
+      function formatTimestamp(ts) {
+        if (!ts || typeof ts.toDate !== 'function') return '—';
+        return ts.toDate().toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
+      }
+      function formatTimestampFull(ts) {
+        if (!ts || typeof ts.toDate !== 'function') return '—';
+        return ts.toDate().toLocaleString();
+      }
+
+      function renderAccount(user) {
+        loadingEl.hidden = true;
+        guestEl.hidden = true;
+        cardEl.hidden = false;
+
+        rowEmail.textContent = user.email || '—';
+        if (user.emailVerified) {
+          statusBadge.className = 'account-status verified';
+          statusBadge.innerHTML = '<svg class="icon" width="12" height="12"><use href="#i-check"></use></svg> Verified';
+          resendBtn.hidden = true;
+        } else {
+          statusBadge.className = 'account-status unverified';
+          statusBadge.textContent = 'Not verified';
+          resendBtn.hidden = false;
+        }
+
+        db.collection('users').doc(user.uid).get().then((doc) => {
+          if (doc.exists) {
+            const data = doc.data();
+            rowCreated.textContent = formatTimestamp(data.created_at);
+            rowLastLogin.textContent = formatTimestampFull(data.last_login_at || data.created_at);
+          }
+        }).catch((err) => console.error('Failed to load account details', err));
+      }
+
+      function renderGuest() {
+        loadingEl.hidden = true;
+        cardEl.hidden = true;
+        guestEl.hidden = false;
+      }
+
+      firebase.auth().onAuthStateChanged((user) => {
+        if (user) renderAccount(user);
+        else renderGuest();
+      });
+
+      resendBtn.addEventListener('click', () => {
+        const user = firebase.auth().currentUser;
+        if (!user) return;
+        resendSuccess.hidden = true;
+        resendError.hidden = true;
+        resendBtn.disabled = true;
+        user.sendEmailVerification()
+          .then(() => { resendSuccess.hidden = false; })
+          .catch((err) => {
+            resendError.textContent = 'Could not send verification email. Please try again shortly.';
+            resendError.hidden = false;
+            console.error('Failed to resend verification email', err);
+          })
+          .finally(() => { resendBtn.disabled = false; });
+      });
+
+      pageLogoutBtn.addEventListener('click', () => {
+        firebase.auth().signOut();
+      });
+    })();
+  </script>
+</body>
+</html>

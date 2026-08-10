@@ -86,8 +86,8 @@
     .account-chip span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .account-chip .icon { width: 12px; height: 12px; flex: none; color: var(--text-3); }
     .account-dropdown { position: absolute; right: 0; top: calc(100% + 8px); min-width: 150px; background: #fff; border: 1px solid var(--border-light); border-radius: var(--r-lg); box-shadow: 0 14px 32px rgba(0,0,0,.12); padding: 6px; z-index: 60; }
-    .account-dropdown button { display: block; width: 100%; text-align: left; padding: 10px 12px; border-radius: var(--r-md); border: none; background: none; font: 600 14px/1 'Roboto', sans-serif; color: var(--text-2); cursor: pointer; }
-    .account-dropdown button:hover { background: var(--page-bg); color: var(--text-1); }
+    .account-dropdown a, .account-dropdown button { display: block; width: 100%; text-align: left; padding: 10px 12px; border-radius: var(--r-md); border: none; background: none; font: 600 14px/1 'Roboto', sans-serif; color: var(--text-2); cursor: pointer; text-decoration: none; }
+    .account-dropdown a:hover, .account-dropdown button:hover { background: var(--page-bg); color: var(--text-1); }
     .account-actions[hidden], .account-signedin[hidden] { display: none; }
 
     /* ---------- Account modal (log in / sign up) ---------- */
@@ -5518,6 +5518,7 @@
               <svg class="icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
             </button>
             <div class="account-dropdown" id="account-dropdown" hidden>
+              <a href="account.html">My account</a>
               <button type="button" id="btn-logout">Log out</button>
             </div>
           </div>
