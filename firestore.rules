@@ -1,15 +1,17 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    function isAdmin() {
-      return request.auth != null && request.auth.token.email in [
-        'philip.forsey@outlook.com',
-        'kellywald@gmail.com'
-      ];
+    function isStaff() {
+      return request.auth != null
+             && exists(/databases/$(database)/documents/admin_users/$(request.auth.uid));
+    }
+    function isSuperAdmin() {
+      return isStaff()
+             && get(/databases/$(database)/documents/admin_users/$(request.auth.uid)).data.role == 'admin';
     }
 
     match /survey_sessions/{sessionId} {
-      allow read: if isAdmin();
+      allow read: if isStaff();
       allow create: if request.resource.data.keys().hasAll([
                       'session_id', 'result_type', 'answers', 'answers_list',
                       'source', 'submitted_at_client', 'submitted_at', 'created_at', 'updated_at'
@@ -23,7 +25,7 @@ service cloud.firestore {
     }
 
     match /profile_sessions/{profileId} {
-      allow read: if isAdmin();
+      allow read: if isStaff();
       allow create: if request.resource.data.keys().hasAll([
                       'session_id', 'result_type', 'name', 'email',
                       'logistics', 'habits', 'trust', 'source',
@@ -40,7 +42,7 @@ service cloud.firestore {
     }
 
     match /users/{userId} {
-      allow read: if isAdmin() || (request.auth != null && request.auth.uid == userId);
+      allow read: if isStaff() || (request.auth != null && request.auth.uid == userId);
       allow create: if request.auth != null && request.auth.uid == userId
                     && request.resource.data.keys().hasAll(['uid', 'email', 'created_at', 'updated_at'])
                     && request.resource.data.uid == userId
@@ -48,6 +50,11 @@ service cloud.firestore {
       allow update: if request.auth != null && request.auth.uid == userId
                     && request.resource.data.uid == userId;
       allow delete: if false;
+    }
+
+    match /admin_users/{staffUid} {
+      allow read: if isSuperAdmin() || (request.auth != null && request.auth.uid == staffUid);
+      allow create, update, delete: if isSuperAdmin();
     }
   }
 }
