@@ -7005,6 +7005,19 @@
       return quizResultSubmission;
     }
 
+    /** If the person is signed in, mirror their roomie type onto users/{uid} so the
+        account page can show it and offer a retake link — separate from the anonymous
+        survey_sessions log above, which stays untouched. */
+    function linkResultToAccount(resultType) {
+      const user = firebase.auth().currentUser;
+      if (!user) return;
+      db.collection('users').doc(user.uid).set({
+        uid: user.uid,
+        result_type: String(resultType || '').toLowerCase(),
+        result_updated_at: firebase.firestore.FieldValue.serverTimestamp()
+      }, { merge: true }).catch((err) => console.error('Failed to link quiz result to account', err));
+    }
+
     let profileResultSubmission = null;
 
     /** Writes the session_id + full profile bundle (logistics/habits/trust) to Firestore at waitlist submission. */
@@ -10163,6 +10176,7 @@
       lastResultKey = key;
       saveSession();
       submitQuizResult(key, answers);
+      linkResultToAccount(key);
       scheduleResultsReveal(key, answers, false);
       setQuizFlowFooterVisible(false);
       setQuizView('results');

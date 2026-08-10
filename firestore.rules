@@ -56,5 +56,12 @@ service cloud.firestore {
       allow read: if isSuperAdmin() || (request.auth != null && request.auth.uid == staffUid);
       allow create, update, delete: if isSuperAdmin();
     }
+
+    match /user_profiles/{userId} {
+      allow read: if request.auth != null && request.auth.uid == userId;
+      allow create, update: if request.auth != null && request.auth.uid == userId
+                            && request.resource.data.uid == userId;
+      allow delete: if false;
+    }
   }
 }

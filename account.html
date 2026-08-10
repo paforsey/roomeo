@@ -24,6 +24,23 @@
     .account-note{margin-top:14px}
     .account-loading,.account-guest{text-align:center;padding:70px 20px;color:var(--muted);font:400 var(--fs-lg) var(--font-sans)}
     .account-guest a{color:var(--orange);font-weight:600}
+
+    .account-card + .account-card{margin-top:24px}
+    .section-title{margin:0 0 6px;font:400 22px/1.3 var(--font-serif);color:var(--ink)}
+    .section-sub{margin:0 0 20px;color:var(--muted);font:400 var(--fs-sm) var(--font-sans)}
+
+    .quiz-result-row{display:flex;align-items:center;gap:16px;margin-bottom:18px}
+    .quiz-result-avatar{width:64px;height:64px;border-radius:50%;object-fit:cover;background:var(--paper);flex:none}
+    .quiz-result-name{font:700 20px var(--font-serif)}
+    .quiz-result-tagline{color:var(--muted);font:400 var(--fs-sm) var(--font-sans);margin-top:2px}
+    .quiz-empty{margin-bottom:16px}
+
+    .user-profile-form{display:flex;flex-direction:column;gap:26px}
+    .profile-fieldset{border:none;padding:0;margin:0;display:flex;flex-direction:column;gap:14px}
+    .profile-fieldset h3{margin:0 0 2px;font:700 var(--fs-xs) var(--font-label);letter-spacing:.08em;text-transform:uppercase;color:var(--orange)}
+    .profile-fieldset label{display:flex;flex-direction:column;gap:6px;font:600 var(--fs-sm) var(--font-sans);color:var(--body)}
+    .profile-fieldset input,.profile-fieldset select{font:400 var(--fs-base) var(--font-sans);padding:10px 12px;border-radius:10px;border:1px solid var(--border);background:#fff;color:var(--ink)}
+    .profile-fieldset input:focus,.profile-fieldset select:focus{outline:2px solid var(--orange);outline-offset:1px}
   </style>
 </head>
 <body>
@@ -75,6 +92,110 @@
         </div>
         <p class="account-form-success account-note" id="resend-success" hidden>Verification email sent — check your inbox.</p>
         <p class="account-form-error account-note" id="resend-error" hidden></p>
+      </div>
+
+      <div id="password-card" class="account-card" hidden>
+        <h2 class="section-title">Change password</h2>
+        <p class="section-sub">You'll need your current password to set a new one.</p>
+        <form id="form-change-password" class="account-form">
+          <label>Current password
+            <div class="password-field">
+              <input type="password" id="cp-current" required autocomplete="current-password" />
+              <button type="button" class="password-toggle" id="toggle-cp-current" aria-label="Show password" aria-pressed="false"></button>
+            </div>
+          </label>
+          <label>New password
+            <div class="password-field">
+              <input type="password" id="cp-new" required minlength="6" autocomplete="new-password" />
+              <button type="button" class="password-toggle" id="toggle-cp-new" aria-label="Show password" aria-pressed="false"></button>
+            </div>
+          </label>
+          <p class="account-form-error" id="cp-error" hidden></p>
+          <p class="account-form-success" id="cp-success" hidden>Password updated.</p>
+          <button type="submit" class="account-submit-btn" id="cp-submit" style="width:fit-content;padding:0 26px;">Update password</button>
+        </form>
+      </div>
+
+      <div id="quiz-card" class="account-card" hidden>
+        <h2 class="section-title">Your roomie type</h2>
+        <div id="quiz-result-block"></div>
+      </div>
+
+      <div id="profile-card" class="account-card" hidden>
+        <h2 class="section-title">Your profile</h2>
+        <p class="section-sub">A quick summary you can keep up to date — separate from your quiz answers.</p>
+        <form id="form-user-profile" class="user-profile-form">
+          <div class="profile-fieldset">
+            <h3>Basics</h3>
+            <label>Target city<input type="text" id="up-city" placeholder="e.g. Seattle, WA" /></label>
+            <label>Budget<input type="text" id="up-budget" placeholder="e.g. $1200–1800/mo" /></label>
+            <label>Move-in timing
+              <select id="up-movein">
+                <option value="">Not set</option>
+                <option value="ASAP">ASAP</option>
+                <option value="1-2 months">1–2 months</option>
+                <option value="3+ months">3+ months</option>
+                <option value="Flexible">Flexible</option>
+              </select>
+            </label>
+            <label>Roommate preference
+              <select id="up-roommate-pref">
+                <option value="">Not set</option>
+                <option value="No preference">No preference</option>
+                <option value="Same gender">Same gender</option>
+                <option value="Prefer matching by lifestyle">Prefer matching by lifestyle</option>
+              </select>
+            </label>
+          </div>
+          <div class="profile-fieldset">
+            <h3>Living preferences</h3>
+            <label>Sleep schedule
+              <select id="up-sleep">
+                <option value="">Not set</option>
+                <option value="Early bird">Early bird</option>
+                <option value="Night owl">Night owl</option>
+                <option value="Flexible">Flexible</option>
+              </select>
+            </label>
+            <label>Cleanliness
+              <select id="up-cleaning">
+                <option value="">Not set</option>
+                <option value="Very tidy">Very tidy</option>
+                <option value="Balanced">Balanced</option>
+                <option value="Relaxed">Relaxed</option>
+              </select>
+            </label>
+            <label>Guests
+              <select id="up-guests">
+                <option value="">Not set</option>
+                <option value="Rarely">Rarely</option>
+                <option value="Sometimes">Sometimes</option>
+                <option value="Often">Often</option>
+              </select>
+            </label>
+            <label>Social battery
+              <select id="up-social">
+                <option value="">Not set</option>
+                <option value="Need quiet time">Need quiet time</option>
+                <option value="Balanced">Balanced</option>
+                <option value="Love company">Love company</option>
+              </select>
+            </label>
+            <label>Conflict style
+              <select id="up-conflict">
+                <option value="">Not set</option>
+                <option value="Talk it out right away">Talk it out right away</option>
+                <option value="Need space first, then talk">Need space first, then talk</option>
+                <option value="Prefer written notes">Prefer written notes</option>
+              </select>
+            </label>
+          </div>
+          <div>
+            <p class="account-form-error" id="up-error" hidden></p>
+            <p class="account-form-success" id="up-success" hidden>Profile saved.</p>
+            <button type="submit" class="account-submit-btn" id="up-submit" style="width:fit-content;padding:0 26px;">Save changes</button>
+          </div>
+        </form>
       </div>
     </main>
   </div>
@@ -309,6 +430,60 @@
       window.__refreshUserDoc = refreshUserDoc;
     })();
 
+    /* ---------- Change password ---------- */
+    (function () {
+      const form = document.getElementById('form-change-password');
+      const currentInput = document.getElementById('cp-current');
+      const newInput = document.getElementById('cp-new');
+      const errEl = document.getElementById('cp-error');
+      const okEl = document.getElementById('cp-success');
+      const submitBtn = document.getElementById('cp-submit');
+
+      function wireToggle(inputId, buttonId) {
+        const input = document.getElementById(inputId);
+        const btn = document.getElementById(buttonId);
+        const EYE = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
+        const EYE_OFF = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.94 10.94 0 0112 20c-7 0-11-8-11-8a21.27 21.27 0 015.06-5.94M9.9 4.24A10.94 10.94 0 0112 4c7 0 11 8 11 8a21.27 21.27 0 01-2.16 3.19M14.12 14.12a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
+        btn.innerHTML = EYE;
+        btn.addEventListener('click', () => {
+          const showing = input.type === 'text';
+          input.type = showing ? 'password' : 'text';
+          btn.innerHTML = showing ? EYE : EYE_OFF;
+          btn.setAttribute('aria-label', showing ? 'Show password' : 'Hide password');
+          btn.setAttribute('aria-pressed', String(!showing));
+        });
+      }
+      wireToggle('cp-current', 'toggle-cp-current');
+      wireToggle('cp-new', 'toggle-cp-new');
+
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const user = firebase.auth().currentUser;
+        if (!user) return;
+        errEl.hidden = true;
+        okEl.hidden = true;
+        submitBtn.disabled = true;
+        const cred = firebase.auth.EmailAuthProvider.credential(user.email, currentInput.value);
+        user.reauthenticateWithCredential(cred)
+          .then(() => user.updatePassword(newInput.value))
+          .then(() => {
+            okEl.hidden = false;
+            form.reset();
+          })
+          .catch((err) => {
+            const map = {
+              'auth/wrong-password': 'Current password is incorrect.',
+              'auth/invalid-credential': 'Current password is incorrect.',
+              'auth/weak-password': 'New password must be at least 6 characters.',
+              'auth/too-many-requests': 'Too many attempts. Please wait a moment and try again.'
+            };
+            errEl.textContent = (err && map[err.code]) || 'Something went wrong. Please try again.';
+            errEl.hidden = false;
+          })
+          .finally(() => { submitBtn.disabled = false; });
+      });
+    })();
+
     /* ---------- Account page content ---------- */
     (function () {
       const loadingEl = document.getElementById('account-loading');
@@ -323,6 +498,88 @@
       const resendSuccess = document.getElementById('resend-success');
       const resendError = document.getElementById('resend-error');
       const pageLogoutBtn = document.getElementById('btn-page-logout');
+      const passwordCard = document.getElementById('password-card');
+      const quizCard = document.getElementById('quiz-card');
+      const quizResultBlock = document.getElementById('quiz-result-block');
+      const profileCard = document.getElementById('profile-card');
+      const profileForm = document.getElementById('form-user-profile');
+      const profileError = document.getElementById('up-error');
+      const profileSuccess = document.getElementById('up-success');
+      const profileSubmit = document.getElementById('up-submit');
+
+      const TYPE_INFO = {
+        beaver: { label: 'The Beaver', tagline: 'The Organizer', color: 'var(--orange)' },
+        cat: { label: 'The Cat', tagline: 'The Independent', color: 'var(--purple)' },
+        owl: { label: 'The Owl', tagline: 'The Quiet Thinker', color: 'var(--blue)' },
+        fox: { label: 'The Fox', tagline: 'The Free Spirit', color: 'var(--orange)' },
+        bunny: { label: 'The Bunny', tagline: 'The Social Butterfly', color: 'var(--pink)' },
+        turtle: { label: 'The Turtle', tagline: 'The Easygoing One', color: 'var(--green)' }
+      };
+
+      function renderQuizCard(resultType) {
+        const info = resultType && TYPE_INFO[resultType];
+        if (info) {
+          quizResultBlock.innerHTML = `
+            <div class="quiz-result-row">
+              <img class="quiz-result-avatar" src="assets/characters/${resultType}.png" alt="${info.label}" />
+              <div>
+                <div class="quiz-result-name" style="color:${info.color}">${info.label}</div>
+                <div class="quiz-result-tagline">${info.tagline}</div>
+              </div>
+            </div>
+            <a class="account-link" href="quiz.html">Retake the quiz →</a>
+          `;
+        } else {
+          quizResultBlock.innerHTML = `
+            <p class="section-sub quiz-empty">You haven't taken the roomie quiz yet.</p>
+            <a class="account-btn-primary" style="text-decoration:none;" href="quiz.html?start=1">Take the quiz</a>
+          `;
+        }
+      }
+
+      function loadUserProfile(uid) {
+        db.collection('user_profiles').doc(uid).get().then((doc) => {
+          const data = doc.exists ? doc.data() : {};
+          document.getElementById('up-city').value = data.targetCity || '';
+          document.getElementById('up-budget').value = data.budget || '';
+          document.getElementById('up-movein').value = data.moveIn || '';
+          document.getElementById('up-roommate-pref').value = data.roommatePref || '';
+          document.getElementById('up-sleep').value = data.sleep || '';
+          document.getElementById('up-cleaning').value = data.cleaning || '';
+          document.getElementById('up-guests').value = data.guests || '';
+          document.getElementById('up-social').value = data.socialBattery || '';
+          document.getElementById('up-conflict').value = data.conflictStyle || '';
+        }).catch((err) => console.error('Failed to load user profile', err));
+      }
+
+      profileForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const user = firebase.auth().currentUser;
+        if (!user) return;
+        profileError.hidden = true;
+        profileSuccess.hidden = true;
+        profileSubmit.disabled = true;
+        db.collection('user_profiles').doc(user.uid).set({
+          uid: user.uid,
+          targetCity: document.getElementById('up-city').value.trim(),
+          budget: document.getElementById('up-budget').value.trim(),
+          moveIn: document.getElementById('up-movein').value,
+          roommatePref: document.getElementById('up-roommate-pref').value,
+          sleep: document.getElementById('up-sleep').value,
+          cleaning: document.getElementById('up-cleaning').value,
+          guests: document.getElementById('up-guests').value,
+          socialBattery: document.getElementById('up-social').value,
+          conflictStyle: document.getElementById('up-conflict').value,
+          updated_at: firebase.firestore.FieldValue.serverTimestamp()
+        }, { merge: true })
+          .then(() => { profileSuccess.hidden = false; })
+          .catch((err) => {
+            profileError.textContent = 'Could not save changes. Please try again.';
+            profileError.hidden = false;
+            console.error('Failed to save user profile', err);
+          })
+          .finally(() => { profileSubmit.disabled = false; });
+      });
 
       function formatTimestamp(ts) {
         if (!ts || typeof ts.toDate !== 'function') return '—';
@@ -337,6 +594,9 @@
         loadingEl.hidden = true;
         guestEl.hidden = true;
         cardEl.hidden = false;
+        passwordCard.hidden = false;
+        quizCard.hidden = false;
+        profileCard.hidden = false;
 
         rowEmail.textContent = user.email || '—';
         if (user.emailVerified) {
@@ -355,13 +615,21 @@
             rowCreated.textContent = formatTimestamp(data.created_at);
             rowVerifiedAt.textContent = data.email_verified_at ? formatTimestampFull(data.email_verified_at) : '—';
             rowLastLogin.textContent = formatTimestampFull(data.last_login_at || data.created_at);
+            renderQuizCard(data.result_type);
+          } else {
+            renderQuizCard(null);
           }
         }).catch((err) => console.error('Failed to load account details', err));
+
+        loadUserProfile(user.uid);
       }
 
       function renderGuest() {
         loadingEl.hidden = true;
         cardEl.hidden = true;
+        passwordCard.hidden = true;
+        quizCard.hidden = true;
+        profileCard.hidden = true;
         guestEl.hidden = false;
       }
 
