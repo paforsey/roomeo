@@ -108,21 +108,16 @@
     .panel-top h2 { font-size: 22px; }
     .panel-actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
 
-    .filter-input, .refresh-btn, .add-user-btn {
+    .refresh-btn, .add-user-btn {
       font: inherit;
       border-radius: 999px;
-      border: 1px solid var(--line);
-      background: var(--surface-strong);
       min-height: 44px;
-    }
-    .filter-input { width: min(320px, 100%); padding: 0 16px; color: var(--text); }
-    .refresh-btn, .add-user-btn {
       padding: 0 18px;
       cursor: pointer;
       font-weight: 700;
       background: var(--accent);
       color: white;
-      border-color: transparent;
+      border: 1px solid transparent;
       display: inline-flex;
       align-items: center;
       gap: 8px;
@@ -325,9 +320,8 @@
       </section>
       <section class="panel" aria-labelledby="sv-records-heading">
         <div class="panel-top">
-          <h2 id="sv-records-heading">Firestore records</h2>
+          <h2 id="sv-records-heading">Firestore Records</h2>
           <div class="panel-actions">
-            <input id="sv-filter-input" class="filter-input" type="search" placeholder="Filter by session id, user id, or result type" />
             <button id="sv-refresh-btn" class="refresh-btn" type="button">Refresh data</button>
             <button id="sv-bulk-delete-btn" class="bulk-delete-btn admin-only-inline" type="button" disabled>Delete selected</button>
           </div>
@@ -350,7 +344,6 @@
 
     <!-- ===== Profile submissions ===== -->
     <section class="tab-panel" id="panel-profile" data-panel="profile" hidden>
-      <span class="readonly-note">🔒 Read-only — admins can delete</span>
       <section class="stats" aria-label="Summary">
         <article class="stat-card"><div class="stat-label">Total profiles</div><div class="stat-value" id="pf-stat-total">0</div></article>
         <article class="stat-card"><div class="stat-label">Latest type</div><div class="stat-value" id="pf-stat-latest-type">-</div></article>
@@ -358,9 +351,8 @@
       </section>
       <section class="panel" aria-labelledby="pf-records-heading">
         <div class="panel-top">
-          <h2 id="pf-records-heading">Firestore records</h2>
+          <h2 id="pf-records-heading">Firestore Records</h2>
           <div class="panel-actions">
-            <input id="pf-filter-input" class="filter-input" type="search" placeholder="Filter by name, email, or result type" />
             <button id="pf-refresh-btn" class="refresh-btn" type="button">Refresh data</button>
             <button id="pf-bulk-delete-btn" class="bulk-delete-btn admin-only-inline" type="button" disabled>Delete selected</button>
           </div>
@@ -377,8 +369,6 @@
 
     <!-- ===== Signed-up users ===== -->
     <section class="tab-panel" id="panel-signedup" data-panel="signedup" hidden>
-      <span class="readonly-note">🔒 Read-only — admins can delete</span>
-      <p class="admin-note admin-only-block">Deleting here only removes this tracking record — it does not delete the person's Firebase login. They'd still be able to sign in.</p>
       <section class="stats" aria-label="Summary">
         <article class="stat-card"><div class="stat-label">Total users</div><div class="stat-value" id="su-stat-total">0</div></article>
         <article class="stat-card"><div class="stat-label">Verified</div><div class="stat-value" id="su-stat-verified">0</div></article>
@@ -386,9 +376,8 @@
       </section>
       <section class="panel" aria-labelledby="su-records-heading">
         <div class="panel-top">
-          <h2 id="su-records-heading">Firestore records</h2>
+          <h2 id="su-records-heading">Firestore Records</h2>
           <div class="panel-actions">
-            <input id="su-filter-input" class="filter-input" type="search" placeholder="Filter by email or session id" />
             <button id="su-refresh-btn" class="refresh-btn" type="button">Refresh data</button>
           </div>
         </div>
@@ -594,7 +583,6 @@
       const recordsBody = document.getElementById('sv-records-body');
       const emptyState = document.getElementById('sv-empty-state');
       const statusRow = document.getElementById('sv-status-row');
-      const filterInput = document.getElementById('sv-filter-input');
       const refreshBtn = document.getElementById('sv-refresh-btn');
       const statTotal = document.getElementById('sv-stat-total');
       const statLatestType = document.getElementById('sv-stat-latest-type');
@@ -662,17 +650,10 @@
         bulkDeleteRecords('survey_sessions', Array.from(selectedIds), () => window.loadSurveyRecords(), bulkDeleteBtn);
       });
       function applyFilter() {
-        const query = filterInput.value.trim().toLowerCase();
-        let records = !query ? allRecords : allRecords.filter((record) => {
-          const haystack = [record.session_id, record.user_id, record.id, record.result_type].join(' ').toLowerCase();
-          return haystack.includes(query);
-        });
-        records = sortRecordsBy(records, sortField, sortDir);
+        const records = sortRecordsBy(allRecords, sortField, sortDir);
         renderRows(records);
         renderStats(records);
-        statusRow.textContent = query
-          ? `Showing ${records.length} filtered record${records.length === 1 ? '' : 's'}.`
-          : `Showing ${records.length} record${records.length === 1 ? '' : 's'}.`;
+        statusRow.textContent = `Showing ${records.length} record${records.length === 1 ? '' : 's'}.`;
         statusRow.classList.remove('error');
       }
       wireSortableHeaders(document.getElementById('sv-thead-row'), (field, th, ths) => {
@@ -697,7 +678,6 @@
           statusRow.classList.add('error');
         }
       };
-      filterInput.addEventListener('input', applyFilter);
       refreshBtn.addEventListener('click', () => window.loadSurveyRecords());
     })();
 
@@ -708,7 +688,6 @@
       const listWrap = document.getElementById('pf-list-wrap');
       const emptyState = document.getElementById('pf-empty-state');
       const statusRow = document.getElementById('pf-status-row');
-      const filterInput = document.getElementById('pf-filter-input');
       const refreshBtn = document.getElementById('pf-refresh-btn');
       const statTotal = document.getElementById('pf-stat-total');
       const statLatestType = document.getElementById('pf-stat-latest-type');
@@ -817,16 +796,10 @@
         bulkDeleteRecords('profile_sessions', Array.from(selectedIds), () => window.loadProfileRecords(), bulkDeleteBtn);
       });
       function applyFilter() {
-        const query = filterInput.value.trim().toLowerCase();
-        const records = !query ? allRecords : allRecords.filter((record) => {
-          const haystack = [record.name, record.email, record.result_type, record.session_id].join(' ').toLowerCase();
-          return haystack.includes(query);
-        });
+        const records = allRecords;
         renderRows(records);
         renderStats(records);
-        statusRow.textContent = query
-          ? `Showing ${records.length} filtered record${records.length === 1 ? '' : 's'}.`
-          : `Showing ${records.length} record${records.length === 1 ? '' : 's'}.`;
+        statusRow.textContent = `Showing ${records.length} record${records.length === 1 ? '' : 's'}.`;
         statusRow.classList.remove('error');
       }
       window.loadProfileRecords = async function loadProfileRecords() {
@@ -845,7 +818,6 @@
           statusRow.classList.add('error');
         }
       };
-      filterInput.addEventListener('input', applyFilter);
       refreshBtn.addEventListener('click', () => window.loadProfileRecords());
     })();
 
@@ -856,7 +828,6 @@
       const recordsBody = document.getElementById('su-records-body');
       const emptyState = document.getElementById('su-empty-state');
       const statusRow = document.getElementById('su-status-row');
-      const filterInput = document.getElementById('su-filter-input');
       const refreshBtn = document.getElementById('su-refresh-btn');
       const statTotal = document.getElementById('su-stat-total');
       const statVerified = document.getElementById('su-stat-verified');
@@ -889,17 +860,10 @@
       }
       bindRowDelete(recordsBody, 'users', () => window.loadSignedupRecords());
       function applyFilter() {
-        const query = filterInput.value.trim().toLowerCase();
-        let records = !query ? allRecords : allRecords.filter((record) => {
-          const haystack = [record.email, record.session_id, record.uid].join(' ').toLowerCase();
-          return haystack.includes(query);
-        });
-        records = sortRecordsBy(records, sortField, sortDir);
+        const records = sortRecordsBy(allRecords, sortField, sortDir);
         renderRows(records);
         renderStats(records);
-        statusRow.textContent = query
-          ? `Showing ${records.length} filtered record${records.length === 1 ? '' : 's'}.`
-          : `Showing ${records.length} record${records.length === 1 ? '' : 's'}.`;
+        statusRow.textContent = `Showing ${records.length} record${records.length === 1 ? '' : 's'}.`;
         statusRow.classList.remove('error');
       }
       wireSortableHeaders(document.getElementById('su-thead-row'), (field, th, ths) => {
@@ -924,7 +888,6 @@
           statusRow.classList.add('error');
         }
       };
-      filterInput.addEventListener('input', applyFilter);
       refreshBtn.addEventListener('click', () => window.loadSignedupRecords());
     })();
 
