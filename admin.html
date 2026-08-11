@@ -330,7 +330,7 @@
         <div class="table-wrap">
           <table aria-describedby="sv-status-row">
             <thead>
-              <tr id="sv-thead-row"><th class="actions-col"><input type="checkbox" id="sv-select-all" aria-label="Select all" /></th><th data-sort="email">Email</th><th data-sort="id">Submission ID</th><th data-sort="session_id">Session ID</th><th data-sort="result_type">Result Type</th><th>Answers</th><th data-sort="submitted_at">Submitted</th></tr>
+              <tr id="sv-thead-row"><th class="actions-col"><input type="checkbox" id="sv-select-all" aria-label="Select all" /></th><th data-sort="email">Email</th><th data-sort="id">Submission ID</th><th data-sort="session_id">Session ID</th><th data-sort="result_type">Result Type</th><th data-sort="submitted_at">Submitted</th></tr>
             </thead>
             <tbody id="sv-records-body"></tbody>
           </table>
@@ -598,11 +598,6 @@
         bulkDeleteBtn.disabled = selectedIds.size === 0;
         bulkDeleteBtn.textContent = selectedIds.size ? `Delete selected (${selectedIds.size})` : 'Delete selected';
       }
-      function summarizeAnswers(record) {
-        if (Array.isArray(record.answers_list)) return JSON.stringify(record.answers_list);
-        if (record.answers && typeof record.answers === 'object') return JSON.stringify(record.answers);
-        return '-';
-      }
       /* survey_sessions doesn't store an email itself (see quiz.html) -- only a
          user_id for signed-in submissions. Resolve those against users/{uid} so
          the report can show an email column; anonymous submissions stay blank. */
@@ -635,7 +630,6 @@
             <td class="mono">${escHtml(record.submission_id || record.id || '-')}</td>
             <td class="mono">${escHtml(record.session_id || record.id || '-')}</td>
             <td><span class="badge">${escHtml(record.result_type || '-')}</span></td>
-            <td class="mono">${escHtml(summarizeAnswers(record))}</td>
             <td>${formatServerTimestamp(record.submitted_at)}</td>
           `;
           recordsBody.appendChild(tr);
