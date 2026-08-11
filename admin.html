@@ -141,9 +141,6 @@
       padding: 6px 10px; border-radius: 999px; background: rgba(217,108,75,0.12);
       color: var(--accent-dark); font-weight: 700; text-transform: capitalize; font-size: 13px;
     }
-    .badge.verified { background: rgba(47,125,81,0.12); color: #2f7d51; }
-    .badge.unverified { background: rgba(217,108,75,0.12); color: var(--accent-dark); }
-
     .role-badge { display: inline-flex; align-items: center; justify-content: center; min-width: 90px; padding: 6px 10px; border-radius: 999px; font-weight: 700; font-size: 12px; text-transform: capitalize; }
     .role-badge.admin { background: rgba(111,79,168,0.12); color: #6f4fa8; }
     .role-badge.contributor { background: rgba(74,114,179,0.12); color: #4a72b3; }
@@ -355,7 +352,7 @@
         <div class="table-wrap">
           <table aria-describedby="su-status-row">
             <thead>
-              <tr id="su-thead-row"><th class="expand-col"></th><th data-sort="email">Email</th><th class="check-col" data-sort="has_assessment">Assessment</th><th data-sort="result_type">Type</th><th class="check-col" data-sort="has_profile">Profile</th><th data-sort="created_at">Signed Up</th><th data-sort="email_verified">Verified</th><th data-sort="email_verified_at">Verified At</th><th class="actions-col">Actions</th></tr>
+              <tr id="su-thead-row"><th class="expand-col"></th><th data-sort="email">Email</th><th class="check-col" data-sort="has_assessment">Assessment</th><th data-sort="result_type">Type</th><th class="check-col" data-sort="has_profile">Profile</th><th data-sort="created_at">Signed Up</th><th class="check-col" data-sort="email_verified">Verified</th><th class="actions-col">Actions</th></tr>
             </thead>
             <tbody id="su-records-body"></tbody>
           </table>
@@ -763,8 +760,7 @@
             <td><span class="badge">${escHtml(record.result_type || '—')}</span></td>
             <td class="check-col">${record.has_profile ? CHECK_ICON : ''}</td>
             <td>${formatServerTimestamp(record.created_at)}</td>
-            <td><span class="badge ${verified ? 'verified' : 'unverified'}">${verified ? 'Verified' : 'Not verified'}</span></td>
-            <td>${formatServerTimestamp(record.email_verified_at)}</td>
+            <td class="check-col">${verified ? CHECK_ICON : ''}</td>
             <td class="actions-col"><button type="button" class="row-icon-btn row-delete-btn" data-id="${escHtml(record.id)}" data-label="this user's tracking record" aria-label="Delete" title="Delete">${DELETE_ICON}</button></td>
           `;
 
@@ -772,7 +768,7 @@
           detailRow.className = 'profile-detail-row';
           detailRow.hidden = !expanded;
           detailRow.innerHTML = profile ? `
-            <td colspan="9">
+            <td colspan="8">
               <div class="profile-detail">
                 <div class="detail-groups">
                   ${renderKvGroup('Logistics', profile.logistics)}
@@ -790,7 +786,7 @@
               </div>
             </td>
           ` : `
-            <td colspan="9">
+            <td colspan="8">
               <div class="profile-detail">
                 <div class="detail-group-empty">No profile submitted yet.</div>
               </div>
