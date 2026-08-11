@@ -170,7 +170,7 @@
     .row-icon-btn svg { width: 16px; height: 16px; }
     .row-delete-btn { border-color: rgba(166,55,34,.3); background: rgba(166,55,34,.08); color: #a63722; }
     .check-icon { width: 18px; height: 18px; color: #2f7d51; }
-    .assessment-col { text-align: center; }
+    .check-col { text-align: center; }
     .row-delete-btn:hover { background: rgba(166,55,34,.16); }
     .admin-note { font-size: 12px; color: var(--muted); margin: -6px 0 16px; }
     .bulk-delete-btn {
@@ -355,7 +355,7 @@
         <div class="table-wrap">
           <table aria-describedby="su-status-row">
             <thead>
-              <tr id="su-thead-row"><th class="expand-col"></th><th data-sort="email">Email</th><th class="assessment-col" data-sort="has_assessment">Assessment</th><th data-sort="result_type">Type</th><th data-sort="session_id">Session ID</th><th data-sort="created_at">Signed Up</th><th data-sort="email_verified">Verified</th><th data-sort="email_verified_at">Verified At</th><th class="actions-col">Actions</th></tr>
+              <tr id="su-thead-row"><th class="expand-col"></th><th data-sort="email">Email</th><th class="check-col" data-sort="has_assessment">Assessment</th><th data-sort="result_type">Type</th><th class="check-col" data-sort="has_profile">Profile</th><th data-sort="created_at">Signed Up</th><th data-sort="email_verified">Verified</th><th data-sort="email_verified_at">Verified At</th><th class="actions-col">Actions</th></tr>
             </thead>
             <tbody id="su-records-body"></tbody>
           </table>
@@ -724,6 +724,7 @@
           const uid = r.uid || r.id;
           const emailKey = (r.email || '').trim().toLowerCase();
           r.linkedProfile = (uid && byUserId[uid]) || bySessionId[r.session_id] || (emailKey && byEmail[emailKey]) || null;
+          r.has_profile = !!r.linkedProfile;
         });
       }
       function renderStats(records) {
@@ -758,9 +759,9 @@
           row.innerHTML = `
             <td class="expand-col"><svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></td>
             <td>${escHtml(record.email || '-')}</td>
-            <td class="assessment-col">${record.has_assessment ? CHECK_ICON : ''}</td>
+            <td class="check-col">${record.has_assessment ? CHECK_ICON : ''}</td>
             <td><span class="badge">${escHtml(record.result_type || '—')}</span></td>
-            <td class="mono">${escHtml(record.session_id || '-')}</td>
+            <td class="check-col">${record.has_profile ? CHECK_ICON : ''}</td>
             <td>${formatServerTimestamp(record.created_at)}</td>
             <td><span class="badge ${verified ? 'verified' : 'unverified'}">${verified ? 'Verified' : 'Not verified'}</span></td>
             <td>${formatServerTimestamp(record.email_verified_at)}</td>
