@@ -99,10 +99,11 @@
 
     /* ---------- Shared stats / panel / table ---------- */
     .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 22px; }
-    .stat-card { background: rgba(255,255,255,0.7); backdrop-filter: blur(10px); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px 18px 16px; box-shadow: var(--shadow); }
+    .stat-card { display: flex; flex-direction: column; background: rgba(255,255,255,0.7); backdrop-filter: blur(10px); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px 18px 16px; box-shadow: var(--shadow); }
     .stat-label { font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 10px; }
     .stat-value { font-size: 30px; font-weight: 700; }
-    .stat-percent { font-size: 12px; color: var(--muted); margin-top: 6px; }
+    .stat-footer { margin-top: auto; padding-top: 10px; display: flex; flex-direction: column; gap: 2px; }
+    .stat-percent { font-size: 12px; color: var(--muted); }
     .type-breakdown { display: flex; flex-wrap: wrap; gap: 6px; }
     .type-breakdown-empty { color: var(--muted); font-size: 14px; }
     .type-chip { display: inline-flex; align-items: center; gap: 5px; padding: 5px 10px; border-radius: 999px; background: rgba(217,108,75,0.12); color: var(--accent-dark); font-weight: 700; font-size: 13px; text-transform: capitalize; }
@@ -311,10 +312,10 @@
     <!-- ===== Survey tracking ===== -->
     <section class="tab-panel" id="panel-survey" data-panel="survey">
       <section class="stats" aria-label="Summary">
-        <article class="stat-card"><div class="stat-label">Assessments</div><div class="stat-value" id="sv-stat-total">0</div><div class="stat-percent" id="sv-stat-total-pct"></div></article>
-        <article class="stat-card"><div class="stat-label">Unique Session IDs</div><div class="stat-value" id="sv-stat-sessions">0</div><div class="stat-percent" id="sv-stat-sessions-pct"></div></article>
-        <article class="stat-card"><div class="stat-label">Accounts</div><div class="stat-value" id="sv-stat-accounts">0</div><div class="stat-percent" id="sv-stat-accounts-pct"></div></article>
-        <article class="stat-card"><div class="stat-label">Types</div><div class="type-breakdown" id="sv-stat-types">–</div><div class="stat-percent" id="sv-stat-types-pct"></div></article>
+        <article class="stat-card"><div class="stat-label">Assessments</div><div class="stat-value" id="sv-stat-total">0</div><div class="stat-footer"><div class="stat-percent" id="sv-stat-total-pct"></div></div></article>
+        <article class="stat-card"><div class="stat-label">Unique Session IDs</div><div class="stat-value" id="sv-stat-sessions">0</div><div class="stat-footer"><div class="stat-percent" id="sv-stat-sessions-pct"></div></div></article>
+        <article class="stat-card"><div class="stat-label">Accounts</div><div class="stat-value" id="sv-stat-accounts">0</div><div class="stat-footer"><div class="stat-percent" id="sv-stat-accounts-pct"></div><div class="stat-percent" id="sv-stat-accounts-of-sessions-pct"></div></div></article>
+        <article class="stat-card"><div class="stat-label">Types</div><div class="type-breakdown" id="sv-stat-types">–</div></article>
       </section>
       <section class="panel" aria-labelledby="sv-records-heading">
         <div class="panel-top">
@@ -565,8 +566,8 @@
       const statSessionsPct = document.getElementById('sv-stat-sessions-pct');
       const statAccounts = document.getElementById('sv-stat-accounts');
       const statAccountsPct = document.getElementById('sv-stat-accounts-pct');
+      const statAccountsOfSessionsPct = document.getElementById('sv-stat-accounts-of-sessions-pct');
       const statTypes = document.getElementById('sv-stat-types');
-      const statTypesPct = document.getElementById('sv-stat-types-pct');
       const bulkDeleteBtn = document.getElementById('sv-bulk-delete-btn');
       const selectAllCheckbox = document.getElementById('sv-select-all');
       let allRecords = [];
@@ -592,8 +593,8 @@
         ));
         records.forEach((r) => { r.email = r.user_id ? (emailByUserId[r.user_id] || null) : null; });
       }
-      function pctOfTotal(count, total) {
-        return total ? `${Math.round((count / total) * 100)}% of assessments` : '0% of assessments';
+      function pctOf(count, base, label) {
+        return base ? `${Math.round((count / base) * 100)}% of ${label}` : `0% of ${label}`;
       }
       function renderStats(records) {
         const total = records.length;
@@ -601,11 +602,12 @@
         const accountsCount = records.filter((r) => r.email).length;
 
         statTotal.textContent = String(total);
-        statTotalPct.textContent = pctOfTotal(total, total);
+        statTotalPct.textContent = pctOf(total, total, 'assessments');
         statSessions.textContent = String(uniqueSessions);
-        statSessionsPct.textContent = pctOfTotal(uniqueSessions, total);
+        statSessionsPct.textContent = pctOf(uniqueSessions, total, 'assessments');
         statAccounts.textContent = String(accountsCount);
-        statAccountsPct.textContent = pctOfTotal(accountsCount, total);
+        statAccountsPct.textContent = pctOf(accountsCount, total, 'assessments');
+        statAccountsOfSessionsPct.textContent = pctOf(accountsCount, uniqueSessions, 'unique session IDs');
 
         const typeCounts = {};
         records.forEach((r) => {
@@ -616,7 +618,6 @@
         statTypes.innerHTML = typeEntries.length
           ? typeEntries.map(([type, count]) => `<span class="type-chip">${escHtml(type)} <span class="count">${count}</span></span>`).join('')
           : '<span class="type-breakdown-empty">–</span>';
-        statTypesPct.textContent = pctOfTotal(typeEntries.reduce((sum, [, count]) => sum + count, 0), total);
       }
       function renderRows(records) {
         recordsBody.innerHTML = '';
