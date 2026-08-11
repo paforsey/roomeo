@@ -317,8 +317,8 @@
         <div class="panel-top">
           <h2 id="sv-records-heading">Firestore Records</h2>
           <div class="panel-actions">
-            <button id="sv-refresh-btn" class="refresh-btn" type="button">Refresh data</button>
-            <button id="sv-bulk-delete-btn" class="bulk-delete-btn admin-only-inline" type="button" disabled>Delete selected</button>
+            <button id="sv-refresh-btn" class="refresh-btn" type="button">Refresh</button>
+            <button id="sv-bulk-delete-btn" class="bulk-delete-btn admin-only-inline" type="button" disabled>Delete</button>
           </div>
         </div>
         <div id="sv-status-row" class="status-row">Loading records...</div>
@@ -348,8 +348,8 @@
         <div class="panel-top">
           <h2 id="pf-records-heading">Firestore Records</h2>
           <div class="panel-actions">
-            <button id="pf-refresh-btn" class="refresh-btn" type="button">Refresh data</button>
-            <button id="pf-bulk-delete-btn" class="bulk-delete-btn admin-only-inline" type="button" disabled>Delete selected</button>
+            <button id="pf-refresh-btn" class="refresh-btn" type="button">Refresh</button>
+            <button id="pf-bulk-delete-btn" class="bulk-delete-btn admin-only-inline" type="button" disabled>Delete</button>
           </div>
         </div>
         <div id="pf-status-row" class="status-row">Loading records...</div>
@@ -379,7 +379,7 @@
         <div class="panel-top">
           <h2 id="su-records-heading">Firestore Records</h2>
           <div class="panel-actions">
-            <button id="su-refresh-btn" class="refresh-btn" type="button">Refresh data</button>
+            <button id="su-refresh-btn" class="refresh-btn" type="button">Refresh</button>
           </div>
         </div>
         <div id="su-status-row" class="status-row">Loading records...</div>
@@ -597,7 +597,7 @@
 
       function updateBulkDeleteState() {
         bulkDeleteBtn.disabled = selectedIds.size === 0;
-        bulkDeleteBtn.textContent = selectedIds.size ? `Delete selected (${selectedIds.size})` : 'Delete selected';
+        bulkDeleteBtn.textContent = selectedIds.size ? `Delete (${selectedIds.size})` : 'Delete';
       }
       /* survey_sessions doesn't store an email itself (see quiz.html) -- only a
          user_id for signed-in submissions. Resolve those against users/{uid} so
@@ -710,7 +710,7 @@
 
       function updateBulkDeleteState() {
         bulkDeleteBtn.disabled = selectedIds.size === 0;
-        bulkDeleteBtn.textContent = selectedIds.size ? `Delete selected (${selectedIds.size})` : 'Delete selected';
+        bulkDeleteBtn.textContent = selectedIds.size ? `Delete (${selectedIds.size})` : 'Delete';
       }
 
       function humanizeKey(key) {
