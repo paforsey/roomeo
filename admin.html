@@ -337,9 +337,10 @@
     <!-- ===== Signed-up users (each row expands to show their linked profile submission, if any) ===== -->
     <section class="tab-panel" id="panel-signedup" data-panel="signedup" hidden>
       <section class="stats" aria-label="Summary">
-        <article class="stat-card"><div class="stat-label">Total users</div><div class="stat-value" id="su-stat-total">0</div></article>
+        <article class="stat-card"><div class="stat-label">Users</div><div class="stat-value" id="su-stat-total">0</div></article>
+        <article class="stat-card"><div class="stat-label">Assessments</div><div class="stat-value" id="su-stat-assessments">0</div></article>
+        <article class="stat-card"><div class="stat-label">Profiles</div><div class="stat-value" id="su-stat-profiles">0</div></article>
         <article class="stat-card"><div class="stat-label">Verified</div><div class="stat-value" id="su-stat-verified">0</div></article>
-        <article class="stat-card"><div class="stat-label">Latest sign-up</div><div class="stat-value" id="su-stat-latest-time" style="font-size:18px;">-</div></article>
       </section>
       <section class="panel" aria-labelledby="su-records-heading">
         <div class="panel-top">
@@ -668,8 +669,9 @@
       const statusRow = document.getElementById('su-status-row');
       const refreshBtn = document.getElementById('su-refresh-btn');
       const statTotal = document.getElementById('su-stat-total');
+      const statAssessments = document.getElementById('su-stat-assessments');
+      const statProfiles = document.getElementById('su-stat-profiles');
       const statVerified = document.getElementById('su-stat-verified');
-      const statLatestTime = document.getElementById('su-stat-latest-time');
       let allRecords = [];
       const expandedIds = new Set();
       let sortField = null;
@@ -726,8 +728,9 @@
       }
       function renderStats(records) {
         statTotal.textContent = String(records.length);
+        statAssessments.textContent = String(records.filter((r) => r.result_type).length);
+        statProfiles.textContent = String(records.filter((r) => r.has_profile).length);
         statVerified.textContent = String(records.filter((r) => r.email_verified).length);
-        statLatestTime.textContent = records.length ? formatServerTimestamp(records[0].created_at) : '-';
       }
       function toggleExpanded(id) {
         if (expandedIds.has(id)) expandedIds.delete(id); else expandedIds.add(id);
