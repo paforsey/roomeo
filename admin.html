@@ -161,13 +161,18 @@
     body.is-admin .admin-only-inline { display: inline-flex; }
     .admin-only-block { display: none; }
     body.is-admin .admin-only-block { display: block; }
-    .row-delete-btn {
-      display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 12px;
-      border-radius: 999px; border: 1px solid rgba(166,55,34,.3); background: rgba(166,55,34,.08);
-      color: #a63722; font: 600 12px var(--font-sans); cursor: pointer; white-space: nowrap;
+    .row-actions-group { display: flex; align-items: center; gap: 6px; }
+    .row-icon-btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 32px; height: 32px; padding: 0; border-radius: 8px;
+      border: 1px solid var(--line); background: var(--surface-strong);
+      color: var(--muted); cursor: pointer;
     }
+    .row-icon-btn:hover { background: var(--bg); color: var(--text); }
+    .row-icon-btn:disabled { opacity: .5; cursor: default; }
+    .row-icon-btn svg { width: 16px; height: 16px; }
+    .row-delete-btn { border-color: rgba(166,55,34,.3); background: rgba(166,55,34,.08); color: #a63722; }
     .row-delete-btn:hover { background: rgba(166,55,34,.16); }
-    .row-delete-btn:disabled { opacity: .5; cursor: default; }
     .admin-note { font-size: 12px; color: var(--muted); margin: -6px 0 16px; }
     .bulk-delete-btn {
       display: inline-flex; align-items: center; gap: 6px; height: 44px; padding: 0 18px;
@@ -216,6 +221,7 @@
     .admin-gate-card p { margin: 0 0 20px; color: var(--muted); font-size: 14px; line-height: 1.5; }
     .admin-form { display: flex; flex-direction: column; gap: 14px; }
     .admin-form label { display: flex; flex-direction: column; gap: 6px; font: 600 13px var(--font-sans); color: var(--text); }
+    .admin-form label[hidden] { display: none; }
     .admin-form input, .admin-form select { font: 400 14px var(--font-sans); padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line); background: #fff; color: var(--text); }
     .admin-form input:focus, .admin-form select:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
     .admin-password-field { position: relative; display: flex; }
@@ -417,7 +423,7 @@
         <div class="table-wrap">
           <table aria-describedby="mu-status-row">
             <thead>
-              <tr><th>Username</th><th>Name</th><th>Email</th><th>Role</th><th>Created</th><th class="actions-col">Actions</th></tr>
+              <tr><th>Username</th><th>First Name</th><th>Last Name</th><th>Email</th><th>Role</th><th>Created</th><th class="actions-col">Actions</th></tr>
             </thead>
             <tbody id="mu-records-body"></tbody>
           </table>
@@ -432,7 +438,7 @@
   <dialog id="adduser-modal" class="adduser-modal">
     <div class="adduser-modal-inner">
       <button type="button" class="adduser-modal-close" id="adduser-modal-close" aria-label="Close">&times;</button>
-      <h2>Add a new user</h2>
+      <h2 id="adduser-modal-title">Add a new user</h2>
       <form id="form-adduser" class="admin-form">
         <label>Username<input type="text" id="adduser-username" required autocomplete="off" /></label>
         <div class="name-row">
@@ -440,7 +446,8 @@
           <label>Last name<input type="text" id="adduser-last-name" required autocomplete="off" /></label>
         </div>
         <label>Email<input type="email" id="adduser-email" required autocomplete="off" /></label>
-        <label>Password
+        <p class="admin-note" id="adduser-edit-note" hidden>Email and password can't be changed here — the account keeps its original login.</p>
+        <label id="adduser-password-label">Password
           <div class="admin-password-field">
             <input type="password" id="adduser-password" required minlength="6" autocomplete="new-password" />
             <button type="button" class="admin-password-toggle" id="adduser-toggle-password" aria-label="Show password" aria-pressed="false"></button>
@@ -488,6 +495,8 @@
     function escHtml(s) {
       return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
     }
+    const EDIT_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>';
+    const DELETE_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>';
     function formatServerTimestamp(value, dateOnly) {
       if (!value) return '-';
       if (typeof value.toDate === 'function') {
@@ -826,7 +835,7 @@
             <td>${formatServerTimestamp(record.created_at)}</td>
             <td><span class="badge ${verified ? 'verified' : 'unverified'}">${verified ? 'Verified' : 'Not verified'}</span></td>
             <td>${formatServerTimestamp(record.email_verified_at)}</td>
-            <td class="actions-col"><button type="button" class="row-delete-btn" data-id="${escHtml(record.id)}" data-label="this user's tracking record">Delete</button></td>
+            <td class="actions-col"><button type="button" class="row-icon-btn row-delete-btn" data-id="${escHtml(record.id)}" data-label="this user's tracking record" aria-label="Delete" title="Delete">${DELETE_ICON}</button></td>
           `;
           recordsBody.appendChild(tr);
         });
@@ -889,21 +898,29 @@
           const tr = document.createElement('tr');
           const role = record.role === 'admin' ? 'admin' : 'contributor';
           const isSelf = firebase.auth().currentUser && record.id === firebase.auth().currentUser.uid;
-          const deleteCell = isSelf
+          const editBtn = `<button type="button" class="row-icon-btn row-edit-btn" data-id="${escHtml(record.id)}" aria-label="Edit" title="Edit">${EDIT_ICON}</button>`;
+          const deleteBtn = isSelf
             ? `<span style="color:var(--muted);font-size:12px;">That's you</span>`
-            : `<button type="button" class="row-delete-btn" data-id="${escHtml(record.id)}" data-label="${escHtml(record.username || 'this staff account')}">Delete</button>`;
+            : `<button type="button" class="row-icon-btn row-delete-btn" data-id="${escHtml(record.id)}" data-label="${escHtml(record.username || 'this staff account')}" aria-label="Delete" title="Delete">${DELETE_ICON}</button>`;
           tr.innerHTML = `
             <td class="mono">${escHtml(record.username || '-')}</td>
-            <td>${escHtml([record.first_name, record.last_name].filter(Boolean).join(' ') || '-')}</td>
+            <td>${escHtml(record.first_name || '-')}</td>
+            <td>${escHtml(record.last_name || '-')}</td>
             <td>${escHtml(record.email || '-')}</td>
             <td><span class="role-badge ${role}">${role}</span></td>
             <td>${formatServerTimestamp(record.created_at, true)}</td>
-            <td class="actions-col">${deleteCell}</td>
+            <td class="actions-col"><div class="row-actions-group">${editBtn}${deleteBtn}</div></td>
           `;
           recordsBody.appendChild(tr);
         });
       }
       bindRowDelete(recordsBody, 'admin_users', () => window.loadManageRecords());
+      recordsBody.addEventListener('click', (e) => {
+        const btn = e.target.closest('.row-edit-btn');
+        if (!btn) return;
+        const record = allRecords.find((r) => r.id === btn.dataset.id);
+        if (record) openAdduserModal('edit', record);
+      });
       window.loadManageRecords = async function loadManageRecords() {
         statusRow.textContent = 'Loading records...';
         statusRow.classList.remove('error');
@@ -930,15 +947,53 @@
       const adduserResult = document.getElementById('adduser-result');
       const adduserResultName = document.getElementById('adduser-result-name');
       const adduserGeneratedPassword = document.getElementById('adduser-generated-password');
+      const adduserModalTitle = document.getElementById('adduser-modal-title');
+      const adduserEmailInput = document.getElementById('adduser-email');
+      const adduserPasswordLabel = document.getElementById('adduser-password-label');
+      const adduserGenerateBtn = document.getElementById('adduser-generate-password');
+      const adduserEditNote = document.getElementById('adduser-edit-note');
+      const adduserPasswordInput = document.getElementById('adduser-password');
 
-      document.getElementById('btn-open-adduser').addEventListener('click', () => {
+      /* null = creating a new user (the original flow: secondary Auth app + Firestore
+         create). Set to the record being edited otherwise — edit mode never touches
+         Firebase Auth at all, just updates the admin_users Firestore doc, since email
+         and password can't be changed for an arbitrary other account from the client SDK. */
+      let editingRecord = null;
+
+      function openAdduserModal(mode, record) {
         formAdduser.reset();
         formAdduser.hidden = false;
         adduserResult.hidden = true;
         adduserError.hidden = true;
+        editingRecord = mode === 'edit' ? record : null;
+
+        if (editingRecord) {
+          adduserModalTitle.textContent = 'Edit user';
+          adduserSubmit.textContent = 'Save changes';
+          document.getElementById('adduser-username').value = record.username || '';
+          document.getElementById('adduser-first-name').value = record.first_name || '';
+          document.getElementById('adduser-last-name').value = record.last_name || '';
+          adduserEmailInput.value = record.email || '';
+          adduserEmailInput.disabled = true;
+          document.getElementById('adduser-role').value = record.role === 'admin' ? 'admin' : 'contributor';
+          adduserPasswordLabel.hidden = true;
+          adduserGenerateBtn.hidden = true;
+          adduserPasswordInput.required = false;
+          adduserEditNote.hidden = false;
+        } else {
+          adduserModalTitle.textContent = 'Add a new user';
+          adduserSubmit.textContent = 'Create user';
+          adduserEmailInput.disabled = false;
+          adduserPasswordLabel.hidden = false;
+          adduserGenerateBtn.hidden = false;
+          adduserPasswordInput.required = true;
+          adduserEditNote.hidden = true;
+        }
         adduserModal.showModal();
-      });
-      document.getElementById('adduser-modal-close').addEventListener('click', () => adduserModal.close());
+      }
+
+      document.getElementById('btn-open-adduser').addEventListener('click', () => openAdduserModal('add'));
+      document.getElementById('adduser-modal-close').addEventListener('click', () => { editingRecord = null; adduserModal.close(); });
       document.getElementById('adduser-done').addEventListener('click', () => {
         adduserModal.close();
         window.loadManageRecords();
@@ -978,11 +1033,41 @@
         const username = document.getElementById('adduser-username').value.trim();
         const firstName = document.getElementById('adduser-first-name').value.trim();
         const lastName = document.getElementById('adduser-last-name').value.trim();
-        const email = document.getElementById('adduser-email').value.trim();
-        const password = document.getElementById('adduser-password').value;
         const role = document.getElementById('adduser-role').value;
         adduserError.hidden = true;
         adduserSubmit.disabled = true;
+
+        if (editingRecord) {
+          const editingUid = editingRecord.id;
+          db.collection('admin_users').where('username', '==', username).limit(1).get()
+            .then((snap) => {
+              const conflict = !snap.empty && snap.docs[0].id !== editingUid;
+              if (conflict) throw { code: 'username-taken' };
+              return db.collection('admin_users').doc(editingUid).update({
+                username: username,
+                first_name: firstName,
+                last_name: lastName,
+                role: role,
+                updated_at: firebase.firestore.FieldValue.serverTimestamp()
+              });
+            })
+            .then(() => {
+              editingRecord = null;
+              adduserModal.close();
+              window.loadManageRecords();
+            })
+            .catch((err) => {
+              adduserError.textContent = (err && err.code === 'username-taken')
+                ? 'That username is already taken.'
+                : 'Could not save changes. Please try again.';
+              adduserError.hidden = false;
+            })
+            .finally(() => { adduserSubmit.disabled = false; });
+          return;
+        }
+
+        const email = adduserEmailInput.value.trim();
+        const password = adduserPasswordInput.value;
 
         db.collection('admin_users').where('username', '==', username).limit(1).get()
           .then((snap) => {
