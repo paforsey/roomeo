@@ -6909,12 +6909,21 @@
           if (type) result.result_type = type;
         } catch (_) {}
 
-        let logistics = null, habits = null;
+        let logistics = null, habits = null, trust = null;
         try { logistics = JSON.parse(sessionStorage.getItem('roomeo_profile_step1') || 'null'); } catch (_) {}
         try { habits = JSON.parse(sessionStorage.getItem('roomeo_profile_step2') || 'null'); } catch (_) {}
+        try { trust = JSON.parse(sessionStorage.getItem('roomeo_profile_step3_trust') || 'null'); } catch (_) {}
 
-        const profile = mapLogisticsHabitsToUserProfile(logistics, habits);
-        if (Object.keys(profile).length) result.profile = profile;
+        /* The curated 9-field mapping backs account.html's own simple edit form;
+           the raw logistics/habits/trust below is the full ~40-field record the
+           quiz's guided flow actually collects. Both get written onto the same
+           user_profiles/{uid} doc, at different field paths, so neither view
+           clobbers the other. */
+        const mapped = mapLogisticsHabitsToUserProfile(logistics, habits);
+        if (Object.keys(mapped).length) result.mapped = mapped;
+        if (logistics || habits || trust) {
+          result.full = { logistics: logistics || {}, habits: habits || {}, trust: trust || {} };
+        }
         return result;
       }
 
@@ -6928,10 +6937,11 @@
             updated_at: firebase.firestore.FieldValue.serverTimestamp()
           }, { merge: true }));
         }
-        if (linked.profile) {
+        if (linked.mapped || linked.full) {
           writes.push(db.collection('user_profiles').doc(user.uid).set(Object.assign(
             { uid: user.uid, updated_at: firebase.firestore.FieldValue.serverTimestamp() },
-            linked.profile
+            linked.mapped || {},
+            linked.full || {}
           ), { merge: true }));
         }
         if (!writes.length) return Promise.resolve();
@@ -7126,21 +7136,26 @@
         updated_at: firebase.firestore.FieldValue.serverTimestamp()
       }).then(() => {
         try { sessionStorage.setItem(STORAGE.profileSubmitted, '1'); } catch (_) {}
-        /* Keep user_profiles (the account's single, current profile) in sync too.
+        /* Keep user_profiles (the account's single, current, full profile) in sync
+           too. profile_sessions above stays an immutable per-submission log -- but
+           there should only ever be ONE profile per person, always reflecting their
+           latest answers, which is what user_profiles is for. Writes both the full
+           raw logistics/habits/trust (everything the 6-step flow collects) and the
+           curated 9-field mapping account.html's own simple edit form reads, onto
+           the same doc at different field paths so neither clobbers the other.
            readSessionQuizAndProfile()/linkSessionDataToAccount() only copy this
            over at signup/login time, so an already-signed-in person resubmitting
-           the waitlist form would otherwise never get user_profiles written at
-           all -- this covers that case the same way linkResultToAccount() already
-           keeps users/{uid}.result_type current on every quiz completion. */
+           the form would otherwise never get user_profiles updated at all -- this
+           covers that case the same way linkResultToAccount() already keeps
+           users/{uid}.result_type current on every quiz completion. */
         const user = firebase.auth().currentUser;
         if (user) {
           const mapped = mapLogisticsHabitsToUserProfile(logistics, habits);
-          if (Object.keys(mapped).length) {
-            db.collection('user_profiles').doc(user.uid).set(Object.assign(
-              { uid: user.uid, updated_at: firebase.firestore.FieldValue.serverTimestamp() },
-              mapped
-            ), { merge: true }).catch((err) => console.error('Failed to sync user_profiles on profile submit', err));
-          }
+          db.collection('user_profiles').doc(user.uid).set(Object.assign(
+            { uid: user.uid, updated_at: firebase.firestore.FieldValue.serverTimestamp(),
+              logistics: logistics || {}, habits: habits || {}, trust: trust || {} },
+            mapped
+          ), { merge: true }).catch((err) => console.error('Failed to sync user_profiles on profile submit', err));
         }
       }).catch((error) => {
         console.error('Failed to submit profile result', error);

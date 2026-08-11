@@ -723,14 +723,19 @@
         const rows = entries.map(([k, v]) => `<dt>${humanizeKey(k)}</dt><dd>${escHtml(formatValue(v))}</dd>`).join('');
         return `<div class="detail-group"><h3>${title}</h3><dl class="kv">${rows}</dl></div>`;
       }
-      /* user_profiles/{uid} is the account's own live profile, edited from
-         account.html -- one doc per user, always current. This deliberately
-         replaces an earlier approach that showed profile_sessions instead: a
-         frozen, one-time snapshot captured whenever someone filled out the
-         waitlist form, which could diverge significantly (different field
-         names, stale values) from what's actually on the account today.
-         There's only ever one profile per user, so this is a direct doc
-         lookup by uid -- no cross-collection matching needed. */
+      /* user_profiles/{uid} is the one true profile per person -- always current,
+         updated in place every time they complete or edit it, rather than a new
+         record per submission. It holds two things at different field paths on
+         the same doc: the curated 9-field summary account.html's own simple form
+         edits (targetCity, sleep, etc. -- top-level, friendly labels), and the
+         full ~40-field record the quiz's 6-step guided flow collects, nested
+         under logistics/habits/trust (raw values). Admin shows the latter, since
+         that's the complete picture; account.html's own card keeps using the
+         curated summary. Single doc per uid, so this is a direct lookup -- no
+         cross-collection matching needed. */
+      function hasProfileContent(section) {
+        return !!(section && typeof section === 'object' && Object.keys(section).length);
+      }
       async function attachUserProfiles(records) {
         await Promise.all(records.map((r) => {
           const uid = r.uid || r.id;
@@ -739,7 +744,10 @@
             .then((doc) => { r.userProfile = doc.exists ? doc.data() : null; })
             .catch((err) => { console.error('Failed to load user_profiles for', uid, err); r.userProfile = null; });
         }));
-        records.forEach((r) => { r.has_profile = !!r.userProfile; });
+        records.forEach((r) => {
+          const p = r.userProfile;
+          r.has_profile = !!(p && (hasProfileContent(p.logistics) || hasProfileContent(p.habits) || hasProfileContent(p.trust)));
+        });
       }
       function renderStats(records) {
         statTotal.textContent = String(records.length);
@@ -784,16 +792,17 @@
           const detailRow = document.createElement('tr');
           detailRow.className = 'profile-detail-row';
           detailRow.hidden = !expanded;
-          if (userProfile) {
-            const { uid: _uid, updated_at, ...profileFields } = userProfile;
+          if (record.has_profile) {
             detailRow.innerHTML = `
               <td colspan="7">
                 <div class="profile-detail">
                   <div class="detail-groups">
-                    ${renderKvGroup('Profile', profileFields)}
+                    ${renderKvGroup('Logistics', userProfile.logistics)}
+                    ${renderKvGroup('Habits', userProfile.habits)}
+                    ${renderKvGroup('Trust & verification', userProfile.trust)}
                   </div>
                   <div class="meta-row">
-                    <span>Last updated: ${escHtml(formatServerTimestamp(updated_at))}</span>
+                    <span>Last updated: ${escHtml(formatServerTimestamp(userProfile.updated_at))}</span>
                   </div>
                 </div>
               </td>
