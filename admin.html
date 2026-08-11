@@ -146,6 +146,14 @@
     .row-delete-btn:hover { background: rgba(166,55,34,.16); }
     .row-delete-btn:disabled { opacity: .5; cursor: default; }
     .admin-note { font-size: 12px; color: var(--muted); margin: -6px 0 16px; }
+    .bulk-delete-btn {
+      display: inline-flex; align-items: center; gap: 6px; height: 44px; padding: 0 18px;
+      border-radius: 999px; border: 1px solid rgba(166,55,34,.3); background: rgba(166,55,34,.08);
+      color: #a63722; font: 700 14px var(--font-sans); cursor: pointer; white-space: nowrap;
+    }
+    .bulk-delete-btn:hover:not(:disabled) { background: rgba(166,55,34,.16); }
+    .bulk-delete-btn:disabled { opacity: .45; cursor: default; }
+    .row-select { width: 17px; height: 17px; cursor: pointer; accent-color: #a63722; flex: none; }
 
     /* ---------- Profile submissions: expandable rows ---------- */
     .list-wrap { padding: 18px 18px 22px; display: grid; gap: 10px; }
@@ -279,13 +287,14 @@
           <div class="panel-actions">
             <input id="sv-filter-input" class="filter-input" type="search" placeholder="Filter by session id, user id, or result type" />
             <button id="sv-refresh-btn" class="refresh-btn" type="button">Refresh data</button>
+            <button id="sv-bulk-delete-btn" class="bulk-delete-btn admin-only-inline" type="button" disabled>Delete selected</button>
           </div>
         </div>
         <div id="sv-status-row" class="status-row">Loading records...</div>
         <div class="table-wrap">
           <table aria-describedby="sv-status-row">
             <thead>
-              <tr><th>Submission ID</th><th>Session ID</th><th>User ID</th><th>Result Type</th><th>Answers</th><th>Submitted</th><th>Client Timestamp</th><th class="actions-col">Actions</th></tr>
+              <tr><th class="actions-col"><input type="checkbox" id="sv-select-all" aria-label="Select all" /></th><th>Submission ID</th><th>Session ID</th><th>User ID</th><th>Result Type</th><th>Answers</th><th>Submitted</th><th>Client Timestamp</th></tr>
             </thead>
             <tbody id="sv-records-body"></tbody>
           </table>
@@ -311,6 +320,7 @@
           <div class="panel-actions">
             <input id="pf-filter-input" class="filter-input" type="search" placeholder="Filter by name, email, or result type" />
             <button id="pf-refresh-btn" class="refresh-btn" type="button">Refresh data</button>
+            <button id="pf-bulk-delete-btn" class="bulk-delete-btn admin-only-inline" type="button" disabled>Delete selected</button>
           </div>
         </div>
         <div id="pf-status-row" class="status-row">Loading records...</div>
@@ -471,6 +481,26 @@
       });
     }
 
+    /* Same idea as bindRowDelete, but for a checkbox-selected batch. Uses a single
+       Firestore batch().commit() rather than N separate deletes. */
+    function bulkDeleteRecords(collectionName, ids, reloadFn, btn) {
+      if (!ids.length) return;
+      if (!confirm(`Delete ${ids.length} record${ids.length === 1 ? '' : 's'}? This cannot be undone.`)) return;
+      btn.disabled = true;
+      const originalText = btn.textContent;
+      btn.textContent = 'Deleting…';
+      const batch = db.batch();
+      ids.forEach((id) => batch.delete(db.collection(collectionName).doc(id)));
+      batch.commit()
+        .then(() => reloadFn())
+        .catch((err) => {
+          console.error(`Failed to bulk delete ${collectionName} records`, err);
+          alert('Could not delete the selected records. You may not have permission, or something went wrong.');
+          btn.disabled = false;
+          btn.textContent = originalText;
+        });
+    }
+
     /* ========================================================
        Survey tracking (sv-)
        ======================================================== */
@@ -483,8 +513,15 @@
       const statTotal = document.getElementById('sv-stat-total');
       const statLatestType = document.getElementById('sv-stat-latest-type');
       const statLatestTime = document.getElementById('sv-stat-latest-time');
+      const bulkDeleteBtn = document.getElementById('sv-bulk-delete-btn');
+      const selectAllCheckbox = document.getElementById('sv-select-all');
       let allRecords = [];
+      const selectedIds = new Set();
 
+      function updateBulkDeleteState() {
+        bulkDeleteBtn.disabled = selectedIds.size === 0;
+        bulkDeleteBtn.textContent = selectedIds.size ? `Delete selected (${selectedIds.size})` : 'Delete selected';
+      }
       function summarizeAnswers(record) {
         if (Array.isArray(record.answers_list)) return JSON.stringify(record.answers_list);
         if (record.answers && typeof record.answers === 'object') return JSON.stringify(record.answers);
@@ -503,6 +540,7 @@
         records.forEach((record) => {
           const tr = document.createElement('tr');
           tr.innerHTML = `
+            <td class="actions-col"><input type="checkbox" class="row-select" data-id="${escHtml(record.id)}" /></td>
             <td class="mono">${escHtml(record.submission_id || record.id || '-')}</td>
             <td class="mono">${escHtml(record.session_id || record.id || '-')}</td>
             <td class="mono">${escHtml(record.user_id || '-')}</td>
@@ -510,12 +548,31 @@
             <td class="mono">${escHtml(summarizeAnswers(record))}</td>
             <td>${formatServerTimestamp(record.submitted_at)}</td>
             <td>${escHtml(record.submitted_at_client || '-')}</td>
-            <td class="actions-col"><button type="button" class="row-delete-btn" data-id="${escHtml(record.id)}" data-label="this survey record">Delete</button></td>
           `;
           recordsBody.appendChild(tr);
         });
+        selectedIds.clear();
+        if (selectAllCheckbox) selectAllCheckbox.checked = false;
+        updateBulkDeleteState();
       }
-      bindRowDelete(recordsBody, 'survey_sessions', () => window.loadSurveyRecords());
+      recordsBody.addEventListener('change', (e) => {
+        const cb = e.target.closest('.row-select');
+        if (!cb) return;
+        if (cb.checked) selectedIds.add(cb.dataset.id); else selectedIds.delete(cb.dataset.id);
+        updateBulkDeleteState();
+      });
+      if (selectAllCheckbox) {
+        selectAllCheckbox.addEventListener('change', () => {
+          recordsBody.querySelectorAll('.row-select').forEach((cb) => {
+            cb.checked = selectAllCheckbox.checked;
+            if (cb.checked) selectedIds.add(cb.dataset.id); else selectedIds.delete(cb.dataset.id);
+          });
+          updateBulkDeleteState();
+        });
+      }
+      bulkDeleteBtn.addEventListener('click', () => {
+        bulkDeleteRecords('survey_sessions', Array.from(selectedIds), () => window.loadSurveyRecords(), bulkDeleteBtn);
+      });
       function applyFilter() {
         const query = filterInput.value.trim().toLowerCase();
         const records = !query ? allRecords : allRecords.filter((record) => {
@@ -561,8 +618,15 @@
       const statTotal = document.getElementById('pf-stat-total');
       const statLatestType = document.getElementById('pf-stat-latest-type');
       const statLatestTime = document.getElementById('pf-stat-latest-time');
+      const bulkDeleteBtn = document.getElementById('pf-bulk-delete-btn');
       let allRecords = [];
       const expandedIds = new Set();
+      const selectedIds = new Set();
+
+      function updateBulkDeleteState() {
+        bulkDeleteBtn.disabled = selectedIds.size === 0;
+        bulkDeleteBtn.textContent = selectedIds.size ? `Delete selected (${selectedIds.size})` : 'Delete selected';
+      }
 
       function humanizeKey(key) {
         return String(key).replace(/([a-z0-9])([A-Z])/g, '$1 $2').replace(/^./, (c) => c.toUpperCase()).trim();
@@ -606,17 +670,20 @@
           summary.setAttribute('tabindex', '0');
           summary.setAttribute('aria-expanded', expandedIds.has(record.id) ? 'true' : 'false');
           summary.innerHTML = `
+            <input type="checkbox" class="row-select admin-only-inline" data-id="${escHtml(record.id)}" aria-label="Select ${escHtml(record.name || 'this record')}" />
             <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
             <span class="summary-name">${escHtml(record.name || '—')}</span>
             <span class="summary-email">${escHtml(record.email || '—')}</span>
             <span class="badge">${escHtml(record.result_type || '—')}</span>
             <span class="summary-time">${escHtml(formatServerTimestamp(record.submitted_at))}</span>
           `;
-          summary.addEventListener('click', () => {
+          summary.addEventListener('click', (e) => {
+            if (e.target.closest('.row-select')) return;
             toggleExpanded(record.id);
             summary.setAttribute('aria-expanded', expandedIds.has(record.id) ? 'true' : 'false');
           });
           summary.addEventListener('keydown', (e) => {
+            if (e.target.closest('.row-select')) return;
             if (e.key === 'Enter' || e.key === ' ') {
               e.preventDefault();
               toggleExpanded(record.id);
@@ -637,16 +704,23 @@
               <span>Submitted (client): ${escHtml(record.submitted_at_client || '—')}</span>
               <span>Doc ID: ${escHtml(record.id)}</span>
             </div>
-            <div style="margin-top:14px;">
-              <button type="button" class="row-delete-btn admin-only-inline" data-id="${escHtml(record.id)}" data-label="this profile record">Delete this record</button>
-            </div>
           `;
           row.appendChild(summary);
           row.appendChild(detail);
           listWrap.appendChild(row);
         });
+        selectedIds.clear();
+        updateBulkDeleteState();
       }
-      bindRowDelete(listWrap, 'profile_sessions', () => window.loadProfileRecords());
+      listWrap.addEventListener('change', (e) => {
+        const cb = e.target.closest('.row-select');
+        if (!cb) return;
+        if (cb.checked) selectedIds.add(cb.dataset.id); else selectedIds.delete(cb.dataset.id);
+        updateBulkDeleteState();
+      });
+      bulkDeleteBtn.addEventListener('click', () => {
+        bulkDeleteRecords('profile_sessions', Array.from(selectedIds), () => window.loadProfileRecords(), bulkDeleteBtn);
+      });
       function applyFilter() {
         const query = filterInput.value.trim().toLowerCase();
         const records = !query ? allRecords : allRecords.filter((record) => {
