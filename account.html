@@ -33,6 +33,7 @@
     .quiz-result-avatar{width:64px;height:64px;border-radius:50%;object-fit:cover;background:var(--paper);flex:none}
     .quiz-result-name{font:700 20px var(--font-serif)}
     .quiz-result-tagline{color:var(--muted);font:400 var(--fs-sm) var(--font-sans);margin-top:2px}
+    .quiz-result-updated{color:var(--muted);font:400 var(--fs-sm) var(--font-sans);margin:0 0 14px}
     .quiz-empty{margin-bottom:16px}
 
     .user-profile-form{display:flex;flex-direction:column;gap:26px}
@@ -585,7 +586,7 @@
         turtle: { label: 'The Turtle', tagline: 'The Easygoing One', color: 'var(--green)' }
       };
 
-      function renderQuizCard(resultType) {
+      function renderQuizCard(resultType, resultUpdatedAt) {
         const info = resultType && TYPE_INFO[resultType];
         if (info) {
           quizResultBlock.innerHTML = `
@@ -596,6 +597,7 @@
                 <div class="quiz-result-tagline">${info.tagline}</div>
               </div>
             </div>
+            <p class="quiz-result-updated">Last taken: ${resultUpdatedAt ? formatTimestampFull(resultUpdatedAt) : '—'}</p>
             <a class="account-link" href="quiz.html">Retake the quiz →</a>
           `;
         } else {
@@ -684,7 +686,7 @@
             rowCreated.textContent = formatTimestamp(data.created_at);
             rowVerifiedAt.textContent = data.email_verified_at ? formatTimestampFull(data.email_verified_at) : '—';
             rowLastLogin.textContent = formatTimestampFull(data.last_login_at || data.created_at);
-            renderQuizCard(data.result_type);
+            renderQuizCard(data.result_type, data.result_updated_at);
           } else {
             renderQuizCard(null);
           }
