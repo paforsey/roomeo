@@ -131,6 +131,22 @@
     .empty-state { padding: 42px 24px 48px; text-align: center; color: var(--muted); }
     .empty-state strong { display: block; color: var(--text); margin-bottom: 8px; }
 
+    /* ---------- Admin-only delete affordances (role = admin) ---------- */
+    .actions-col { display: none; }
+    body.is-admin .actions-col { display: table-cell; }
+    .admin-only-inline { display: none; }
+    body.is-admin .admin-only-inline { display: inline-flex; }
+    .admin-only-block { display: none; }
+    body.is-admin .admin-only-block { display: block; }
+    .row-delete-btn {
+      display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 12px;
+      border-radius: 999px; border: 1px solid rgba(166,55,34,.3); background: rgba(166,55,34,.08);
+      color: #a63722; font: 600 12px var(--font-sans); cursor: pointer; white-space: nowrap;
+    }
+    .row-delete-btn:hover { background: rgba(166,55,34,.16); }
+    .row-delete-btn:disabled { opacity: .5; cursor: default; }
+    .admin-note { font-size: 12px; color: var(--muted); margin: -6px 0 16px; }
+
     /* ---------- Profile submissions: expandable rows ---------- */
     .list-wrap { padding: 18px 18px 22px; display: grid; gap: 10px; }
     .profile-row { border: 1px solid var(--line); border-radius: 16px; background: var(--surface-strong); overflow: hidden; }
@@ -269,7 +285,7 @@
         <div class="table-wrap">
           <table aria-describedby="sv-status-row">
             <thead>
-              <tr><th>Submission ID</th><th>Session ID</th><th>User ID</th><th>Result Type</th><th>Answers</th><th>Submitted</th><th>Client Timestamp</th></tr>
+              <tr><th>Submission ID</th><th>Session ID</th><th>User ID</th><th>Result Type</th><th>Answers</th><th>Submitted</th><th>Client Timestamp</th><th class="actions-col">Actions</th></tr>
             </thead>
             <tbody id="sv-records-body"></tbody>
           </table>
@@ -283,7 +299,7 @@
 
     <!-- ===== Profile submissions ===== -->
     <section class="tab-panel" id="panel-profile" data-panel="profile" hidden>
-      <span class="readonly-note">🔒 Read-only — no editing</span>
+      <span class="readonly-note">🔒 Read-only — admins can delete</span>
       <section class="stats" aria-label="Summary">
         <article class="stat-card"><div class="stat-label">Total profiles</div><div class="stat-value" id="pf-stat-total">0</div></article>
         <article class="stat-card"><div class="stat-label">Latest type</div><div class="stat-value" id="pf-stat-latest-type">-</div></article>
@@ -309,7 +325,8 @@
 
     <!-- ===== Signed-up users ===== -->
     <section class="tab-panel" id="panel-signedup" data-panel="signedup" hidden>
-      <span class="readonly-note">🔒 Read-only — no editing</span>
+      <span class="readonly-note">🔒 Read-only — admins can delete</span>
+      <p class="admin-note admin-only-block">Deleting here only removes this tracking record — it does not delete the person's Firebase login. They'd still be able to sign in.</p>
       <section class="stats" aria-label="Summary">
         <article class="stat-card"><div class="stat-label">Total users</div><div class="stat-value" id="su-stat-total">0</div></article>
         <article class="stat-card"><div class="stat-label">Verified</div><div class="stat-value" id="su-stat-verified">0</div></article>
@@ -327,7 +344,7 @@
         <div class="table-wrap">
           <table aria-describedby="su-status-row">
             <thead>
-              <tr><th>Email</th><th>Session ID</th><th>Signed Up</th><th>Verified</th><th>Verified At</th></tr>
+              <tr><th>Email</th><th>Session ID</th><th>Signed Up</th><th>Verified</th><th>Verified At</th><th class="actions-col">Actions</th></tr>
             </thead>
             <tbody id="su-records-body"></tbody>
           </table>
@@ -356,7 +373,7 @@
         <div class="table-wrap">
           <table aria-describedby="mu-status-row">
             <thead>
-              <tr><th>Username</th><th>Name</th><th>Email</th><th>Role</th><th>Created</th></tr>
+              <tr><th>Username</th><th>Name</th><th>Email</th><th>Role</th><th>Created</th><th class="actions-col">Actions</th></tr>
             </thead>
             <tbody id="mu-records-body"></tbody>
           </table>
@@ -428,6 +445,32 @@
       return String(value);
     }
 
+    /* Admin-only delete: event-delegated on each panel's static container, so it
+       works for rows re-rendered after every reload without re-binding. Confirms
+       first (native confirm() — this is an internal tool, not customer-facing, and
+       the action is genuinely irreversible), then deletes and reloads that panel. */
+    function bindRowDelete(containerEl, collectionName, reloadFn) {
+      containerEl.addEventListener('click', (e) => {
+        const btn = e.target.closest('.row-delete-btn');
+        if (!btn || btn.disabled) return;
+        const id = btn.dataset.id;
+        if (!id) return;
+        const label = btn.dataset.label || 'this record';
+        if (!confirm(`Delete ${label}? This cannot be undone.`)) return;
+        btn.disabled = true;
+        const originalText = btn.textContent;
+        btn.textContent = 'Deleting…';
+        db.collection(collectionName).doc(id).delete()
+          .then(() => reloadFn())
+          .catch((err) => {
+            console.error(`Failed to delete ${collectionName} record`, err);
+            alert('Could not delete this record. You may not have permission, or something went wrong.');
+            btn.disabled = false;
+            btn.textContent = originalText;
+          });
+      });
+    }
+
     /* ========================================================
        Survey tracking (sv-)
        ======================================================== */
@@ -467,10 +510,12 @@
             <td class="mono">${escHtml(summarizeAnswers(record))}</td>
             <td>${formatServerTimestamp(record.submitted_at)}</td>
             <td>${escHtml(record.submitted_at_client || '-')}</td>
+            <td class="actions-col"><button type="button" class="row-delete-btn" data-id="${escHtml(record.id)}" data-label="this survey record">Delete</button></td>
           `;
           recordsBody.appendChild(tr);
         });
       }
+      bindRowDelete(recordsBody, 'survey_sessions', () => window.loadSurveyRecords());
       function applyFilter() {
         const query = filterInput.value.trim().toLowerCase();
         const records = !query ? allRecords : allRecords.filter((record) => {
@@ -592,12 +637,16 @@
               <span>Submitted (client): ${escHtml(record.submitted_at_client || '—')}</span>
               <span>Doc ID: ${escHtml(record.id)}</span>
             </div>
+            <div style="margin-top:14px;">
+              <button type="button" class="row-delete-btn admin-only-inline" data-id="${escHtml(record.id)}" data-label="this profile record">Delete this record</button>
+            </div>
           `;
           row.appendChild(summary);
           row.appendChild(detail);
           listWrap.appendChild(row);
         });
       }
+      bindRowDelete(listWrap, 'profile_sessions', () => window.loadProfileRecords());
       function applyFilter() {
         const query = filterInput.value.trim().toLowerCase();
         const records = !query ? allRecords : allRecords.filter((record) => {
@@ -662,10 +711,12 @@
             <td>${formatServerTimestamp(record.created_at)}</td>
             <td><span class="badge ${verified ? 'verified' : 'unverified'}">${verified ? 'Verified' : 'Not verified'}</span></td>
             <td>${formatServerTimestamp(record.email_verified_at)}</td>
+            <td class="actions-col"><button type="button" class="row-delete-btn" data-id="${escHtml(record.id)}" data-label="this user's tracking record">Delete</button></td>
           `;
           recordsBody.appendChild(tr);
         });
       }
+      bindRowDelete(recordsBody, 'users', () => window.loadSignedupRecords());
       function applyFilter() {
         const query = filterInput.value.trim().toLowerCase();
         const records = !query ? allRecords : allRecords.filter((record) => {
@@ -722,16 +773,22 @@
         records.forEach((record) => {
           const tr = document.createElement('tr');
           const role = record.role === 'admin' ? 'admin' : 'contributor';
+          const isSelf = firebase.auth().currentUser && record.id === firebase.auth().currentUser.uid;
+          const deleteCell = isSelf
+            ? `<span style="color:var(--muted);font-size:12px;">That's you</span>`
+            : `<button type="button" class="row-delete-btn" data-id="${escHtml(record.id)}" data-label="${escHtml(record.username || 'this staff account')}">Delete</button>`;
           tr.innerHTML = `
             <td class="mono">${escHtml(record.username || '-')}</td>
             <td>${escHtml([record.first_name, record.last_name].filter(Boolean).join(' ') || '-')}</td>
             <td>${escHtml(record.email || '-')}</td>
             <td><span class="role-badge ${role}">${role}</span></td>
             <td>${formatServerTimestamp(record.created_at, true)}</td>
+            <td class="actions-col">${deleteCell}</td>
           `;
           recordsBody.appendChild(tr);
         });
       }
+      bindRowDelete(recordsBody, 'admin_users', () => window.loadManageRecords());
       window.loadManageRecords = async function loadManageRecords() {
         statusRow.textContent = 'Loading records...';
         statusRow.classList.remove('error');
@@ -928,8 +985,8 @@
     deniedLogoutBtn.addEventListener('click', () => firebase.auth().signOut());
     portalLogoutBtn.addEventListener('click', () => firebase.auth().signOut());
 
-    function showGate() { loadingEl.hidden = true; gateEl.hidden = false; deniedEl.hidden = true; contentEl.hidden = true; }
-    function showDenied(email) { loadingEl.hidden = true; gateEl.hidden = true; deniedEl.hidden = false; contentEl.hidden = true; deniedEmailEl.textContent = email; }
+    function showGate() { loadingEl.hidden = true; gateEl.hidden = false; deniedEl.hidden = true; contentEl.hidden = true; document.body.classList.remove('is-admin'); }
+    function showDenied(email) { loadingEl.hidden = true; gateEl.hidden = true; deniedEl.hidden = false; contentEl.hidden = true; deniedEmailEl.textContent = email; document.body.classList.remove('is-admin'); }
     function showContent(email, role) {
       loadingEl.hidden = true;
       gateEl.hidden = true;
@@ -937,6 +994,7 @@
       contentEl.hidden = false;
       portalUserEmail.textContent = email;
       tabButtons.manage.hidden = role !== 'admin';
+      document.body.classList.toggle('is-admin', role === 'admin');
       activateTab('survey');
     }
 
