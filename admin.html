@@ -330,7 +330,7 @@
         <div class="table-wrap">
           <table aria-describedby="sv-status-row">
             <thead>
-              <tr id="sv-thead-row"><th class="actions-col"><input type="checkbox" id="sv-select-all" aria-label="Select all" /></th><th data-sort="id">Submission ID</th><th data-sort="session_id">Session ID</th><th data-sort="user_id">User ID</th><th data-sort="result_type">Result Type</th><th>Answers</th><th data-sort="submitted_at">Submitted</th><th data-sort="submitted_at_client">Client Timestamp</th></tr>
+              <tr id="sv-thead-row"><th class="actions-col"><input type="checkbox" id="sv-select-all" aria-label="Select all" /></th><th data-sort="email">Email</th><th data-sort="id">Submission ID</th><th data-sort="session_id">Session ID</th><th data-sort="result_type">Result Type</th><th>Answers</th><th data-sort="submitted_at">Submitted</th></tr>
             </thead>
             <tbody id="sv-records-body"></tbody>
           </table>
@@ -603,6 +603,20 @@
         if (record.answers && typeof record.answers === 'object') return JSON.stringify(record.answers);
         return '-';
       }
+      /* survey_sessions doesn't store an email itself (see quiz.html) -- only a
+         user_id for signed-in submissions. Resolve those against users/{uid} so
+         the report can show an email column; anonymous submissions stay blank. */
+      async function attachEmails(records) {
+        const uniqueUserIds = Array.from(new Set(records.map((r) => r.user_id).filter(Boolean)));
+        if (!uniqueUserIds.length) return;
+        const emailByUserId = {};
+        await Promise.all(uniqueUserIds.map((uid) =>
+          db.collection('users').doc(uid).get()
+            .then((doc) => { if (doc.exists) emailByUserId[uid] = doc.data().email || null; })
+            .catch(() => {})
+        ));
+        records.forEach((r) => { r.email = r.user_id ? (emailByUserId[r.user_id] || null) : null; });
+      }
       function renderStats(records) {
         statTotal.textContent = String(records.length);
         if (!records.length) { statLatestType.textContent = '-'; statLatestTime.textContent = '-'; return; }
@@ -617,13 +631,12 @@
           const tr = document.createElement('tr');
           tr.innerHTML = `
             <td class="actions-col"><input type="checkbox" class="row-select" data-id="${escHtml(record.id)}" /></td>
+            <td>${escHtml(record.email || '—')}</td>
             <td class="mono">${escHtml(record.submission_id || record.id || '-')}</td>
             <td class="mono">${escHtml(record.session_id || record.id || '-')}</td>
-            <td class="mono">${escHtml(record.user_id || '-')}</td>
             <td><span class="badge">${escHtml(record.result_type || '-')}</span></td>
             <td class="mono">${escHtml(summarizeAnswers(record))}</td>
             <td>${formatServerTimestamp(record.submitted_at)}</td>
-            <td>${escHtml(record.submitted_at_client || '-')}</td>
           `;
           recordsBody.appendChild(tr);
         });
@@ -668,6 +681,7 @@
         try {
           const snapshot = await db.collection('survey_sessions').orderBy('submitted_at', 'desc').get();
           allRecords = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+          await attachEmails(allRecords);
           applyFilter();
         } catch (error) {
           console.error('Failed to load Firestore records', error);
