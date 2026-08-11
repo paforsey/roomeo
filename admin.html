@@ -102,6 +102,7 @@
     .stat-card { background: rgba(255,255,255,0.7); backdrop-filter: blur(10px); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px 18px 16px; box-shadow: var(--shadow); }
     .stat-label { font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 10px; }
     .stat-value { font-size: 30px; font-weight: 700; }
+    .stat-percent { font-size: 12px; color: var(--muted); margin-top: 6px; }
     .type-breakdown { display: flex; flex-wrap: wrap; gap: 6px; }
     .type-breakdown-empty { color: var(--muted); font-size: 14px; }
     .type-chip { display: inline-flex; align-items: center; gap: 5px; padding: 5px 10px; border-radius: 999px; background: rgba(217,108,75,0.12); color: var(--accent-dark); font-weight: 700; font-size: 13px; text-transform: capitalize; }
@@ -310,10 +311,10 @@
     <!-- ===== Survey tracking ===== -->
     <section class="tab-panel" id="panel-survey" data-panel="survey">
       <section class="stats" aria-label="Summary">
-        <article class="stat-card"><div class="stat-label">Assessments</div><div class="stat-value" id="sv-stat-total">0</div></article>
-        <article class="stat-card"><div class="stat-label">Session IDs</div><div class="stat-value" id="sv-stat-sessions">0</div></article>
-        <article class="stat-card"><div class="stat-label">Accounts</div><div class="stat-value" id="sv-stat-accounts">0</div></article>
-        <article class="stat-card"><div class="stat-label">Types</div><div class="type-breakdown" id="sv-stat-types">–</div></article>
+        <article class="stat-card"><div class="stat-label">Assessments</div><div class="stat-value" id="sv-stat-total">0</div><div class="stat-percent" id="sv-stat-total-pct"></div></article>
+        <article class="stat-card"><div class="stat-label">Unique Session IDs</div><div class="stat-value" id="sv-stat-sessions">0</div><div class="stat-percent" id="sv-stat-sessions-pct"></div></article>
+        <article class="stat-card"><div class="stat-label">Accounts</div><div class="stat-value" id="sv-stat-accounts">0</div><div class="stat-percent" id="sv-stat-accounts-pct"></div></article>
+        <article class="stat-card"><div class="stat-label">Types</div><div class="type-breakdown" id="sv-stat-types">–</div><div class="stat-percent" id="sv-stat-types-pct"></div></article>
       </section>
       <section class="panel" aria-labelledby="sv-records-heading">
         <div class="panel-top">
@@ -327,7 +328,7 @@
         <div class="table-wrap">
           <table aria-describedby="sv-status-row">
             <thead>
-              <tr id="sv-thead-row"><th class="actions-col"><input type="checkbox" id="sv-select-all" aria-label="Select all" /></th><th data-sort="email">Email</th><th data-sort="id">Submission ID</th><th data-sort="session_id">Session ID</th><th data-sort="result_type">Result Type</th><th data-sort="submitted_at">Submitted</th></tr>
+              <tr id="sv-thead-row"><th class="actions-col"><input type="checkbox" id="sv-select-all" aria-label="Select all" /></th><th data-sort="email">Email</th><th data-sort="session_id">Session ID</th><th data-sort="id">Submission ID</th><th data-sort="result_type">Result Type</th><th data-sort="submitted_at">Submitted</th></tr>
             </thead>
             <tbody id="sv-records-body"></tbody>
           </table>
@@ -559,9 +560,13 @@
       const statusRow = document.getElementById('sv-status-row');
       const refreshBtn = document.getElementById('sv-refresh-btn');
       const statTotal = document.getElementById('sv-stat-total');
+      const statTotalPct = document.getElementById('sv-stat-total-pct');
       const statSessions = document.getElementById('sv-stat-sessions');
+      const statSessionsPct = document.getElementById('sv-stat-sessions-pct');
       const statAccounts = document.getElementById('sv-stat-accounts');
+      const statAccountsPct = document.getElementById('sv-stat-accounts-pct');
       const statTypes = document.getElementById('sv-stat-types');
+      const statTypesPct = document.getElementById('sv-stat-types-pct');
       const bulkDeleteBtn = document.getElementById('sv-bulk-delete-btn');
       const selectAllCheckbox = document.getElementById('sv-select-all');
       let allRecords = [];
@@ -587,10 +592,21 @@
         ));
         records.forEach((r) => { r.email = r.user_id ? (emailByUserId[r.user_id] || null) : null; });
       }
+      function pctOfTotal(count, total) {
+        return total ? `${Math.round((count / total) * 100)}% of assessments` : '0% of assessments';
+      }
       function renderStats(records) {
-        statTotal.textContent = String(records.length);
-        statSessions.textContent = String(new Set(records.map((r) => r.session_id).filter(Boolean)).size);
-        statAccounts.textContent = String(records.filter((r) => r.email).length);
+        const total = records.length;
+        const uniqueSessions = new Set(records.map((r) => r.session_id).filter(Boolean)).size;
+        const accountsCount = records.filter((r) => r.email).length;
+
+        statTotal.textContent = String(total);
+        statTotalPct.textContent = pctOfTotal(total, total);
+        statSessions.textContent = String(uniqueSessions);
+        statSessionsPct.textContent = pctOfTotal(uniqueSessions, total);
+        statAccounts.textContent = String(accountsCount);
+        statAccountsPct.textContent = pctOfTotal(accountsCount, total);
+
         const typeCounts = {};
         records.forEach((r) => {
           const type = r.result_type || 'Unknown';
@@ -600,6 +616,7 @@
         statTypes.innerHTML = typeEntries.length
           ? typeEntries.map(([type, count]) => `<span class="type-chip">${escHtml(type)} <span class="count">${count}</span></span>`).join('')
           : '<span class="type-breakdown-empty">–</span>';
+        statTypesPct.textContent = pctOfTotal(typeEntries.reduce((sum, [, count]) => sum + count, 0), total);
       }
       function renderRows(records) {
         recordsBody.innerHTML = '';
@@ -609,8 +626,8 @@
           tr.innerHTML = `
             <td class="actions-col"><input type="checkbox" class="row-select" data-id="${escHtml(record.id)}" /></td>
             <td>${escHtml(record.email || '—')}</td>
-            <td class="mono">${escHtml(record.submission_id || record.id || '-')}</td>
             <td class="mono">${escHtml(record.session_id || record.id || '-')}</td>
+            <td class="mono">${escHtml(record.submission_id || record.id || '-')}</td>
             <td><span class="badge">${escHtml(record.result_type || '-')}</span></td>
             <td>${formatServerTimestamp(record.submitted_at)}</td>
           `;
