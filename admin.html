@@ -310,10 +310,10 @@
     <h1>Admin Portal</h1>
 
     <div class="admin-tabs" role="tablist">
-      <button type="button" class="admin-tab" id="tab-btn-survey" data-tab="survey" role="tab" aria-selected="true">Survey tracking</button>
-      <button type="button" class="admin-tab" id="tab-btn-profile" data-tab="profile" role="tab" aria-selected="false">Profile submissions</button>
-      <button type="button" class="admin-tab" id="tab-btn-signedup" data-tab="signedup" role="tab" aria-selected="false">Signed-up users</button>
-      <button type="button" class="admin-tab" id="tab-btn-manage" data-tab="manage" role="tab" aria-selected="false" hidden>Manage users</button>
+      <button type="button" class="admin-tab" id="tab-btn-survey" data-tab="survey" role="tab" aria-selected="true">Assessments</button>
+      <button type="button" class="admin-tab" id="tab-btn-profile" data-tab="profile" role="tab" aria-selected="false">Profiles</button>
+      <button type="button" class="admin-tab" id="tab-btn-signedup" data-tab="signedup" role="tab" aria-selected="false">Users</button>
+      <button type="button" class="admin-tab" id="tab-btn-manage" data-tab="manage" role="tab" aria-selected="false" hidden>Team</button>
     </div>
 
     <!-- ===== Survey tracking ===== -->
@@ -410,7 +410,6 @@
 
     <!-- ===== Manage users ===== -->
     <section class="tab-panel" id="panel-manage" data-panel="manage" hidden>
-      <span class="readonly-note">🔒 Admin-only</span>
       <section class="stats" aria-label="Summary">
         <article class="stat-card"><div class="stat-label">Total staff</div><div class="stat-value" id="mu-stat-total">0</div></article>
         <article class="stat-card"><div class="stat-label">Admins</div><div class="stat-value" id="mu-stat-admins">0</div></article>
@@ -418,7 +417,7 @@
       </section>
       <section class="panel" aria-labelledby="mu-records-heading">
         <div class="panel-top">
-          <h2 id="mu-records-heading">Staff accounts</h2>
+          <h2 id="mu-records-heading">Member Accounts</h2>
           <button type="button" class="add-user-btn" id="btn-open-adduser">+ Add user</button>
         </div>
         <div id="mu-status-row" class="status-row">Loading records...</div>
@@ -994,7 +993,7 @@
           const snapshot = await db.collection('admin_users').orderBy('created_at', 'desc').get();
           allRecords = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
           renderCurrent();
-          statusRow.textContent = `Showing ${allRecords.length} staff account${allRecords.length === 1 ? '' : 's'}.`;
+          statusRow.textContent = `Showing ${allRecords.length} team account${allRecords.length === 1 ? '' : 's'}.`;
         } catch (error) {
           console.error('Failed to load admin_users', error);
           allRecords = [];
