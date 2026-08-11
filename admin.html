@@ -341,7 +341,7 @@
       </section>
     </section>
 
-    <!-- ===== Signed-up users (each row expands to show their linked profile submission, if any) ===== -->
+    <!-- ===== Signed-up users (each row expands to show their live account profile, if any) ===== -->
     <section class="tab-panel" id="panel-signedup" data-panel="signedup" hidden>
       <section class="stats" aria-label="Summary">
         <article class="stat-card"><div class="stat-label">Users</div><div class="stat-value" id="su-stat-total">0</div></article>
@@ -691,8 +691,7 @@
 
     /* ========================================================
        Signed-up users (su-) -- each row expands to show that person's
-       linked profile submission (profile_sessions), matched by user_id
-       first, falling back to session_id, then email.
+       live account profile (user_profiles/{uid}), one per user.
        ======================================================== */
     (function () {
       const recordsBody = document.getElementById('su-records-body');
@@ -724,38 +723,23 @@
         const rows = entries.map(([k, v]) => `<dt>${humanizeKey(k)}</dt><dd>${escHtml(formatValue(v))}</dd>`).join('');
         return `<div class="detail-group"><h3>${title}</h3><dl class="kv">${rows}</dl></div>`;
       }
-      /* users/{uid}.result_type is always kept current -- every quiz completion
-         unconditionally overwrites it (see linkResultToAccount() in quiz.html) --
-         so the Type column below reads it directly, no extra lookup needed.
-         The *profile* submission is a separate collection and has to be matched
-         up: by user_id first (most reliable, tied to the account), falling back
-         to session_id (same browser session), then email (same person, other
-         device) -- so people who filled out their profile before or apart from
-         signing in still get linked wherever the data allows it. */
-      async function attachLinkedProfiles(records) {
-        let snapshot;
-        try {
-          snapshot = await db.collection('profile_sessions').orderBy('submitted_at', 'desc').get();
-        } catch (err) {
-          console.error('Failed to load profile_sessions for linking', err);
-          return;
-        }
-        const profiles = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-        const byUserId = {};
-        const bySessionId = {};
-        const byEmail = {};
-        profiles.forEach((p) => {
-          if (p.user_id && !(p.user_id in byUserId)) byUserId[p.user_id] = p;
-          if (p.session_id && !(p.session_id in bySessionId)) bySessionId[p.session_id] = p;
-          const emailKey = (p.email || '').trim().toLowerCase();
-          if (emailKey && !(emailKey in byEmail)) byEmail[emailKey] = p;
-        });
-        records.forEach((r) => {
+      /* user_profiles/{uid} is the account's own live profile, edited from
+         account.html -- one doc per user, always current. This deliberately
+         replaces an earlier approach that showed profile_sessions instead: a
+         frozen, one-time snapshot captured whenever someone filled out the
+         waitlist form, which could diverge significantly (different field
+         names, stale values) from what's actually on the account today.
+         There's only ever one profile per user, so this is a direct doc
+         lookup by uid -- no cross-collection matching needed. */
+      async function attachUserProfiles(records) {
+        await Promise.all(records.map((r) => {
           const uid = r.uid || r.id;
-          const emailKey = (r.email || '').trim().toLowerCase();
-          r.linkedProfile = (uid && byUserId[uid]) || bySessionId[r.session_id] || (emailKey && byEmail[emailKey]) || null;
-          r.has_profile = !!r.linkedProfile;
-        });
+          if (!uid) return Promise.resolve();
+          return db.collection('user_profiles').doc(uid).get()
+            .then((doc) => { r.userProfile = doc.exists ? doc.data() : null; })
+            .catch((err) => { console.error('Failed to load user_profiles for', uid, err); r.userProfile = null; });
+        }));
+        records.forEach((r) => { r.has_profile = !!r.userProfile; });
       }
       function renderStats(records) {
         statTotal.textContent = String(records.length);
@@ -779,7 +763,7 @@
         records.forEach((record) => {
           const expanded = expandedIds.has(record.id);
           const verified = !!record.email_verified;
-          const profile = record.linkedProfile;
+          const userProfile = record.userProfile;
 
           const row = document.createElement('tr');
           row.className = 'profile-row' + (expanded ? ' expanded' : '');
@@ -800,31 +784,29 @@
           const detailRow = document.createElement('tr');
           detailRow.className = 'profile-detail-row';
           detailRow.hidden = !expanded;
-          detailRow.innerHTML = profile ? `
-            <td colspan="7">
-              <div class="profile-detail">
-                <div class="detail-groups">
-                  ${renderKvGroup('Logistics', profile.logistics)}
-                  ${renderKvGroup('Habits', profile.habits)}
-                  ${renderKvGroup('Trust & verification', profile.trust)}
+          if (userProfile) {
+            const { uid: _uid, updated_at, ...profileFields } = userProfile;
+            detailRow.innerHTML = `
+              <td colspan="7">
+                <div class="profile-detail">
+                  <div class="detail-groups">
+                    ${renderKvGroup('Profile', profileFields)}
+                  </div>
+                  <div class="meta-row">
+                    <span>Last updated: ${escHtml(formatServerTimestamp(updated_at))}</span>
+                  </div>
                 </div>
-                <div class="meta-row">
-                  <span>Name: ${escHtml(profile.name || '—')}</span>
-                  <span>Profile session: ${escHtml(profile.session_id || '—')}</span>
-                  <span>Submitted: ${escHtml(formatServerTimestamp(profile.submitted_at))}</span>
-                  ${profile.result_type && record.result_type && profile.result_type !== record.result_type
-                    ? `<span>Type at submission: ${escHtml(profile.result_type)}</span>` : ''}
-                  <span>Doc ID: ${escHtml(profile.id)}</span>
+              </td>
+            `;
+          } else {
+            detailRow.innerHTML = `
+              <td colspan="7">
+                <div class="profile-detail">
+                  <div class="detail-group-empty">No account profile set yet.</div>
                 </div>
-              </div>
-            </td>
-          ` : `
-            <td colspan="7">
-              <div class="profile-detail">
-                <div class="detail-group-empty">No profile submitted yet.</div>
-              </div>
-            </td>
-          `;
+              </td>
+            `;
+          }
           recordsBody.appendChild(row);
           recordsBody.appendChild(detailRow);
         });
@@ -864,7 +846,7 @@
         try {
           const snapshot = await db.collection('users').orderBy('created_at', 'desc').get();
           allRecords = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-          await attachLinkedProfiles(allRecords);
+          await attachUserProfiles(allRecords);
           applyFilter();
         } catch (error) {
           console.error('Failed to load Firestore records', error);

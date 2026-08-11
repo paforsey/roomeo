@@ -60,7 +60,7 @@ service cloud.firestore {
     }
 
     match /user_profiles/{userId} {
-      allow read: if request.auth != null && request.auth.uid == userId;
+      allow read: if isStaff() || (request.auth != null && request.auth.uid == userId);
       allow create, update: if request.auth != null && request.auth.uid == userId
                             && request.resource.data.uid == userId;
       allow delete: if false;
