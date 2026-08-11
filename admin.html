@@ -181,19 +181,15 @@
     .row-select { width: 17px; height: 17px; cursor: pointer; accent-color: #a63722; flex: none; }
 
     /* ---------- Profile submissions: expandable rows ---------- */
-    .list-wrap { padding: 18px 18px 22px; display: grid; gap: 10px; }
-    .profile-row { border: 1px solid var(--line); border-radius: 16px; background: var(--surface-strong); overflow: hidden; }
-    .profile-summary { display: flex; align-items: center; gap: 14px; padding: 14px 16px; cursor: pointer; user-select: none; flex-wrap: wrap; }
-    .profile-summary:hover { background: rgba(232,108,44,0.05); }
-    .profile-summary:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+    .expand-col { width: 40px; }
+    .profile-row { cursor: pointer; user-select: none; }
+    .profile-row:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
     .chevron { flex: 0 0 auto; width: 18px; height: 18px; color: var(--muted); transition: transform 0.15s ease; }
     .profile-row.expanded .chevron { transform: rotate(90deg); color: var(--accent); }
-    .summary-name { font-weight: 700; font-size: 15px; min-width: 120px; }
-    .summary-email { color: var(--muted); font-size: 13px; flex: 1 1 200px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .summary-time { color: var(--muted); font-size: 12px; flex: 0 0 auto; white-space: nowrap; }
-    .badge-note { color: var(--muted); font-size: 12px; font-style: italic; flex: 0 0 auto; white-space: nowrap; }
-    .profile-detail { display: none; border-top: 1px solid var(--line); padding: 16px 18px 20px; background: #fffaf3; }
-    .profile-row.expanded .profile-detail { display: block; }
+    .badge-note { color: var(--muted); font-size: 12px; font-style: italic; white-space: nowrap; }
+    .profile-detail-row td { padding: 0; }
+    .profile-detail-row[hidden] { display: none; }
+    .profile-detail { border-top: 1px solid var(--line); padding: 16px 18px 20px; background: #fffaf3; }
     .detail-groups { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
     .detail-group h3 { margin: 0 0 10px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--accent-dark); font-family: var(--font-label); }
     .detail-group-empty { font-size: 13px; color: var(--muted); font-style: italic; }
@@ -207,8 +203,6 @@
       .panel-top { padding: 18px; }
       .status-row { padding: 12px 18px 0; }
       .table-wrap { padding: 14px; }
-      .list-wrap { padding: 14px; }
-      .summary-time { width: 100%; order: 5; }
     }
 
     /* ---------- Admin login gate ---------- */
@@ -309,7 +303,7 @@
       <button type="button" class="admin-tab" id="tab-btn-survey" data-tab="survey" role="tab" aria-selected="true">Assessments</button>
       <button type="button" class="admin-tab" id="tab-btn-profile" data-tab="profile" role="tab" aria-selected="false">Profiles</button>
       <button type="button" class="admin-tab" id="tab-btn-signedup" data-tab="signedup" role="tab" aria-selected="false">Users</button>
-      <button type="button" class="admin-tab" id="tab-btn-manage" data-tab="manage" role="tab" aria-selected="false" hidden>Team</button>
+      <button type="button" class="admin-tab" id="tab-btn-manage" data-tab="manage" role="tab" aria-selected="false" hidden>Roomeo Team</button>
     </div>
 
     <!-- ===== Survey tracking ===== -->
@@ -359,7 +353,13 @@
           </div>
         </div>
         <div id="pf-status-row" class="status-row">Loading records...</div>
-        <div class="list-wrap" id="pf-list-wrap">
+        <div class="table-wrap">
+          <table aria-describedby="pf-status-row">
+            <thead>
+              <tr id="pf-thead-row"><th class="actions-col"></th><th class="expand-col"></th><th data-sort="name">Name</th><th data-sort="email">Email</th><th data-sort="current_result_type">Type</th><th data-sort="submitted_at">Submitted</th></tr>
+            </thead>
+            <tbody id="pf-records-body"></tbody>
+          </table>
           <div id="pf-empty-state" class="empty-state" hidden>
             <strong>No profile records found.</strong>
             Complete a profile and join the waitlist, then refresh this page.
@@ -694,7 +694,7 @@
        Profile submissions (pf-)
        ======================================================== */
     (function () {
-      const listWrap = document.getElementById('pf-list-wrap');
+      const recordsBody = document.getElementById('pf-records-body');
       const emptyState = document.getElementById('pf-empty-state');
       const statusRow = document.getElementById('pf-status-row');
       const refreshBtn = document.getElementById('pf-refresh-btn');
@@ -705,6 +705,8 @@
       let allRecords = [];
       const expandedIds = new Set();
       const selectedIds = new Set();
+      let sortField = null;
+      let sortDir = 1;
 
       function updateBulkDeleteState() {
         bulkDeleteBtn.disabled = selectedIds.size === 0;
@@ -764,69 +766,80 @@
       }
       function toggleExpanded(id) {
         if (expandedIds.has(id)) expandedIds.delete(id); else expandedIds.add(id);
-        const row = listWrap.querySelector(`.profile-row[data-id="${CSS.escape(id)}"]`);
-        if (row) row.classList.toggle('expanded', expandedIds.has(id));
+        const row = recordsBody.querySelector(`.profile-row[data-id="${CSS.escape(id)}"]`);
+        if (!row) return;
+        const expanded = expandedIds.has(id);
+        row.classList.toggle('expanded', expanded);
+        row.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+        const detailRow = row.nextElementSibling;
+        if (detailRow && detailRow.classList.contains('profile-detail-row')) detailRow.hidden = !expanded;
       }
       function renderRows(records) {
-        listWrap.querySelectorAll('.profile-row').forEach((n) => n.remove());
+        recordsBody.innerHTML = '';
         emptyState.hidden = records.length > 0;
         records.forEach((record) => {
-          const row = document.createElement('div');
-          row.className = 'profile-row' + (expandedIds.has(record.id) ? ' expanded' : '');
+          const expanded = expandedIds.has(record.id);
+          const displayType = record.current_result_type || record.result_type || '—';
+          const retakeNote = (record.current_result_type && record.result_type && record.current_result_type !== record.result_type)
+            ? `<span class="badge-note" title="Result at the time they submitted this profile">retaken — was ${escHtml(record.result_type)}</span>`
+            : '';
+
+          const row = document.createElement('tr');
+          row.className = 'profile-row' + (expanded ? ' expanded' : '');
           row.dataset.id = record.id;
-
-          const summary = document.createElement('div');
-          summary.className = 'profile-summary';
-          summary.setAttribute('role', 'button');
-          summary.setAttribute('tabindex', '0');
-          summary.setAttribute('aria-expanded', expandedIds.has(record.id) ? 'true' : 'false');
-          summary.innerHTML = `
-            <input type="checkbox" class="row-select admin-only-inline" data-id="${escHtml(record.id)}" aria-label="Select ${escHtml(record.name || 'this record')}" />
-            <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
-            <span class="summary-name">${escHtml(record.name || '—')}</span>
-            <span class="summary-email">${escHtml(record.email || '—')}</span>
-            <span class="badge">${escHtml(record.current_result_type || record.result_type || '—')}</span>
-            ${record.current_result_type && record.result_type && record.current_result_type !== record.result_type
-              ? `<span class="badge-note" title="Result at the time they submitted this profile">retaken — was ${escHtml(record.result_type)}</span>`
-              : ''}
-            <span class="summary-time">${escHtml(formatServerTimestamp(record.submitted_at))}</span>
+          row.setAttribute('role', 'button');
+          row.setAttribute('tabindex', '0');
+          row.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+          row.innerHTML = `
+            <td class="actions-col"><input type="checkbox" class="row-select" data-id="${escHtml(record.id)}" aria-label="Select ${escHtml(record.name || 'this record')}" /></td>
+            <td class="expand-col"><svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></td>
+            <td>${escHtml(record.name || '—')}</td>
+            <td>${escHtml(record.email || '—')}</td>
+            <td><span class="badge">${escHtml(displayType)}</span>${retakeNote}</td>
+            <td>${formatServerTimestamp(record.submitted_at)}</td>
           `;
-          summary.addEventListener('click', (e) => {
-            if (e.target.closest('.row-select')) return;
-            toggleExpanded(record.id);
-            summary.setAttribute('aria-expanded', expandedIds.has(record.id) ? 'true' : 'false');
-          });
-          summary.addEventListener('keydown', (e) => {
-            if (e.target.closest('.row-select')) return;
-            if (e.key === 'Enter' || e.key === ' ') {
-              e.preventDefault();
-              toggleExpanded(record.id);
-              summary.setAttribute('aria-expanded', expandedIds.has(record.id) ? 'true' : 'false');
-            }
-          });
 
-          const detail = document.createElement('div');
-          detail.className = 'profile-detail';
-          detail.innerHTML = `
-            <div class="detail-groups">
-              ${renderKvGroup('Logistics', record.logistics)}
-              ${renderKvGroup('Habits', record.habits)}
-              ${renderKvGroup('Trust & verification', record.trust)}
-            </div>
-            <div class="meta-row">
-              <span>Session: ${escHtml(record.session_id || '—')}</span>
-              <span>Submitted (client): ${escHtml(record.submitted_at_client || '—')}</span>
-              <span>Doc ID: ${escHtml(record.id)}</span>
-            </div>
+          const detailRow = document.createElement('tr');
+          detailRow.className = 'profile-detail-row';
+          detailRow.hidden = !expanded;
+          detailRow.innerHTML = `
+            <td colspan="6">
+              <div class="profile-detail">
+                <div class="detail-groups">
+                  ${renderKvGroup('Logistics', record.logistics)}
+                  ${renderKvGroup('Habits', record.habits)}
+                  ${renderKvGroup('Trust & verification', record.trust)}
+                </div>
+                <div class="meta-row">
+                  <span>Session: ${escHtml(record.session_id || '—')}</span>
+                  <span>Submitted (client): ${escHtml(record.submitted_at_client || '—')}</span>
+                  <span>Doc ID: ${escHtml(record.id)}</span>
+                </div>
+              </div>
+            </td>
           `;
-          row.appendChild(summary);
-          row.appendChild(detail);
-          listWrap.appendChild(row);
+          recordsBody.appendChild(row);
+          recordsBody.appendChild(detailRow);
         });
         selectedIds.clear();
         updateBulkDeleteState();
       }
-      listWrap.addEventListener('change', (e) => {
+      recordsBody.addEventListener('click', (e) => {
+        if (e.target.closest('.row-select')) return;
+        const row = e.target.closest('.profile-row');
+        if (!row) return;
+        toggleExpanded(row.dataset.id);
+      });
+      recordsBody.addEventListener('keydown', (e) => {
+        if (e.target.closest('.row-select')) return;
+        const row = e.target.closest('.profile-row');
+        if (!row) return;
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          toggleExpanded(row.dataset.id);
+        }
+      });
+      recordsBody.addEventListener('change', (e) => {
         const cb = e.target.closest('.row-select');
         if (!cb) return;
         if (cb.checked) selectedIds.add(cb.dataset.id); else selectedIds.delete(cb.dataset.id);
@@ -836,12 +849,18 @@
         bulkDeleteRecords('profile_sessions', Array.from(selectedIds), () => window.loadProfileRecords(), bulkDeleteBtn);
       });
       function applyFilter() {
-        const records = allRecords;
+        const records = sortRecordsBy(allRecords, sortField, sortDir);
         renderRows(records);
         renderStats(records);
         statusRow.textContent = `Showing ${records.length} record${records.length === 1 ? '' : 's'}.`;
         statusRow.classList.remove('error');
       }
+      wireSortableHeaders(document.getElementById('pf-thead-row'), (field, th, ths) => {
+        sortDir = sortField === field ? sortDir * -1 : 1;
+        sortField = field;
+        updateSortIndicators(ths, sortField, sortDir);
+        applyFilter();
+      });
       window.loadProfileRecords = async function loadProfileRecords() {
         statusRow.textContent = 'Loading records...';
         statusRow.classList.remove('error');
