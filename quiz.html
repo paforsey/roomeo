@@ -5519,7 +5519,7 @@
             </button>
             <div class="account-dropdown" id="account-dropdown" hidden>
               <a href="quiz.html?version=20260718c&amp;start=1">Take the Assessment</a>
-              <a href="account.html#profile-card">Build Your Profile</a>
+              <a href="quiz.html?view=profile-1">Build Your Profile</a>
               <a href="account.html">My account</a>
               <button type="button" id="btn-logout">Log out</button>
             </div>
@@ -7167,6 +7167,26 @@
         return true;
       } catch (_) {
         return /(?:^|[?&])start(?:=|$)/.test(location.search);
+      }
+    }
+
+    /* Lets a link from another page (e.g. the header's "Build Your Profile")
+       land on the same screen as clicking "Build my matching profile" on the
+       results page, without duplicating showProfileStep1()'s setup logic --
+       bootQuizPage() below already knows how to restore any of these views
+       from sessionStorage on reload; this just gives the URL an equally
+       strong say over which one, consumed once like ?start does above. */
+    function consumeViewIntent() {
+      try {
+        const qs = new URLSearchParams(location.search);
+        if (!qs.has('view')) return null;
+        const view = qs.get('view');
+        qs.delete('view');
+        const rest = qs.toString();
+        history.replaceState(null, '', location.pathname + (rest ? '?' + rest : '') + location.hash);
+        return view;
+      } catch (_) {
+        return null;
       }
     }
 
@@ -10315,8 +10335,9 @@
       if (bootFromDesignPreview()) return;
       if (bootFromFigmaCapturePreview()) return;
       if (bootFromHash()) return;
+      const viewIntent = consumeViewIntent();
       try {
-        const view = sessionStorage.getItem(STORAGE.view);
+        const view = viewIntent || sessionStorage.getItem(STORAGE.view);
         if (view === 'results' && showResultsFromMemory()) return;
         if (view === 'profile-1') { showProfileStep1(); return; }
         if (view === 'profile-2') { showProfileStep2(); return; }
