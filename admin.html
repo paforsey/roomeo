@@ -64,8 +64,35 @@
       margin-bottom: 16px;
     }
 
-    .portal-footer { margin: 14px 0 28px; display: flex; align-items: center; gap: 14px; }
-    .signed-in-as { color: var(--muted); font-size: 14px; }
+    /* ---------- Admin header + account menu ---------- */
+    .admin-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin: -8px 0 28px; padding-bottom: 20px; border-bottom: 1px solid var(--line);
+    }
+    .admin-header-brand {
+      font: 700 15px var(--font-label); letter-spacing: .06em; text-transform: uppercase;
+      color: var(--text); text-decoration: none;
+    }
+    .admin-account { position: relative; }
+    .admin-account-chip {
+      display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 16px;
+      border-radius: 999px; border: 1px solid var(--line); background: var(--surface-strong);
+      font: 600 14px var(--font-sans); color: var(--text); cursor: pointer; max-width: 260px;
+    }
+    .admin-account-chip:hover { background: var(--bg); }
+    .admin-account-chip span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .admin-account-chip svg { flex: none; color: var(--muted); }
+    .admin-account-dropdown {
+      position: absolute; right: 0; top: calc(100% + 8px); min-width: 160px;
+      background: #fff; border: 1px solid var(--line); border-radius: 14px;
+      box-shadow: var(--shadow); padding: 6px; z-index: 60;
+    }
+    .admin-account-dropdown[hidden] { display: none; }
+    .admin-account-dropdown button {
+      display: block; width: 100%; text-align: left; padding: 10px 12px; border-radius: 10px;
+      border: none; background: none; font: 600 14px var(--font-sans); color: var(--accent-dark); cursor: pointer;
+    }
+    .admin-account-dropdown button:hover { background: var(--bg); }
 
     /* ---------- Tabs ---------- */
     .admin-tabs { display: flex; gap: 6px; background: rgba(255,255,255,.6); border: 1px solid var(--line); border-radius: 999px; padding: 5px; margin-bottom: 24px; width: fit-content; max-width: 100%; overflow-x: auto; }
@@ -259,13 +286,21 @@
   </div>
 
   <main id="admin-content" class="page" hidden>
+    <header class="admin-header">
+      <a class="admin-header-brand" href="index.html">MyRoomeo Admin</a>
+      <div class="admin-account">
+        <button type="button" class="admin-account-chip" id="admin-account-chip-btn" aria-haspopup="true" aria-expanded="false">
+          <span id="admin-account-username"></span>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <div class="admin-account-dropdown" id="admin-account-dropdown" hidden>
+          <button type="button" id="admin-account-logout">Log out</button>
+        </div>
+      </div>
+    </header>
+
     <span class="eyebrow">Private Admin</span>
     <h1>Admin portal</h1>
-
-    <div class="portal-footer">
-      <span class="signed-in-as">Signed in as <strong id="portal-user-email"></strong></span>
-      <button type="button" class="admin-logout-link" id="portal-logout">Log out</button>
-    </div>
 
     <div class="admin-tabs" role="tablist">
       <button type="button" class="admin-tab" id="tab-btn-survey" data-tab="survey" role="tab" aria-selected="true">Survey tracking</button>
@@ -1014,8 +1049,10 @@
     const loginSubmit = document.getElementById('admin-login-submit');
     const deniedEmailEl = document.getElementById('admin-denied-email');
     const deniedLogoutBtn = document.getElementById('admin-denied-logout');
-    const portalUserEmail = document.getElementById('portal-user-email');
-    const portalLogoutBtn = document.getElementById('portal-logout');
+    const adminAccountChipBtn = document.getElementById('admin-account-chip-btn');
+    const adminAccountDropdown = document.getElementById('admin-account-dropdown');
+    const adminAccountUsername = document.getElementById('admin-account-username');
+    const adminAccountLogoutBtn = document.getElementById('admin-account-logout');
 
     function wirePasswordToggle(inputId, buttonId) {
       const input = document.getElementById(inputId);
@@ -1057,16 +1094,30 @@
     });
 
     deniedLogoutBtn.addEventListener('click', () => firebase.auth().signOut());
-    portalLogoutBtn.addEventListener('click', () => firebase.auth().signOut());
+    adminAccountLogoutBtn.addEventListener('click', () => {
+      firebase.auth().signOut();
+      adminAccountDropdown.hidden = true;
+    });
+    adminAccountChipBtn.addEventListener('click', () => {
+      const willOpen = adminAccountDropdown.hidden;
+      adminAccountDropdown.hidden = !willOpen;
+      adminAccountChipBtn.setAttribute('aria-expanded', String(willOpen));
+    });
+    document.addEventListener('click', (e) => {
+      if (!adminAccountDropdown.hidden && !adminAccountDropdown.contains(e.target) && !adminAccountChipBtn.contains(e.target)) {
+        adminAccountDropdown.hidden = true;
+        adminAccountChipBtn.setAttribute('aria-expanded', 'false');
+      }
+    });
 
     function showGate() { loadingEl.hidden = true; gateEl.hidden = false; deniedEl.hidden = true; contentEl.hidden = true; document.body.classList.remove('is-admin'); }
     function showDenied(email) { loadingEl.hidden = true; gateEl.hidden = true; deniedEl.hidden = false; contentEl.hidden = true; deniedEmailEl.textContent = email; document.body.classList.remove('is-admin'); }
-    function showContent(email, role) {
+    function showContent(email, role, username) {
       loadingEl.hidden = true;
       gateEl.hidden = true;
       deniedEl.hidden = true;
       contentEl.hidden = false;
-      portalUserEmail.textContent = email;
+      adminAccountUsername.textContent = username || email;
       tabButtons.manage.hidden = role !== 'admin';
       document.body.classList.toggle('is-admin', role === 'admin');
       activateTab('survey');
@@ -1076,11 +1127,12 @@
       if (!user) { showGate(); return; }
       /* Self-read on admin_users/{uid} is allowed for any staff member (admin or
          contributor) — this both confirms isStaff() access and gives us the role
-         needed to decide whether to show the "Manage users" tab. */
+         and username needed for the header/tabs. */
       db.collection('admin_users').doc(user.uid).get()
         .then((doc) => {
           if (!doc.exists) { showDenied(user.email); return; }
-          showContent(user.email, doc.data().role);
+          const data = doc.data();
+          showContent(user.email, data.role, data.username);
         })
         .catch(() => showDenied(user.email));
     });
