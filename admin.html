@@ -169,6 +169,8 @@
     .row-icon-btn:disabled { opacity: .5; cursor: default; }
     .row-icon-btn svg { width: 16px; height: 16px; }
     .row-delete-btn { border-color: rgba(166,55,34,.3); background: rgba(166,55,34,.08); color: #a63722; }
+    .check-icon { width: 18px; height: 18px; color: #2f7d51; }
+    .assessment-col { text-align: center; }
     .row-delete-btn:hover { background: rgba(166,55,34,.16); }
     .admin-note { font-size: 12px; color: var(--muted); margin: -6px 0 16px; }
     .bulk-delete-btn {
@@ -353,7 +355,7 @@
         <div class="table-wrap">
           <table aria-describedby="su-status-row">
             <thead>
-              <tr id="su-thead-row"><th class="expand-col"></th><th data-sort="email">Email</th><th data-sort="result_type">Type</th><th data-sort="session_id">Session ID</th><th data-sort="created_at">Signed Up</th><th data-sort="email_verified">Verified</th><th data-sort="email_verified_at">Verified At</th><th class="actions-col">Actions</th></tr>
+              <tr id="su-thead-row"><th class="expand-col"></th><th data-sort="email">Email</th><th class="assessment-col" data-sort="has_assessment">Assessment</th><th data-sort="result_type">Type</th><th data-sort="session_id">Session ID</th><th data-sort="created_at">Signed Up</th><th data-sort="email_verified">Verified</th><th data-sort="email_verified_at">Verified At</th><th class="actions-col">Actions</th></tr>
             </thead>
             <tbody id="su-records-body"></tbody>
           </table>
@@ -460,6 +462,7 @@
     }
     const EDIT_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>';
     const DELETE_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>';
+    const CHECK_ICON = '<svg class="check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>';
 
     /* ---------- Shared sortable-header helpers (Survey/Signed-up/Manage tables) ---------- */
     function wireSortableHeaders(theadRow, onSort) {
@@ -755,6 +758,7 @@
           row.innerHTML = `
             <td class="expand-col"><svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></td>
             <td>${escHtml(record.email || '-')}</td>
+            <td class="assessment-col">${record.has_assessment ? CHECK_ICON : ''}</td>
             <td><span class="badge">${escHtml(record.result_type || '—')}</span></td>
             <td class="mono">${escHtml(record.session_id || '-')}</td>
             <td>${formatServerTimestamp(record.created_at)}</td>
@@ -767,7 +771,7 @@
           detailRow.className = 'profile-detail-row';
           detailRow.hidden = !expanded;
           detailRow.innerHTML = profile ? `
-            <td colspan="8">
+            <td colspan="9">
               <div class="profile-detail">
                 <div class="detail-groups">
                   ${renderKvGroup('Logistics', profile.logistics)}
@@ -785,7 +789,7 @@
               </div>
             </td>
           ` : `
-            <td colspan="8">
+            <td colspan="9">
               <div class="profile-detail">
                 <div class="detail-group-empty">No profile submitted yet.</div>
               </div>
@@ -830,6 +834,7 @@
         try {
           const snapshot = await db.collection('users').orderBy('created_at', 'desc').get();
           allRecords = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+          allRecords.forEach((r) => { r.has_assessment = !!r.result_type; });
           await attachLinkedProfiles(allRecords);
           applyFilter();
         } catch (error) {
