@@ -191,6 +191,7 @@
     .summary-name { font-weight: 700; font-size: 15px; min-width: 120px; }
     .summary-email { color: var(--muted); font-size: 13px; flex: 1 1 200px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .summary-time { color: var(--muted); font-size: 12px; flex: 0 0 auto; white-space: nowrap; }
+    .badge-note { color: var(--muted); font-size: 12px; font-style: italic; flex: 0 0 auto; white-space: nowrap; }
     .profile-detail { display: none; border-top: 1px solid var(--line); padding: 16px 18px 20px; background: #fffaf3; }
     .profile-row.expanded .profile-detail { display: block; }
     .detail-groups { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
@@ -726,11 +727,39 @@
         const rows = entries.map(([k, v]) => `<dt>${humanizeKey(k)}</dt><dd>${escHtml(formatValue(v))}</dd>`).join('');
         return `<div class="detail-group"><h3>${title}</h3><dl class="kv">${rows}</dl></div>`;
       }
+      /* profile_sessions.result_type is a one-time snapshot taken when the person
+         submitted their profile (see submitProfileResult() in quiz.html) -- if they
+         retake the quiz afterward, that value goes stale. Resolve each person's
+         *current* type from their most recent survey_sessions submission instead
+         (matched by user_id when signed in, falling back to session_id for
+         anonymous submissions), and use that for display everywhere below. The
+         original stored value is kept as a fallback and shown alongside it when
+         the two differ, so nothing is silently hidden. */
+      async function attachCurrentResultTypes(records) {
+        let snapshot;
+        try {
+          snapshot = await db.collection('survey_sessions').orderBy('submitted_at', 'desc').get();
+        } catch (err) {
+          console.error('Failed to load survey_sessions for result-type lookup', err);
+          return;
+        }
+        const latestByUserId = {};
+        const latestBySessionId = {};
+        snapshot.docs.forEach((doc) => {
+          const d = doc.data();
+          if (d.user_id && !(d.user_id in latestByUserId)) latestByUserId[d.user_id] = d.result_type;
+          if (d.session_id && !(d.session_id in latestBySessionId)) latestBySessionId[d.session_id] = d.result_type;
+        });
+        records.forEach((r) => {
+          const current = (r.user_id && latestByUserId[r.user_id]) || latestBySessionId[r.session_id] || null;
+          r.current_result_type = current || r.result_type || null;
+        });
+      }
       function renderStats(records) {
         statTotal.textContent = String(records.length);
         if (!records.length) { statLatestType.textContent = '-'; statLatestTime.textContent = '-'; return; }
         const latest = records[0];
-        statLatestType.textContent = latest.result_type || '-';
+        statLatestType.textContent = latest.current_result_type || latest.result_type || '-';
         statLatestTime.textContent = formatServerTimestamp(latest.submitted_at || latest.submitted_at_client);
       }
       function toggleExpanded(id) {
@@ -756,7 +785,10 @@
             <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
             <span class="summary-name">${escHtml(record.name || '—')}</span>
             <span class="summary-email">${escHtml(record.email || '—')}</span>
-            <span class="badge">${escHtml(record.result_type || '—')}</span>
+            <span class="badge">${escHtml(record.current_result_type || record.result_type || '—')}</span>
+            ${record.current_result_type && record.result_type && record.current_result_type !== record.result_type
+              ? `<span class="badge-note" title="Result at the time they submitted this profile">retaken — was ${escHtml(record.result_type)}</span>`
+              : ''}
             <span class="summary-time">${escHtml(formatServerTimestamp(record.submitted_at))}</span>
           `;
           summary.addEventListener('click', (e) => {
@@ -816,6 +848,7 @@
         try {
           const snapshot = await db.collection('profile_sessions').orderBy('submitted_at', 'desc').get();
           allRecords = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+          await attachCurrentResultTypes(allRecords);
           applyFilter();
         } catch (error) {
           console.error('Failed to load Firestore records', error);
