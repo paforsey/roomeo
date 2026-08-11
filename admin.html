@@ -356,7 +356,7 @@
         <div class="table-wrap">
           <table aria-describedby="pf-status-row">
             <thead>
-              <tr id="pf-thead-row"><th class="actions-col"></th><th class="expand-col"></th><th data-sort="name">Name</th><th data-sort="email">Email</th><th data-sort="current_result_type">Type</th><th data-sort="submitted_at">Submitted</th></tr>
+              <tr id="pf-thead-row"><th class="actions-col"></th><th class="expand-col"></th><th data-sort="email">Email</th><th data-sort="current_result_type">Type</th><th data-sort="submitted_at">Submitted</th></tr>
             </thead>
             <tbody id="pf-records-body"></tbody>
           </table>
@@ -793,7 +793,6 @@
           row.innerHTML = `
             <td class="actions-col"><input type="checkbox" class="row-select" data-id="${escHtml(record.id)}" aria-label="Select ${escHtml(record.name || 'this record')}" /></td>
             <td class="expand-col"><svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></td>
-            <td>${escHtml(record.name || '—')}</td>
             <td>${escHtml(record.email || '—')}</td>
             <td><span class="badge">${escHtml(displayType)}</span>${retakeNote}</td>
             <td>${formatServerTimestamp(record.submitted_at)}</td>
@@ -803,7 +802,7 @@
           detailRow.className = 'profile-detail-row';
           detailRow.hidden = !expanded;
           detailRow.innerHTML = `
-            <td colspan="6">
+            <td colspan="5">
               <div class="profile-detail">
                 <div class="detail-groups">
                   ${renderKvGroup('Logistics', record.logistics)}
@@ -811,6 +810,7 @@
                   ${renderKvGroup('Trust & verification', record.trust)}
                 </div>
                 <div class="meta-row">
+                  <span>Name: ${escHtml(record.name || '—')}</span>
                   <span>Session: ${escHtml(record.session_id || '—')}</span>
                   <span>Submitted (client): ${escHtml(record.submitted_at_client || '—')}</span>
                   <span>Doc ID: ${escHtml(record.id)}</span>
