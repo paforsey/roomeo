@@ -222,6 +222,11 @@
     .admin-password-field input { flex: 1; min-width: 0; padding-right: 42px; }
     .admin-password-toggle { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border: none; background: none; color: var(--muted); cursor: pointer; border-radius: 6px; }
     .admin-password-toggle:hover { color: var(--text); background: var(--bg); }
+    .generate-password-btn {
+      align-self: flex-start; margin: -6px 0 4px; background: none; border: none; padding: 0;
+      color: var(--accent-dark); font: 600 13px var(--font-sans); cursor: pointer; text-decoration: underline;
+    }
+    .generate-password-btn:hover { color: var(--accent); }
     .admin-form-error { color: #a63722; font: 600 13px var(--font-sans); margin: 0; }
     .admin-form-success { color: #2f7d51; font: 600 13px var(--font-sans); margin: 0; }
     .admin-submit-btn { height: 44px; border-radius: 22px; border: none; background: var(--accent); color: #fff; font: 700 14px var(--font-sans); cursor: pointer; transition: background-color .2s ease; }
@@ -435,6 +440,13 @@
           <label>Last name<input type="text" id="adduser-last-name" required autocomplete="off" /></label>
         </div>
         <label>Email<input type="email" id="adduser-email" required autocomplete="off" /></label>
+        <label>Password
+          <div class="admin-password-field">
+            <input type="password" id="adduser-password" required minlength="6" autocomplete="new-password" />
+            <button type="button" class="admin-password-toggle" id="adduser-toggle-password" aria-label="Show password" aria-pressed="false"></button>
+          </div>
+        </label>
+        <button type="button" class="generate-password-btn" id="adduser-generate-password">Generate secure password</button>
         <label>Access level
           <select id="adduser-role">
             <option value="contributor">Contributor</option>
@@ -446,12 +458,12 @@
       </form>
 
       <div id="adduser-result" class="password-reveal" hidden>
-        <p><strong id="adduser-result-name"></strong> was created. Share this password with them securely — it won't be shown again.</p>
+        <p><strong id="adduser-result-name"></strong> was created. Share this password with them securely.</p>
         <div class="password-reveal-row">
           <input type="text" id="adduser-generated-password" readonly />
           <button type="button" class="password-copy-btn" id="adduser-copy-password">Copy</button>
         </div>
-        <p class="password-warning">⚠️ This is the only time this password will be displayed.</p>
+        <p class="password-warning">⚠️ This won't be shown again after you close this dialog.</p>
         <button type="button" class="admin-submit-btn" id="adduser-done" style="margin-top:16px;">Done</button>
       </div>
     </div>
@@ -942,6 +954,17 @@
         crypto.getRandomValues(bytes);
         return Array.from(bytes, (b) => chars[b % chars.length]).join('');
       }
+
+      wirePasswordToggle('adduser-password', 'adduser-toggle-password');
+      document.getElementById('adduser-generate-password').addEventListener('click', () => {
+        const pwInput = document.getElementById('adduser-password');
+        pwInput.value = generateSecurePassword(16);
+        /* Reveal it via the real toggle button (not just setting .type directly) so its
+           icon/aria-label stay in sync with the field's actual visibility state. */
+        if (pwInput.type === 'password') {
+          document.getElementById('adduser-toggle-password').click();
+        }
+      });
       function addUserErrorMessage(err) {
         const map = {
           'auth/email-already-in-use': 'An account with this email already exists.',
@@ -956,6 +979,7 @@
         const firstName = document.getElementById('adduser-first-name').value.trim();
         const lastName = document.getElementById('adduser-last-name').value.trim();
         const email = document.getElementById('adduser-email').value.trim();
+        const password = document.getElementById('adduser-password').value;
         const role = document.getElementById('adduser-role').value;
         adduserError.hidden = true;
         adduserSubmit.disabled = true;
@@ -963,7 +987,6 @@
         db.collection('admin_users').where('username', '==', username).limit(1).get()
           .then((snap) => {
             if (!snap.empty) throw { code: 'username-taken' };
-            const password = generateSecurePassword(16);
             const secondaryApp = firebase.initializeApp(FIREBASE_CONFIG, 'secondary-' + Date.now());
             const secondaryAuth = secondaryApp.auth();
             return secondaryAuth.createUserWithEmailAndPassword(email, password)
