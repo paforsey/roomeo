@@ -6800,6 +6800,39 @@
     firebase.analytics();
     const db = firebase.firestore();
 
+    /* Quiz-flow pref-chip values -> account page's curated dropdown options.
+       Only mapped where the meanings genuinely align; anything without a clean
+       match (e.g. conflictStyle "avoid") is left unset rather than guessed.
+       Shared by the signup/login linking path and the waitlist-submission
+       sync path below, so both ways user_profiles gets written use the same
+       vocabulary. */
+    function mapLogisticsHabitsToUserProfile(logistics, habits) {
+      const SLEEP_MAP = { early: 'Early bird', flex: 'Flexible', night: 'Night owl' };
+      const GUESTS_MAP = { rarely: 'Rarely', sometimes: 'Sometimes', often: 'Often' };
+      const CLEANING_MAP = { weekly: 'Very tidy', split: 'Balanced', casual: 'Relaxed', relaxed: 'Relaxed' };
+      const CONFLICT_MAP = { talk: 'Talk it out right away', space: 'Need space first, then talk' };
+      const ROOMMATE_PREF_MAP = { any: 'No preference', women: 'Same gender', men: 'Same gender', mixed: 'No preference' };
+      const SOCIAL_MAP = { 1: 'Need quiet time', 2: 'Balanced', 3: 'Love company' };
+
+      const profile = {};
+      if (logistics) {
+        if (logistics.targetCity) profile.targetCity = logistics.targetCity;
+        if (logistics.budget) profile.budget = String(logistics.budget);
+        if (logistics.moveIn) profile.moveIn = logistics.moveIn;
+        if (logistics.roommatePref && ROOMMATE_PREF_MAP[logistics.roommatePref]) {
+          profile.roommatePref = ROOMMATE_PREF_MAP[logistics.roommatePref];
+        }
+      }
+      if (habits) {
+        if (habits.sleep && SLEEP_MAP[habits.sleep]) profile.sleep = SLEEP_MAP[habits.sleep];
+        if (habits.cleaning && CLEANING_MAP[habits.cleaning]) profile.cleaning = CLEANING_MAP[habits.cleaning];
+        if (habits.guests && GUESTS_MAP[habits.guests]) profile.guests = GUESTS_MAP[habits.guests];
+        if (habits.conflictStyle && CONFLICT_MAP[habits.conflictStyle]) profile.conflictStyle = CONFLICT_MAP[habits.conflictStyle];
+        if (habits.socialBattery && SOCIAL_MAP[habits.socialBattery]) profile.socialBattery = SOCIAL_MAP[habits.socialBattery];
+      }
+      return profile;
+    }
+
     /* ---------- Account menu: sign up / log in / log out ---------- */
     (function () {
       const modal = document.getElementById('account-modal');
@@ -6878,32 +6911,7 @@
         try { logistics = JSON.parse(sessionStorage.getItem('roomeo_profile_step1') || 'null'); } catch (_) {}
         try { habits = JSON.parse(sessionStorage.getItem('roomeo_profile_step2') || 'null'); } catch (_) {}
 
-        /* Quiz-flow pref-chip values -> account page's curated dropdown options.
-           Only mapped where the meanings genuinely align; anything without a clean
-           match (e.g. conflictStyle "avoid") is left unset rather than guessed. */
-        const SLEEP_MAP = { early: 'Early bird', flex: 'Flexible', night: 'Night owl' };
-        const GUESTS_MAP = { rarely: 'Rarely', sometimes: 'Sometimes', often: 'Often' };
-        const CLEANING_MAP = { weekly: 'Very tidy', split: 'Balanced', casual: 'Relaxed', relaxed: 'Relaxed' };
-        const CONFLICT_MAP = { talk: 'Talk it out right away', space: 'Need space first, then talk' };
-        const ROOMMATE_PREF_MAP = { any: 'No preference', women: 'Same gender', men: 'Same gender', mixed: 'No preference' };
-        const SOCIAL_MAP = { 1: 'Need quiet time', 2: 'Balanced', 3: 'Love company' };
-
-        const profile = {};
-        if (logistics) {
-          if (logistics.targetCity) profile.targetCity = logistics.targetCity;
-          if (logistics.budget) profile.budget = String(logistics.budget);
-          if (logistics.moveIn) profile.moveIn = logistics.moveIn;
-          if (logistics.roommatePref && ROOMMATE_PREF_MAP[logistics.roommatePref]) {
-            profile.roommatePref = ROOMMATE_PREF_MAP[logistics.roommatePref];
-          }
-        }
-        if (habits) {
-          if (habits.sleep && SLEEP_MAP[habits.sleep]) profile.sleep = SLEEP_MAP[habits.sleep];
-          if (habits.cleaning && CLEANING_MAP[habits.cleaning]) profile.cleaning = CLEANING_MAP[habits.cleaning];
-          if (habits.guests && GUESTS_MAP[habits.guests]) profile.guests = GUESTS_MAP[habits.guests];
-          if (habits.conflictStyle && CONFLICT_MAP[habits.conflictStyle]) profile.conflictStyle = CONFLICT_MAP[habits.conflictStyle];
-          if (habits.socialBattery && SOCIAL_MAP[habits.socialBattery]) profile.socialBattery = SOCIAL_MAP[habits.socialBattery];
-        }
+        const profile = mapLogisticsHabitsToUserProfile(logistics, habits);
         if (Object.keys(profile).length) result.profile = profile;
         return result;
       }
@@ -7116,6 +7124,22 @@
         updated_at: firebase.firestore.FieldValue.serverTimestamp()
       }).then(() => {
         try { sessionStorage.setItem(STORAGE.profileSubmitted, '1'); } catch (_) {}
+        /* Keep user_profiles (the account's single, current profile) in sync too.
+           readSessionQuizAndProfile()/linkSessionDataToAccount() only copy this
+           over at signup/login time, so an already-signed-in person resubmitting
+           the waitlist form would otherwise never get user_profiles written at
+           all -- this covers that case the same way linkResultToAccount() already
+           keeps users/{uid}.result_type current on every quiz completion. */
+        const user = firebase.auth().currentUser;
+        if (user) {
+          const mapped = mapLogisticsHabitsToUserProfile(logistics, habits);
+          if (Object.keys(mapped).length) {
+            db.collection('user_profiles').doc(user.uid).set(Object.assign(
+              { uid: user.uid, updated_at: firebase.firestore.FieldValue.serverTimestamp() },
+              mapped
+            ), { merge: true }).catch((err) => console.error('Failed to sync user_profiles on profile submit', err));
+          }
+        }
       }).catch((error) => {
         console.error('Failed to submit profile result', error);
         profileResultSubmission = null;
@@ -8226,7 +8250,19 @@
         sessionStorage.removeItem(STORAGE.p2);
         sessionStorage.removeItem(STORAGE.p3);
         sessionStorage.removeItem(STORAGE.waitlistJoined);
+        /* Also clear the once-per-session submission guards -- without this,
+           retaking the quiz in the same tab silently skipped writing a new
+           survey_sessions/profile_sessions record: submitQuizResult() and
+           submitProfileResult() both short-circuit and return the FIRST
+           attempt's already-resolved promise, so the retake never gets its
+           own row even though users/{uid}.result_type does update (that path
+           has no such guard). Resetting these here means a genuine new
+           attempt always produces a genuine new record. */
+        sessionStorage.removeItem(STORAGE.submitted);
+        sessionStorage.removeItem(STORAGE.profileSubmitted);
       } catch (_) {}
+      quizResultSubmission = null;
+      profileResultSubmission = null;
       setQuizFlowFooterVisible(false);
       setQuizIllustration(-1);
     }
