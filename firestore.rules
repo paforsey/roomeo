@@ -65,5 +65,15 @@ service cloud.firestore {
                             && request.resource.data.uid == userId;
       allow delete: if false;
     }
+
+    /* Minimal username -> email lookup so the admin login form can accept a
+       username instead of only an email (Firebase Auth sign-in always needs an
+       actual email). Deliberately holds nothing but the email — no name, no
+       role, no other admin_users fields — since this has to be publicly
+       readable to resolve a username *before* anyone is signed in. */
+    match /username_lookup/{username} {
+      allow read: if true;
+      allow write: if isSuperAdmin();
+    }
   }
 }
