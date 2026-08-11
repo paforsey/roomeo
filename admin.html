@@ -102,6 +102,10 @@
     .stat-card { background: rgba(255,255,255,0.7); backdrop-filter: blur(10px); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px 18px 16px; box-shadow: var(--shadow); }
     .stat-label { font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 10px; }
     .stat-value { font-size: 30px; font-weight: 700; }
+    .type-breakdown { display: flex; flex-wrap: wrap; gap: 6px; }
+    .type-breakdown-empty { color: var(--muted); font-size: 14px; }
+    .type-chip { display: inline-flex; align-items: center; gap: 5px; padding: 5px 10px; border-radius: 999px; background: rgba(217,108,75,0.12); color: var(--accent-dark); font-weight: 700; font-size: 13px; text-transform: capitalize; }
+    .type-chip .count { opacity: .65; font-weight: 800; }
 
     .panel { background: var(--surface); border: 1px solid var(--line); border-radius: 28px; box-shadow: var(--shadow); overflow: hidden; }
     .panel-top { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 22px 24px; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
@@ -306,9 +310,10 @@
     <!-- ===== Survey tracking ===== -->
     <section class="tab-panel" id="panel-survey" data-panel="survey">
       <section class="stats" aria-label="Summary">
-        <article class="stat-card"><div class="stat-label">Total records</div><div class="stat-value" id="sv-stat-total">0</div></article>
-        <article class="stat-card"><div class="stat-label">Latest result type</div><div class="stat-value" id="sv-stat-latest-type">-</div></article>
-        <article class="stat-card"><div class="stat-label">Latest submission</div><div class="stat-value" id="sv-stat-latest-time" style="font-size:18px;">-</div></article>
+        <article class="stat-card"><div class="stat-label">Assessments</div><div class="stat-value" id="sv-stat-total">0</div></article>
+        <article class="stat-card"><div class="stat-label">Session IDs</div><div class="stat-value" id="sv-stat-sessions">0</div></article>
+        <article class="stat-card"><div class="stat-label">Accounts</div><div class="stat-value" id="sv-stat-accounts">0</div></article>
+        <article class="stat-card"><div class="stat-label">Types</div><div class="type-breakdown" id="sv-stat-types">–</div></article>
       </section>
       <section class="panel" aria-labelledby="sv-records-heading">
         <div class="panel-top">
@@ -554,8 +559,9 @@
       const statusRow = document.getElementById('sv-status-row');
       const refreshBtn = document.getElementById('sv-refresh-btn');
       const statTotal = document.getElementById('sv-stat-total');
-      const statLatestType = document.getElementById('sv-stat-latest-type');
-      const statLatestTime = document.getElementById('sv-stat-latest-time');
+      const statSessions = document.getElementById('sv-stat-sessions');
+      const statAccounts = document.getElementById('sv-stat-accounts');
+      const statTypes = document.getElementById('sv-stat-types');
       const bulkDeleteBtn = document.getElementById('sv-bulk-delete-btn');
       const selectAllCheckbox = document.getElementById('sv-select-all');
       let allRecords = [];
@@ -583,10 +589,17 @@
       }
       function renderStats(records) {
         statTotal.textContent = String(records.length);
-        if (!records.length) { statLatestType.textContent = '-'; statLatestTime.textContent = '-'; return; }
-        const latest = records[0];
-        statLatestType.textContent = latest.result_type || '-';
-        statLatestTime.textContent = formatServerTimestamp(latest.submitted_at || latest.submitted_at_client);
+        statSessions.textContent = String(new Set(records.map((r) => r.session_id).filter(Boolean)).size);
+        statAccounts.textContent = String(records.filter((r) => r.email).length);
+        const typeCounts = {};
+        records.forEach((r) => {
+          const type = r.result_type || 'Unknown';
+          typeCounts[type] = (typeCounts[type] || 0) + 1;
+        });
+        const typeEntries = Object.entries(typeCounts).sort((a, b) => b[1] - a[1]);
+        statTypes.innerHTML = typeEntries.length
+          ? typeEntries.map(([type, count]) => `<span class="type-chip">${escHtml(type)} <span class="count">${count}</span></span>`).join('')
+          : '<span class="type-breakdown-empty">–</span>';
       }
       function renderRows(records) {
         recordsBody.innerHTML = '';
