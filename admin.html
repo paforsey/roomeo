@@ -180,13 +180,12 @@
     .bulk-delete-btn:disabled { opacity: .45; cursor: default; }
     .row-select { width: 17px; height: 17px; cursor: pointer; accent-color: #a63722; flex: none; }
 
-    /* ---------- Profile submissions: expandable rows ---------- */
+    /* ---------- Users: expandable rows showing their linked profile ---------- */
     .expand-col { width: 40px; }
     .profile-row { cursor: pointer; user-select: none; }
     .profile-row:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
     .chevron { flex: 0 0 auto; width: 18px; height: 18px; color: var(--muted); transition: transform 0.15s ease; }
     .profile-row.expanded .chevron { transform: rotate(90deg); color: var(--accent); }
-    .badge-note { color: var(--muted); font-size: 12px; font-style: italic; white-space: nowrap; }
     .profile-detail-row td { padding: 0; }
     .profile-detail-row[hidden] { display: none; }
     .profile-detail { border-top: 1px solid var(--line); padding: 16px 18px 20px; background: #fffaf3; }
@@ -301,7 +300,6 @@
 
     <div class="admin-tabs" role="tablist">
       <button type="button" class="admin-tab" id="tab-btn-survey" data-tab="survey" role="tab" aria-selected="true">Assessments</button>
-      <button type="button" class="admin-tab" id="tab-btn-profile" data-tab="profile" role="tab" aria-selected="false">Profiles</button>
       <button type="button" class="admin-tab" id="tab-btn-signedup" data-tab="signedup" role="tab" aria-selected="false">Users</button>
       <button type="button" class="admin-tab" id="tab-btn-manage" data-tab="manage" role="tab" aria-selected="false" hidden>Roomeo Team</button>
     </div>
@@ -337,38 +335,7 @@
       </section>
     </section>
 
-    <!-- ===== Profile submissions ===== -->
-    <section class="tab-panel" id="panel-profile" data-panel="profile" hidden>
-      <section class="stats" aria-label="Summary">
-        <article class="stat-card"><div class="stat-label">Total profiles</div><div class="stat-value" id="pf-stat-total">0</div></article>
-        <article class="stat-card"><div class="stat-label">Latest type</div><div class="stat-value" id="pf-stat-latest-type">-</div></article>
-        <article class="stat-card"><div class="stat-label">Latest submission</div><div class="stat-value" id="pf-stat-latest-time" style="font-size:18px;">-</div></article>
-      </section>
-      <section class="panel" aria-labelledby="pf-records-heading">
-        <div class="panel-top">
-          <h2 id="pf-records-heading">Firestore Records</h2>
-          <div class="panel-actions">
-            <button id="pf-refresh-btn" class="refresh-btn" type="button">Refresh</button>
-            <button id="pf-bulk-delete-btn" class="bulk-delete-btn admin-only-inline" type="button" disabled>Delete</button>
-          </div>
-        </div>
-        <div id="pf-status-row" class="status-row">Loading records...</div>
-        <div class="table-wrap">
-          <table aria-describedby="pf-status-row">
-            <thead>
-              <tr id="pf-thead-row"><th class="actions-col"></th><th class="expand-col"></th><th data-sort="email">Email</th><th data-sort="current_result_type">Type</th><th data-sort="submitted_at">Submitted</th></tr>
-            </thead>
-            <tbody id="pf-records-body"></tbody>
-          </table>
-          <div id="pf-empty-state" class="empty-state" hidden>
-            <strong>No profile records found.</strong>
-            Complete a profile and join the waitlist, then refresh this page.
-          </div>
-        </div>
-      </section>
-    </section>
-
-    <!-- ===== Signed-up users ===== -->
+    <!-- ===== Signed-up users (each row expands to show their linked profile submission, if any) ===== -->
     <section class="tab-panel" id="panel-signedup" data-panel="signedup" hidden>
       <section class="stats" aria-label="Summary">
         <article class="stat-card"><div class="stat-label">Total users</div><div class="stat-value" id="su-stat-total">0</div></article>
@@ -386,7 +353,7 @@
         <div class="table-wrap">
           <table aria-describedby="su-status-row">
             <thead>
-              <tr id="su-thead-row"><th data-sort="email">Email</th><th data-sort="session_id">Session ID</th><th data-sort="created_at">Signed Up</th><th data-sort="email_verified">Verified</th><th data-sort="email_verified_at">Verified At</th><th class="actions-col">Actions</th></tr>
+              <tr id="su-thead-row"><th class="expand-col"></th><th data-sort="email">Email</th><th data-sort="result_type">Type</th><th data-sort="session_id">Session ID</th><th data-sort="created_at">Signed Up</th><th data-sort="email_verified">Verified</th><th data-sort="email_verified_at">Verified At</th><th class="actions-col">Actions</th></tr>
             </thead>
             <tbody id="su-records-body"></tbody>
           </table>
@@ -691,27 +658,22 @@
     })();
 
     /* ========================================================
-       Profile submissions (pf-)
+       Signed-up users (su-) -- each row expands to show that person's
+       linked profile submission (profile_sessions), matched by user_id
+       first, falling back to session_id, then email.
        ======================================================== */
     (function () {
-      const recordsBody = document.getElementById('pf-records-body');
-      const emptyState = document.getElementById('pf-empty-state');
-      const statusRow = document.getElementById('pf-status-row');
-      const refreshBtn = document.getElementById('pf-refresh-btn');
-      const statTotal = document.getElementById('pf-stat-total');
-      const statLatestType = document.getElementById('pf-stat-latest-type');
-      const statLatestTime = document.getElementById('pf-stat-latest-time');
-      const bulkDeleteBtn = document.getElementById('pf-bulk-delete-btn');
+      const recordsBody = document.getElementById('su-records-body');
+      const emptyState = document.getElementById('su-empty-state');
+      const statusRow = document.getElementById('su-status-row');
+      const refreshBtn = document.getElementById('su-refresh-btn');
+      const statTotal = document.getElementById('su-stat-total');
+      const statVerified = document.getElementById('su-stat-verified');
+      const statLatestTime = document.getElementById('su-stat-latest-time');
       let allRecords = [];
       const expandedIds = new Set();
-      const selectedIds = new Set();
       let sortField = null;
       let sortDir = 1;
-
-      function updateBulkDeleteState() {
-        bulkDeleteBtn.disabled = selectedIds.size === 0;
-        bulkDeleteBtn.textContent = selectedIds.size ? `Delete (${selectedIds.size})` : 'Delete';
-      }
 
       function humanizeKey(key) {
         return String(key).replace(/([a-z0-9])([A-Z])/g, '$1 $2').replace(/^./, (c) => c.toUpperCase()).trim();
@@ -729,40 +691,42 @@
         const rows = entries.map(([k, v]) => `<dt>${humanizeKey(k)}</dt><dd>${escHtml(formatValue(v))}</dd>`).join('');
         return `<div class="detail-group"><h3>${title}</h3><dl class="kv">${rows}</dl></div>`;
       }
-      /* profile_sessions.result_type is a one-time snapshot taken when the person
-         submitted their profile (see submitProfileResult() in quiz.html) -- if they
-         retake the quiz afterward, that value goes stale. Resolve each person's
-         *current* type from their most recent survey_sessions submission instead
-         (matched by user_id when signed in, falling back to session_id for
-         anonymous submissions), and use that for display everywhere below. The
-         original stored value is kept as a fallback and shown alongside it when
-         the two differ, so nothing is silently hidden. */
-      async function attachCurrentResultTypes(records) {
+      /* users/{uid}.result_type is always kept current -- every quiz completion
+         unconditionally overwrites it (see linkResultToAccount() in quiz.html) --
+         so the Type column below reads it directly, no extra lookup needed.
+         The *profile* submission is a separate collection and has to be matched
+         up: by user_id first (most reliable, tied to the account), falling back
+         to session_id (same browser session), then email (same person, other
+         device) -- so people who filled out their profile before or apart from
+         signing in still get linked wherever the data allows it. */
+      async function attachLinkedProfiles(records) {
         let snapshot;
         try {
-          snapshot = await db.collection('survey_sessions').orderBy('submitted_at', 'desc').get();
+          snapshot = await db.collection('profile_sessions').orderBy('submitted_at', 'desc').get();
         } catch (err) {
-          console.error('Failed to load survey_sessions for result-type lookup', err);
+          console.error('Failed to load profile_sessions for linking', err);
           return;
         }
-        const latestByUserId = {};
-        const latestBySessionId = {};
-        snapshot.docs.forEach((doc) => {
-          const d = doc.data();
-          if (d.user_id && !(d.user_id in latestByUserId)) latestByUserId[d.user_id] = d.result_type;
-          if (d.session_id && !(d.session_id in latestBySessionId)) latestBySessionId[d.session_id] = d.result_type;
+        const profiles = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+        const byUserId = {};
+        const bySessionId = {};
+        const byEmail = {};
+        profiles.forEach((p) => {
+          if (p.user_id && !(p.user_id in byUserId)) byUserId[p.user_id] = p;
+          if (p.session_id && !(p.session_id in bySessionId)) bySessionId[p.session_id] = p;
+          const emailKey = (p.email || '').trim().toLowerCase();
+          if (emailKey && !(emailKey in byEmail)) byEmail[emailKey] = p;
         });
         records.forEach((r) => {
-          const current = (r.user_id && latestByUserId[r.user_id]) || latestBySessionId[r.session_id] || null;
-          r.current_result_type = current || r.result_type || null;
+          const uid = r.uid || r.id;
+          const emailKey = (r.email || '').trim().toLowerCase();
+          r.linkedProfile = (uid && byUserId[uid]) || bySessionId[r.session_id] || (emailKey && byEmail[emailKey]) || null;
         });
       }
       function renderStats(records) {
         statTotal.textContent = String(records.length);
-        if (!records.length) { statLatestType.textContent = '-'; statLatestTime.textContent = '-'; return; }
-        const latest = records[0];
-        statLatestType.textContent = latest.current_result_type || latest.result_type || '-';
-        statLatestTime.textContent = formatServerTimestamp(latest.submitted_at || latest.submitted_at_client);
+        statVerified.textContent = String(records.filter((r) => r.email_verified).length);
+        statLatestTime.textContent = records.length ? formatServerTimestamp(records[0].created_at) : '-';
       }
       function toggleExpanded(id) {
         if (expandedIds.has(id)) expandedIds.delete(id); else expandedIds.add(id);
@@ -779,10 +743,8 @@
         emptyState.hidden = records.length > 0;
         records.forEach((record) => {
           const expanded = expandedIds.has(record.id);
-          const displayType = record.current_result_type || record.result_type || '—';
-          const retakeNote = (record.current_result_type && record.result_type && record.current_result_type !== record.result_type)
-            ? `<span class="badge-note" title="Result at the time they submitted this profile">retaken — was ${escHtml(record.result_type)}</span>`
-            : '';
+          const verified = !!record.email_verified;
+          const profile = record.linkedProfile;
 
           const row = document.createElement('tr');
           row.className = 'profile-row' + (expanded ? ' expanded' : '');
@@ -791,47 +753,56 @@
           row.setAttribute('tabindex', '0');
           row.setAttribute('aria-expanded', expanded ? 'true' : 'false');
           row.innerHTML = `
-            <td class="actions-col"><input type="checkbox" class="row-select" data-id="${escHtml(record.id)}" aria-label="Select ${escHtml(record.name || 'this record')}" /></td>
             <td class="expand-col"><svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></td>
-            <td>${escHtml(record.email || '—')}</td>
-            <td><span class="badge">${escHtml(displayType)}</span>${retakeNote}</td>
-            <td>${formatServerTimestamp(record.submitted_at)}</td>
+            <td>${escHtml(record.email || '-')}</td>
+            <td><span class="badge">${escHtml(record.result_type || '—')}</span></td>
+            <td class="mono">${escHtml(record.session_id || '-')}</td>
+            <td>${formatServerTimestamp(record.created_at)}</td>
+            <td><span class="badge ${verified ? 'verified' : 'unverified'}">${verified ? 'Verified' : 'Not verified'}</span></td>
+            <td>${formatServerTimestamp(record.email_verified_at)}</td>
+            <td class="actions-col"><button type="button" class="row-icon-btn row-delete-btn" data-id="${escHtml(record.id)}" data-label="this user's tracking record" aria-label="Delete" title="Delete">${DELETE_ICON}</button></td>
           `;
 
           const detailRow = document.createElement('tr');
           detailRow.className = 'profile-detail-row';
           detailRow.hidden = !expanded;
-          detailRow.innerHTML = `
-            <td colspan="5">
+          detailRow.innerHTML = profile ? `
+            <td colspan="8">
               <div class="profile-detail">
                 <div class="detail-groups">
-                  ${renderKvGroup('Logistics', record.logistics)}
-                  ${renderKvGroup('Habits', record.habits)}
-                  ${renderKvGroup('Trust & verification', record.trust)}
+                  ${renderKvGroup('Logistics', profile.logistics)}
+                  ${renderKvGroup('Habits', profile.habits)}
+                  ${renderKvGroup('Trust & verification', profile.trust)}
                 </div>
                 <div class="meta-row">
-                  <span>Name: ${escHtml(record.name || '—')}</span>
-                  <span>Session: ${escHtml(record.session_id || '—')}</span>
-                  <span>Submitted (client): ${escHtml(record.submitted_at_client || '—')}</span>
-                  <span>Doc ID: ${escHtml(record.id)}</span>
+                  <span>Name: ${escHtml(profile.name || '—')}</span>
+                  <span>Profile session: ${escHtml(profile.session_id || '—')}</span>
+                  <span>Submitted: ${escHtml(formatServerTimestamp(profile.submitted_at))}</span>
+                  ${profile.result_type && record.result_type && profile.result_type !== record.result_type
+                    ? `<span>Type at submission: ${escHtml(profile.result_type)}</span>` : ''}
+                  <span>Doc ID: ${escHtml(profile.id)}</span>
                 </div>
+              </div>
+            </td>
+          ` : `
+            <td colspan="8">
+              <div class="profile-detail">
+                <div class="detail-group-empty">No profile submitted yet.</div>
               </div>
             </td>
           `;
           recordsBody.appendChild(row);
           recordsBody.appendChild(detailRow);
         });
-        selectedIds.clear();
-        updateBulkDeleteState();
       }
       recordsBody.addEventListener('click', (e) => {
-        if (e.target.closest('.row-select')) return;
+        if (e.target.closest('.row-delete-btn')) return;
         const row = e.target.closest('.profile-row');
         if (!row) return;
         toggleExpanded(row.dataset.id);
       });
       recordsBody.addEventListener('keydown', (e) => {
-        if (e.target.closest('.row-select')) return;
+        if (e.target.closest('.row-delete-btn')) return;
         const row = e.target.closest('.profile-row');
         if (!row) return;
         if (e.key === 'Enter' || e.key === ' ') {
@@ -839,85 +810,6 @@
           toggleExpanded(row.dataset.id);
         }
       });
-      recordsBody.addEventListener('change', (e) => {
-        const cb = e.target.closest('.row-select');
-        if (!cb) return;
-        if (cb.checked) selectedIds.add(cb.dataset.id); else selectedIds.delete(cb.dataset.id);
-        updateBulkDeleteState();
-      });
-      bulkDeleteBtn.addEventListener('click', () => {
-        bulkDeleteRecords('profile_sessions', Array.from(selectedIds), () => window.loadProfileRecords(), bulkDeleteBtn);
-      });
-      function applyFilter() {
-        const records = sortRecordsBy(allRecords, sortField, sortDir);
-        renderRows(records);
-        renderStats(records);
-        statusRow.textContent = `Showing ${records.length} record${records.length === 1 ? '' : 's'}.`;
-        statusRow.classList.remove('error');
-      }
-      wireSortableHeaders(document.getElementById('pf-thead-row'), (field, th, ths) => {
-        sortDir = sortField === field ? sortDir * -1 : 1;
-        sortField = field;
-        updateSortIndicators(ths, sortField, sortDir);
-        applyFilter();
-      });
-      window.loadProfileRecords = async function loadProfileRecords() {
-        statusRow.textContent = 'Loading records...';
-        statusRow.classList.remove('error');
-        try {
-          const snapshot = await db.collection('profile_sessions').orderBy('submitted_at', 'desc').get();
-          allRecords = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-          await attachCurrentResultTypes(allRecords);
-          applyFilter();
-        } catch (error) {
-          console.error('Failed to load Firestore records', error);
-          allRecords = [];
-          renderRows([]);
-          renderStats([]);
-          statusRow.textContent = 'Could not load records. Check Firestore rules and make sure reporting reads are allowed.';
-          statusRow.classList.add('error');
-        }
-      };
-      refreshBtn.addEventListener('click', () => window.loadProfileRecords());
-    })();
-
-    /* ========================================================
-       Signed-up users (su-)
-       ======================================================== */
-    (function () {
-      const recordsBody = document.getElementById('su-records-body');
-      const emptyState = document.getElementById('su-empty-state');
-      const statusRow = document.getElementById('su-status-row');
-      const refreshBtn = document.getElementById('su-refresh-btn');
-      const statTotal = document.getElementById('su-stat-total');
-      const statVerified = document.getElementById('su-stat-verified');
-      const statLatestTime = document.getElementById('su-stat-latest-time');
-      let allRecords = [];
-      let sortField = null;
-      let sortDir = 1;
-
-      function renderStats(records) {
-        statTotal.textContent = String(records.length);
-        statVerified.textContent = String(records.filter((r) => r.email_verified).length);
-        statLatestTime.textContent = records.length ? formatServerTimestamp(records[0].created_at) : '-';
-      }
-      function renderRows(records) {
-        recordsBody.innerHTML = '';
-        emptyState.hidden = records.length > 0;
-        records.forEach((record) => {
-          const tr = document.createElement('tr');
-          const verified = !!record.email_verified;
-          tr.innerHTML = `
-            <td>${escHtml(record.email || '-')}</td>
-            <td class="mono">${escHtml(record.session_id || '-')}</td>
-            <td>${formatServerTimestamp(record.created_at)}</td>
-            <td><span class="badge ${verified ? 'verified' : 'unverified'}">${verified ? 'Verified' : 'Not verified'}</span></td>
-            <td>${formatServerTimestamp(record.email_verified_at)}</td>
-            <td class="actions-col"><button type="button" class="row-icon-btn row-delete-btn" data-id="${escHtml(record.id)}" data-label="this user's tracking record" aria-label="Delete" title="Delete">${DELETE_ICON}</button></td>
-          `;
-          recordsBody.appendChild(tr);
-        });
-      }
       bindRowDelete(recordsBody, 'users', () => window.loadSignedupRecords());
       function applyFilter() {
         const records = sortRecordsBy(allRecords, sortField, sortDir);
@@ -938,6 +830,7 @@
         try {
           const snapshot = await db.collection('users').orderBy('created_at', 'desc').get();
           allRecords = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+          await attachLinkedProfiles(allRecords);
           applyFilter();
         } catch (error) {
           console.error('Failed to load Firestore records', error);
@@ -1237,17 +1130,16 @@
     /* ========================================================
        Tabs
        ======================================================== */
-    const TAB_NAMES = ['survey', 'profile', 'signedup', 'manage'];
+    const TAB_NAMES = ['survey', 'signedup', 'manage'];
     const tabButtons = {};
     const tabPanels = {};
     TAB_NAMES.forEach((name) => {
       tabButtons[name] = document.getElementById('tab-btn-' + name);
       tabPanels[name] = document.getElementById('panel-' + name);
     });
-    const tabLoaded = { survey: false, profile: false, signedup: false, manage: false };
+    const tabLoaded = { survey: false, signedup: false, manage: false };
     const tabLoaders = {
       survey: () => window.loadSurveyRecords(),
-      profile: () => window.loadProfileRecords(),
       signedup: () => window.loadSignedupRecords(),
       manage: () => window.loadManageRecords()
     };
