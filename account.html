@@ -40,8 +40,9 @@
     .profile-fieldset{border:none;padding:0;margin:0;display:flex;flex-direction:column;gap:14px}
     .profile-fieldset h3{margin:0 0 2px;font:700 var(--fs-xs) var(--font-label);letter-spacing:.08em;text-transform:uppercase;color:var(--orange)}
     .profile-fieldset label{display:flex;flex-direction:column;gap:6px;font:600 var(--fs-sm) var(--font-sans);color:var(--body)}
-    .profile-fieldset input,.profile-fieldset select{font:400 var(--fs-base) var(--font-sans);padding:10px 12px;border-radius:10px;border:1px solid var(--border);background:#fff;color:var(--ink)}
-    .profile-fieldset input:focus,.profile-fieldset select:focus{outline:2px solid var(--orange);outline-offset:1px}
+    .profile-fieldset input,.profile-fieldset select,.profile-fieldset textarea{font:400 var(--fs-base) var(--font-sans);padding:10px 12px;border-radius:10px;border:1px solid var(--border);background:#fff;color:var(--ink)}
+    .profile-fieldset textarea{resize:vertical;font-family:var(--font-sans)}
+    .profile-fieldset input:focus,.profile-fieldset select:focus,.profile-fieldset textarea:focus{outline:2px solid var(--orange);outline-offset:1px}
   </style>
 </head>
 <body>
@@ -151,6 +152,158 @@
             </label>
           </div>
           <div class="profile-fieldset">
+            <h3>About you</h3>
+            <label>First name<input type="text" id="up-name" placeholder="What should your future roomies call you?" /></label>
+            <label>Gender identity
+              <select id="up-gender">
+                <option value="">Not set</option>
+                <option value="woman">Woman</option>
+                <option value="man">Man</option>
+                <option value="nonbinary">Non-binary</option>
+                <option value="genderqueer-fluid">Genderqueer / Genderfluid</option>
+                <option value="agender">Agender</option>
+                <option value="questioning">Questioning</option>
+                <option value="self-describe">Prefer to self-describe</option>
+                <option value="prefer-not">Prefer not to say</option>
+              </select>
+            </label>
+            <label>Age range
+              <select id="up-age-range">
+                <option value="">Not set</option>
+                <option value="18-22">18–22</option>
+                <option value="23-27">23–27</option>
+                <option value="28-34">28–34</option>
+                <option value="35plus">35+</option>
+              </select>
+            </label>
+            <label>Life stage
+              <select id="up-life-stage">
+                <option value="">Not set</option>
+                <option value="student">In school</option>
+                <option value="working">Working full-time</option>
+                <option value="flexible">Remote / flexible</option>
+              </select>
+            </label>
+            <label>About me<textarea id="up-bio" rows="4" maxlength="420" placeholder="What are you like to live with? What makes a place feel like home to you?"></textarea></label>
+            <label>Identity, in your own words (optional)<input type="text" id="up-identity" placeholder="Anything about your identity you would like roomies to know?" /></label>
+            <label>Religion or spiritual practice (optional)<textarea id="up-religion" rows="3" placeholder="Prayer time, holidays, practices, or no religion — share only what matters at home."></textarea></label>
+            <label>Dietary needs &amp; household boundaries (optional)<textarea id="up-dietary" rows="3" placeholder="Allergies, shared cookware, food preferences, or anything roomies should know."></textarea></label>
+          </div>
+          <div class="profile-fieldset">
+            <h3>Location &amp; housing</h3>
+            <label>Current city<input type="text" id="up-current-city" placeholder="e.g. Bellevue" /></label>
+            <label>Already have a place?
+              <select id="up-has-place">
+                <option value="">Not set</option>
+                <option value="yes">Yes</option>
+                <option value="no">No</option>
+              </select>
+            </label>
+            <label>What you're looking for
+              <select id="up-search-intent">
+                <option value="">Not set</option>
+                <option value="roommate">Looking for roommate</option>
+                <option value="room">Looking for room</option>
+                <option value="housing-group">Housing group</option>
+                <option value="sublease">Sublease</option>
+                <option value="takeover">Lease takeover</option>
+              </select>
+            </label>
+            <label>Housing type
+              <select id="up-housing-type">
+                <option value="">Not set</option>
+                <option value="house">Houses</option>
+                <option value="townhome">Townhomes</option>
+                <option value="condo">Condos / Co-ops</option>
+                <option value="apartment">Apartments</option>
+              </select>
+            </label>
+            <label>Room preference
+              <select id="up-room-pref">
+                <option value="">Not set</option>
+                <option value="entire">Entire place</option>
+                <option value="private">Private bedroom</option>
+                <option value="private-bath">Bedroom + private bath</option>
+                <option value="shared-bedroom">Shared bedroom</option>
+                <option value="couch">Couch / living-room setup</option>
+              </select>
+            </label>
+            <label>Kitchen / cooking needs
+              <select id="up-kitchen-access">
+                <option value="">Not set</option>
+                <option value="must-cook">Need full kitchen</option>
+                <option value="light-ok">Light cooking OK</option>
+                <option value="no-need">Don't cook at home</option>
+              </select>
+            </label>
+            <label>Minimum budget ($/mo)<input type="number" id="up-budget-min" min="400" max="5000" step="50" placeholder="e.g. 900" /></label>
+            <label>Maximum budget ($/mo)<input type="number" id="up-budget-max" min="400" max="5000" step="50" placeholder="e.g. 1800" /></label>
+            <label>Lease duration
+              <select id="up-lease-duration">
+                <option value="">Not set</option>
+                <option value="month">Month-to-month</option>
+                <option value="6mo">6 months</option>
+                <option value="12mo">12 months</option>
+                <option value="flex">Flexible</option>
+              </select>
+            </label>
+            <label>Furnished
+              <select id="up-furnished">
+                <option value="">Not set</option>
+                <option value="any">Any</option>
+                <option value="yes">Furnished</option>
+                <option value="no">Unfurnished</option>
+              </select>
+            </label>
+            <label>Parking
+              <select id="up-parking">
+                <option value="">Not set</option>
+                <option value="no">Not needed</option>
+                <option value="preferred">Preferred</option>
+                <option value="required">Required</option>
+              </select>
+            </label>
+            <label>Pet ownership
+              <select id="up-has-pets">
+                <option value="">Not set</option>
+                <option value="no">No pets</option>
+                <option value="yes">I have pets</option>
+              </select>
+            </label>
+            <label>Pet-friendly required
+              <select id="up-pet-friendly">
+                <option value="">Not set</option>
+                <option value="no">No</option>
+                <option value="yes">Yes</option>
+              </select>
+            </label>
+            <label>Utilities included
+              <select id="up-utilities">
+                <option value="">Not set</option>
+                <option value="no">Not required</option>
+                <option value="preferred">Preferred</option>
+                <option value="required">Required</option>
+              </select>
+            </label>
+            <label>In-unit laundry
+              <select id="up-laundry">
+                <option value="">Not set</option>
+                <option value="no">Not required</option>
+                <option value="preferred">Preferred</option>
+                <option value="required">Required</option>
+              </select>
+            </label>
+            <label>Preferred distance from school
+              <select id="up-school-distance">
+                <option value="">Not set</option>
+                <option value="walkable">Walkable</option>
+                <option value="2mi">Within 2 miles</option>
+                <option value="5mi">Within 5 miles</option>
+                <option value="flexible">Flexible</option>
+              </select>
+            </label>
+          </div>
+          <div class="profile-fieldset">
             <h3>Living preferences</h3>
             <label>Sleep schedule
               <select id="up-sleep">
@@ -192,6 +345,62 @@
                 <option value="Prefer written notes">Prefer written notes</option>
               </select>
             </label>
+            <label>Noise tolerance
+              <select id="up-noise">
+                <option value="">Not set</option>
+                <option value="1">Needs quiet</option>
+                <option value="2">Medium noise OK</option>
+                <option value="3">Lived-in noise OK</option>
+              </select>
+            </label>
+            <label>Overnight guest comfort
+              <select id="up-overnight-guests">
+                <option value="">Not set</option>
+                <option value="never">Not OK</option>
+                <option value="notice">With notice</option>
+                <option value="fine">Totally fine</option>
+              </select>
+            </label>
+            <label>Cooking frequency
+              <select id="up-cooking">
+                <option value="">Not set</option>
+                <option value="rarely">Rarely</option>
+                <option value="sometimes">Sometimes</option>
+                <option value="often">Often</option>
+                <option value="daily">Daily</option>
+              </select>
+            </label>
+            <label>Work-from-home frequency
+              <select id="up-wfh">
+                <option value="">Not set</option>
+                <option value="never">Office-first</option>
+                <option value="sometimes">1–2 days</option>
+                <option value="half">Half week</option>
+                <option value="mostly">Mostly WFH</option>
+                <option value="always">Always WFH</option>
+              </select>
+            </label>
+            <label>Shared space usage
+              <select id="up-shared-space">
+                <option value="">Not set</option>
+                <option value="minimal">Mostly in my room</option>
+                <option value="balanced">Balanced</option>
+                <option value="hangout">Common areas = hangout</option>
+              </select>
+            </label>
+          </div>
+          <div class="profile-fieldset">
+            <h3>Verification &amp; readiness</h3>
+            <label>School email (.edu)<input type="email" id="up-school-email" placeholder="you@university.edu" /></label>
+            <label>Work email<input type="email" id="up-work-email" placeholder="you@company.com" /></label>
+            <label>Move-in ready
+              <select id="up-move-in-ready">
+                <option value="">Not set</option>
+                <option value="yes">Yes</option>
+                <option value="no">Not yet</option>
+              </select>
+            </label>
+            <p class="section-sub" style="margin:2px 0 0;">Saving an email here doesn't verify it — that still happens through the quiz's own verification step.</p>
           </div>
           <div>
             <p class="account-form-error" id="up-error" hidden></p>
@@ -611,6 +820,10 @@
       function loadUserProfile(uid) {
         db.collection('user_profiles').doc(uid).get().then((doc) => {
           const data = doc.exists ? doc.data() : {};
+          const logistics = data.logistics || {};
+          const habits = data.habits || {};
+          const trust = data.trust || {};
+
           document.getElementById('up-city').value = data.targetCity || '';
           document.getElementById('up-budget').value = data.budget || '';
           document.getElementById('up-movein').value = data.moveIn || '';
@@ -620,6 +833,47 @@
           document.getElementById('up-guests').value = data.guests || '';
           document.getElementById('up-social').value = data.socialBattery || '';
           document.getElementById('up-conflict').value = data.conflictStyle || '';
+
+          /* Everything below reads/writes the full logistics/habits/trust record --
+             the same one the quiz's 6-step flow collects -- rather than the curated
+             fields above. Kept at these nested paths on the same doc so neither view
+             clobbers the other (see submitProfileResult()/linkSessionDataToAccount()
+             in quiz.html). */
+          document.getElementById('up-name').value = logistics.name || '';
+          document.getElementById('up-gender').value = logistics.gender || '';
+          document.getElementById('up-age-range').value = logistics.ageRange || '';
+          document.getElementById('up-life-stage').value = logistics.lifeStage || '';
+          document.getElementById('up-bio').value = logistics.bio || '';
+          document.getElementById('up-identity').value = logistics.ethnicitySelfDescribe || logistics.ethnicitySelf || '';
+          document.getElementById('up-religion').value = logistics.religion || '';
+          document.getElementById('up-dietary').value = logistics.dietaryNeeds || '';
+
+          document.getElementById('up-current-city').value = logistics.currentCity || '';
+          document.getElementById('up-has-place').value = logistics.hasPlace || '';
+          document.getElementById('up-search-intent').value = logistics.searchIntent || '';
+          document.getElementById('up-housing-type').value = logistics.housingType || '';
+          document.getElementById('up-room-pref').value = logistics.roomPreference || '';
+          document.getElementById('up-kitchen-access').value = logistics.kitchenAccess || '';
+          document.getElementById('up-budget-min').value = (logistics.budgetMin || logistics.budgetMin === 0) ? logistics.budgetMin : '';
+          document.getElementById('up-budget-max').value = (logistics.budgetMax || logistics.budgetMax === 0) ? logistics.budgetMax : '';
+          document.getElementById('up-lease-duration').value = logistics.leaseDuration || '';
+          document.getElementById('up-furnished').value = logistics.furnished || '';
+          document.getElementById('up-parking').value = logistics.parking || '';
+          document.getElementById('up-has-pets').value = logistics.hasPets || '';
+          document.getElementById('up-pet-friendly').value = logistics.petFriendly || '';
+          document.getElementById('up-utilities').value = logistics.utilitiesIncluded || '';
+          document.getElementById('up-laundry').value = logistics.inUnitLaundry || '';
+          document.getElementById('up-school-distance').value = logistics.schoolDistance || '';
+
+          document.getElementById('up-noise').value = (habits.noiseTolerance || habits.noiseTolerance === 0) ? String(habits.noiseTolerance) : '';
+          document.getElementById('up-overnight-guests').value = habits.overnightGuests || '';
+          document.getElementById('up-cooking').value = habits.cooking || '';
+          document.getElementById('up-wfh').value = habits.wfhFreq || '';
+          document.getElementById('up-shared-space').value = habits.sharedSpace || '';
+
+          document.getElementById('up-school-email').value = trust.schoolEmail || '';
+          document.getElementById('up-work-email').value = trust.workEmail || '';
+          document.getElementById('up-move-in-ready').value = trust.moveInReady || '';
         }).catch((err) => console.error('Failed to load user profile', err));
       }
 
@@ -630,6 +884,12 @@
         profileError.hidden = true;
         profileSuccess.hidden = true;
         profileSubmit.disabled = true;
+
+        const identityValue = document.getElementById('up-identity').value.trim();
+        const budgetMinValue = document.getElementById('up-budget-min').value;
+        const budgetMaxValue = document.getElementById('up-budget-max').value;
+        const noiseValue = document.getElementById('up-noise').value;
+
         db.collection('user_profiles').doc(user.uid).set({
           uid: user.uid,
           targetCity: document.getElementById('up-city').value.trim(),
@@ -641,6 +901,49 @@
           guests: document.getElementById('up-guests').value,
           socialBattery: document.getElementById('up-social').value,
           conflictStyle: document.getElementById('up-conflict').value,
+          /* Deep-merges into the existing logistics/habits/trust maps (Firestore's
+             {merge:true} is field-path-aware for nested objects), so fields only the
+             quiz's own flow sets -- targetCity, neighborhoods, ethnicity, budgetCosts,
+             the *Verified flags, etc. -- are left untouched here, not wiped out. */
+          logistics: {
+            name: document.getElementById('up-name').value.trim(),
+            gender: document.getElementById('up-gender').value,
+            ageRange: document.getElementById('up-age-range').value,
+            lifeStage: document.getElementById('up-life-stage').value,
+            bio: document.getElementById('up-bio').value.trim(),
+            ethnicitySelfDescribe: identityValue,
+            ethnicitySelf: identityValue,
+            religion: document.getElementById('up-religion').value.trim(),
+            dietaryNeeds: document.getElementById('up-dietary').value.trim(),
+            currentCity: document.getElementById('up-current-city').value.trim(),
+            hasPlace: document.getElementById('up-has-place').value,
+            searchIntent: document.getElementById('up-search-intent').value,
+            housingType: document.getElementById('up-housing-type').value,
+            roomPreference: document.getElementById('up-room-pref').value,
+            kitchenAccess: document.getElementById('up-kitchen-access').value,
+            budgetMin: budgetMinValue ? Number(budgetMinValue) : null,
+            budgetMax: budgetMaxValue ? Number(budgetMaxValue) : null,
+            leaseDuration: document.getElementById('up-lease-duration').value,
+            furnished: document.getElementById('up-furnished').value,
+            parking: document.getElementById('up-parking').value,
+            hasPets: document.getElementById('up-has-pets').value,
+            petFriendly: document.getElementById('up-pet-friendly').value,
+            utilitiesIncluded: document.getElementById('up-utilities').value,
+            inUnitLaundry: document.getElementById('up-laundry').value,
+            schoolDistance: document.getElementById('up-school-distance').value
+          },
+          habits: {
+            noiseTolerance: noiseValue ? Number(noiseValue) : null,
+            overnightGuests: document.getElementById('up-overnight-guests').value,
+            cooking: document.getElementById('up-cooking').value,
+            wfhFreq: document.getElementById('up-wfh').value,
+            sharedSpace: document.getElementById('up-shared-space').value
+          },
+          trust: {
+            schoolEmail: document.getElementById('up-school-email').value.trim(),
+            workEmail: document.getElementById('up-work-email').value.trim(),
+            moveInReady: document.getElementById('up-move-in-ready').value
+          },
           updated_at: firebase.firestore.FieldValue.serverTimestamp()
         }, { merge: true })
           .then(() => { profileSuccess.hidden = false; })
