@@ -157,7 +157,13 @@
     /* ---------- Admin-only delete affordances (role = admin) ---------- */
     .actions-col { display: none; }
     body.is-admin .actions-col { display: table-cell; }
-    .admin-only-inline { display: none; }
+    /* Doubled selector bumps specificity to (0,0,2,0) so this reliably beats any
+       single-class component rule (e.g. .bulk-delete-btn's own `display:
+       inline-flex`) regardless of source order -- .admin-only-inline was
+       silently losing that fight before, leaving admin-only buttons visible
+       to contributors (though Firestore rules still blocked the actual write,
+       so this was a UX bug, not a security hole). */
+    .admin-only-inline.admin-only-inline { display: none; }
     body.is-admin .admin-only-inline { display: inline-flex; }
     .admin-only-block { display: none; }
     body.is-admin .admin-only-block { display: block; }
@@ -322,6 +328,7 @@
           <h2 id="sv-records-heading">Firestore Records</h2>
           <div class="panel-actions">
             <button id="sv-refresh-btn" class="refresh-btn" type="button">Refresh</button>
+            <button id="sv-cleanup-btn" class="bulk-delete-btn admin-only-inline" type="button" title="Delete assessments older than 30 days that aren't linked to an account, keeping each linked account's most recent one">Clean up old</button>
             <button id="sv-bulk-delete-btn" class="bulk-delete-btn admin-only-inline" type="button" disabled>Delete</button>
           </div>
         </div>
@@ -532,17 +539,28 @@
       });
     }
 
-    /* Same idea as bindRowDelete, but for a checkbox-selected batch. Uses a single
-       Firestore batch().commit() rather than N separate deletes. */
+    /* Firestore batch().commit() caps out at 500 writes -- chunk with headroom
+       so a large bulk-delete (manual selection or the stale-assessment cleanup
+       below) never silently fails past that limit. Chunks commit sequentially,
+       not in parallel, so a failure partway through doesn't race later chunks. */
+    function deleteDocsInBatches(collectionName, ids) {
+      const chunks = [];
+      for (let i = 0; i < ids.length; i += 450) chunks.push(ids.slice(i, i + 450));
+      return chunks.reduce((p, chunk) => p.then(() => {
+        const batch = db.batch();
+        chunk.forEach((id) => batch.delete(db.collection(collectionName).doc(id)));
+        return batch.commit();
+      }), Promise.resolve());
+    }
+
+    /* Same idea as bindRowDelete, but for a checkbox-selected batch. */
     function bulkDeleteRecords(collectionName, ids, reloadFn, btn) {
       if (!ids.length) return;
       if (!confirm(`Delete ${ids.length} record${ids.length === 1 ? '' : 's'}? This cannot be undone.`)) return;
       btn.disabled = true;
       const originalText = btn.textContent;
       btn.textContent = 'Deleting…';
-      const batch = db.batch();
-      ids.forEach((id) => batch.delete(db.collection(collectionName).doc(id)));
-      batch.commit()
+      deleteDocsInBatches(collectionName, ids)
         .then(() => reloadFn())
         .catch((err) => {
           console.error(`Failed to bulk delete ${collectionName} records`, err);
@@ -569,6 +587,7 @@
       const statAccountsOfSessionsPct = document.getElementById('sv-stat-accounts-of-sessions-pct');
       const statTypes = document.getElementById('sv-stat-types');
       const bulkDeleteBtn = document.getElementById('sv-bulk-delete-btn');
+      const cleanupBtn = document.getElementById('sv-cleanup-btn');
       const selectAllCheckbox = document.getElementById('sv-select-all');
       let allRecords = [];
       const selectedIds = new Set();
@@ -579,6 +598,53 @@
         bulkDeleteBtn.disabled = selectedIds.size === 0;
         bulkDeleteBtn.textContent = selectedIds.size ? `Delete (${selectedIds.size})` : 'Delete';
       }
+      /* Deletion criteria (per explicit spec): among assessments submitted more
+         than 30 days ago -- (a) any not linked to an account (no user_id) get
+         deleted outright, (b) for a linked account with multiple old
+         submissions, only their single most recent one survives; everything
+         within the last 30 days is left alone regardless of linkage. */
+      function computeStaleAssessmentIds(records) {
+        const cutoffMs = Date.now() - 30 * 24 * 60 * 60 * 1000;
+        const old = records.filter((r) => r.submitted_at && typeof r.submitted_at.toDate === 'function'
+          && r.submitted_at.toDate().getTime() < cutoffMs);
+        const toDelete = [];
+        const byUser = {};
+        old.forEach((r) => {
+          if (!r.user_id) { toDelete.push(r.id); return; }
+          (byUser[r.user_id] = byUser[r.user_id] || []).push(r);
+        });
+        const unlinkedCount = toDelete.length;
+        let keptCount = 0;
+        Object.values(byUser).forEach((group) => {
+          group.sort((a, b) => b.submitted_at.toDate().getTime() - a.submitted_at.toDate().getTime());
+          keptCount++;
+          group.slice(1).forEach((r) => toDelete.push(r.id));
+        });
+        return { toDelete, unlinkedCount, linkedDuplicateCount: toDelete.length - unlinkedCount, keptCount };
+      }
+      function cleanupStaleAssessments() {
+        const { toDelete, unlinkedCount, linkedDuplicateCount, keptCount } = computeStaleAssessmentIds(allRecords);
+        if (!toDelete.length) { alert('Nothing to clean up — no assessments older than 30 days match.'); return; }
+        const msg = `Delete ${toDelete.length} assessment${toDelete.length === 1 ? '' : 's'} older than 30 days?\n\n`
+          + `${unlinkedCount} not linked to any account\n`
+          + `${linkedDuplicateCount} older duplicate${linkedDuplicateCount === 1 ? '' : 's'} for ${keptCount} account${keptCount === 1 ? '' : 's'} (their most recent stays)\n\n`
+          + `This cannot be undone.`;
+        if (!confirm(msg)) return;
+        cleanupBtn.disabled = true;
+        const originalText = cleanupBtn.textContent;
+        cleanupBtn.textContent = 'Cleaning up…';
+        deleteDocsInBatches('survey_sessions', toDelete)
+          .then(() => window.loadSurveyRecords())
+          .catch((err) => {
+            console.error('Failed to clean up stale assessments', err);
+            alert('Could not complete cleanup. You may not have permission, or something went wrong.');
+          })
+          .finally(() => {
+            cleanupBtn.disabled = false;
+            cleanupBtn.textContent = originalText;
+          });
+      }
+      cleanupBtn.addEventListener('click', cleanupStaleAssessments);
       /* survey_sessions doesn't store an email itself (see quiz.html) -- only a
          user_id for signed-in submissions. Resolve those against users/{uid} so
          the report can show an email column; anonymous submissions stay blank. */
