@@ -1,0 +1,47 @@
+name: Clean up stale assessments
+
+# Scheduled/unattended twin of the "Clean Up" button on admin.html's
+# Assessments tab -- same deletion criteria, see scripts/cleanup-stale-assessments.js.
+#
+# Requires a repo secret named FIREBASE_SERVICE_ACCOUNT_KEY: the full JSON
+# contents of a Firebase service account key (Firebase Console -> Project
+# Settings -> Service Accounts -> Generate new private key). Set it via
+# GitHub's own UI (Settings -> Secrets and variables -> Actions), not by
+# pasting it anywhere in this repo.
+
+"on":
+  schedule:
+    # 9am UTC daily (~1-2am Pacific). Adjust if you'd rather it run at a
+    # different time -- cron here is UTC regardless of your local timezone.
+    - cron: '0 9 * * *'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Preview only -- do not delete anything'
+        type: boolean
+        default: false
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        working-directory: scripts
+        run: npm install
+
+      - name: Run cleanup
+        working-directory: scripts
+        env:
+          FIREBASE_SERVICE_ACCOUNT_KEY: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_KEY }}
+        run: |
+          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
+            node cleanup-stale-assessments.js --dry-run
+          else
+            node cleanup-stale-assessments.js
+          fi

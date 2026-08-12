@@ -1,0 +1,14 @@
+{
+  "name": "myroomeo-maintenance-scripts",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Standalone maintenance scripts for the MyRoomeo Firestore project (kept separate from the dormant React app's package.json so CI installs stay minimal).",
+  "type": "commonjs",
+  "scripts": {
+    "cleanup-stale-assessments": "node cleanup-stale-assessments.js",
+    "cleanup-stale-assessments:dry-run": "node cleanup-stale-assessments.js --dry-run"
+  },
+  "dependencies": {
+    "firebase-admin": "^12.6.0"
+  }
+}
