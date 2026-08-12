@@ -7119,48 +7119,54 @@
       if (!name || !email) return;
 
       const resultType = lastResultKey || sessionStorage.getItem(STORAGE.type) || '';
+      const user = firebase.auth().currentUser;
 
-      profileResultSubmission = db.collection('profile_sessions').add({
-        session_id: getSessionId(),
-        user_id: (firebase.auth().currentUser && firebase.auth().currentUser.uid) || null,
-        result_type: String(resultType || '').toLowerCase(),
-        name: name,
-        email: email,
-        logistics: logistics || {},
-        habits: habits || {},
-        trust: trust || {},
-        source: 'profile',
-        submitted_at_client: new Date().toISOString(),
-        submitted_at: firebase.firestore.FieldValue.serverTimestamp(),
-        created_at: firebase.firestore.FieldValue.serverTimestamp(),
-        updated_at: firebase.firestore.FieldValue.serverTimestamp()
-      }).then(() => {
-        try { sessionStorage.setItem(STORAGE.profileSubmitted, '1'); } catch (_) {}
-        /* Keep user_profiles (the account's single, current, full profile) in sync
-           too. profile_sessions above stays an immutable per-submission log -- but
-           there should only ever be ONE profile per person, always reflecting their
-           latest answers, which is what user_profiles is for. Writes both the full
-           raw logistics/habits/trust (everything the 6-step flow collects) and the
-           curated 9-field mapping account.html's own simple edit form reads, onto
-           the same doc at different field paths so neither clobbers the other.
-           readSessionQuizAndProfile()/linkSessionDataToAccount() only copy this
-           over at signup/login time, so an already-signed-in person resubmitting
-           the form would otherwise never get user_profiles updated at all -- this
-           covers that case the same way linkResultToAccount() already keeps
-           users/{uid}.result_type current on every quiz completion. */
-        const user = firebase.auth().currentUser;
-        if (user) {
-          const mapped = mapLogisticsHabitsToUserProfile(logistics, habits);
-          db.collection('user_profiles').doc(user.uid).set(Object.assign(
-            { uid: user.uid, updated_at: firebase.firestore.FieldValue.serverTimestamp(),
-              logistics: logistics || {}, habits: habits || {}, trust: trust || {} },
-            mapped
-          ), { merge: true }).catch((err) => console.error('Failed to sync user_profiles on profile submit', err));
-        }
-      }).catch((error) => {
-        console.error('Failed to submit profile result', error);
-        profileResultSubmission = null;
-      });
+      if (user) {
+        /* Signed in: user_profiles/{uid} IS the one profile -- there is no
+           separate log entry to also write. Every submission updates the same
+           doc in place, both the full raw logistics/habits/trust (everything
+           the 6-step flow collects) and the curated 9-field mapping
+           account.html's own simple edit form reads, at different field paths
+           on the same doc so neither clobbers the other. */
+        const mapped = mapLogisticsHabitsToUserProfile(logistics, habits);
+        profileResultSubmission = db.collection('user_profiles').doc(user.uid).set(Object.assign(
+          { uid: user.uid, updated_at: firebase.firestore.FieldValue.serverTimestamp(),
+            logistics: logistics || {}, habits: habits || {}, trust: trust || {} },
+          mapped
+        ), { merge: true }).then(() => {
+          try { sessionStorage.setItem(STORAGE.profileSubmitted, '1'); } catch (_) {}
+        }).catch((error) => {
+          console.error('Failed to save profile', error);
+          profileResultSubmission = null;
+        });
+      } else {
+        /* Not signed in yet -- there's no uid to key a single profile doc on,
+           so this is a one-per-session holding record in profile_sessions,
+           keyed by session_id and upserted (not .add()'d) so retaking/editing
+           the form before signing up still only ever produces one doc, not a
+           growing log. linkSessionDataToAccount() copies it into
+           user_profiles/{uid} once they do sign up. */
+        profileResultSubmission = db.collection('profile_sessions').doc(getSessionId()).set({
+          session_id: getSessionId(),
+          user_id: null,
+          result_type: String(resultType || '').toLowerCase(),
+          name: name,
+          email: email,
+          logistics: logistics || {},
+          habits: habits || {},
+          trust: trust || {},
+          source: 'profile',
+          submitted_at_client: new Date().toISOString(),
+          submitted_at: firebase.firestore.FieldValue.serverTimestamp(),
+          created_at: firebase.firestore.FieldValue.serverTimestamp(),
+          updated_at: firebase.firestore.FieldValue.serverTimestamp()
+        }, { merge: true }).then(() => {
+          try { sessionStorage.setItem(STORAGE.profileSubmitted, '1'); } catch (_) {}
+        }).catch((error) => {
+          console.error('Failed to submit profile result', error);
+          profileResultSubmission = null;
+        });
+      }
 
       return profileResultSubmission;
     }

@@ -25,9 +25,14 @@ service cloud.firestore {
       allow delete: if isSuperAdmin();
     }
 
+    /* One-per-session holding record for someone who hasn't signed up yet --
+       upserted (create or update) rather than appended, so a person editing
+       their profile before creating an account never produces more than one
+       doc. Once they sign up, linkSessionDataToAccount() copies this into
+       user_profiles/{uid}, which is the one real profile from then on. */
     match /profile_sessions/{profileId} {
       allow read: if isStaff();
-      allow create: if request.resource.data.keys().hasAll([
+      allow create, update: if request.resource.data.keys().hasAll([
                       'session_id', 'result_type', 'name', 'email',
                       'logistics', 'habits', 'trust', 'source',
                       'submitted_at_client', 'submitted_at', 'created_at', 'updated_at'
@@ -39,7 +44,6 @@ service cloud.firestore {
                     && request.resource.data.habits is map
                     && request.resource.data.trust is map
                     && request.resource.data.source == 'profile';
-      allow update: if false;
       allow delete: if isSuperAdmin();
     }
 
