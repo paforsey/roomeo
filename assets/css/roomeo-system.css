@@ -75,6 +75,7 @@
 .account-modal-close:hover{color:var(--ink)}
 .account-modal h2{margin:0 0 20px;font:400 var(--fs-2xl)/var(--lh-snug) var(--font-serif);color:var(--ink)}
 .account-modal-tabs{display:flex;gap:6px;background:var(--paper);border-radius:999px;padding:4px;margin-bottom:20px}
+.account-modal-tabs[hidden]{display:none}
 .account-tab{flex:1;border:none;background:none;padding:8px 0;border-radius:999px;font:600 var(--fs-sm)/var(--lh-tight) var(--font-sans);color:var(--muted);cursor:pointer}
 .account-tab[aria-selected="true"]{background:#fff;color:var(--ink);box-shadow:0 2px 6px rgba(63,43,31,.12)}
 .account-form{display:flex;flex-direction:column;gap:14px}
@@ -88,6 +89,9 @@
 .password-toggle:hover{color:var(--ink);background:var(--paper)}
 .account-form-error{color:#a63722;font:600 var(--fs-sm)/var(--lh-normal) var(--font-sans);margin:0}
 .account-form-success{color:#2f7d51;font:600 var(--fs-sm)/var(--lh-normal) var(--font-sans);margin:0}
+.account-form-hint{margin:0;font:400 var(--fs-sm)/var(--lh-relaxed) var(--font-sans);color:var(--muted)}
+.account-form-link{align-self:flex-start;border:none;background:none;padding:0;font:600 var(--fs-sm)/var(--lh-tight) var(--font-sans);color:var(--orange);cursor:pointer;text-decoration:underline;text-underline-offset:2px}
+.account-form-link:hover{color:#cf5a1f}
 .account-submit-btn{height:46px;border-radius:23px;border:none;background:var(--orange);color:#fff;font:700 var(--fs-base)/var(--lh-tight) var(--font-sans);cursor:pointer;transition:background-color .2s ease}
 .account-submit-btn:hover{background:#cf5a1f}
 .account-submit-btn:disabled{opacity:.6;cursor:default}

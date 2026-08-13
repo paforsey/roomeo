@@ -416,7 +416,7 @@
     <div class="account-modal-inner">
       <button type="button" class="account-modal-close" id="account-modal-close" aria-label="Close">&times;</button>
       <h2>Welcome to MyRoomeo</h2>
-      <div class="account-modal-tabs" role="tablist">
+      <div class="account-modal-tabs" role="tablist" id="account-modal-tabs">
         <button type="button" class="account-tab" id="tab-login" role="tab" aria-selected="true">Log in</button>
         <button type="button" class="account-tab" id="tab-signup" role="tab" aria-selected="false">Sign up</button>
       </div>
@@ -429,6 +429,7 @@
             <button type="button" class="password-toggle" id="toggle-login-password" aria-label="Show password" aria-pressed="false"></button>
           </div>
         </label>
+        <button type="button" class="account-form-link" id="btn-forgot-password">Forgot password?</button>
         <p class="account-form-error" id="login-error" hidden></p>
         <button type="submit" class="account-submit-btn" id="login-submit">Log in</button>
       </form>
@@ -444,6 +445,15 @@
         <p class="account-form-error" id="signup-error" hidden></p>
         <p class="account-form-success" id="signup-success" hidden>Account created! Check your email to verify your address.</p>
         <button type="submit" class="account-submit-btn" id="signup-submit">Sign up</button>
+      </form>
+
+      <form id="form-reset" class="account-form" hidden>
+        <p class="account-form-hint">Enter your email and we'll send you a link to reset your password.</p>
+        <label>Email<input type="email" id="reset-email" required autocomplete="email" /></label>
+        <p class="account-form-error" id="reset-error" hidden></p>
+        <p class="account-form-success" id="reset-success" hidden>Check your inbox for a link to reset your password.</p>
+        <button type="submit" class="account-submit-btn" id="reset-submit">Send reset link</button>
+        <button type="button" class="account-form-link" id="btn-back-to-login">← Back to log in</button>
       </form>
     </div>
   </dialog>
@@ -479,10 +489,12 @@
     /* ---------- Account menu: sign up / log in / log out ---------- */
     (function () {
       const modal = document.getElementById('account-modal');
+      const tabsEl = document.getElementById('account-modal-tabs');
       const tabLogin = document.getElementById('tab-login');
       const tabSignup = document.getElementById('tab-signup');
       const formLogin = document.getElementById('form-login');
       const formSignup = document.getElementById('form-signup');
+      const formReset = document.getElementById('form-reset');
       const actions = document.getElementById('account-actions');
       const signedIn = document.getElementById('account-signedin');
       const emailLabel = document.getElementById('account-email-label');
@@ -491,10 +503,20 @@
 
       function showTab(which) {
         const isLogin = which === 'login';
+        tabsEl.hidden = false;
+        formReset.hidden = true;
         tabLogin.setAttribute('aria-selected', String(isLogin));
         tabSignup.setAttribute('aria-selected', String(!isLogin));
         formLogin.hidden = !isLogin;
         formSignup.hidden = isLogin;
+      }
+      function showReset() {
+        tabsEl.hidden = true;
+        formLogin.hidden = true;
+        formSignup.hidden = true;
+        formReset.hidden = false;
+        document.getElementById('reset-error').hidden = true;
+        document.getElementById('reset-success').hidden = true;
       }
       function openModal(which) {
         showTab(which || 'login');
@@ -505,6 +527,12 @@
       document.getElementById('btn-open-login').addEventListener('click', () => openModal('login'));
       document.getElementById('btn-open-signup').addEventListener('click', () => openModal('signup'));
       document.getElementById('account-modal-close').addEventListener('click', () => modal.close());
+      document.getElementById('btn-forgot-password').addEventListener('click', () => {
+        const prefill = document.getElementById('login-email').value.trim();
+        if (prefill) document.getElementById('reset-email').value = prefill;
+        showReset();
+      });
+      document.getElementById('btn-back-to-login').addEventListener('click', () => showTab('login'));
 
       function wirePasswordToggle(inputId, buttonId) {
         const input = document.getElementById(inputId);
@@ -674,6 +702,21 @@
             formSignup.reset();
             setTimeout(() => modal.close(), 2500);
           })
+          .catch((err) => { errEl.textContent = authErrorMessage(err); errEl.hidden = false; })
+          .finally(() => { btn.disabled = false; });
+      });
+
+      formReset.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const email = document.getElementById('reset-email').value.trim();
+        const errEl = document.getElementById('reset-error');
+        const okEl = document.getElementById('reset-success');
+        errEl.hidden = true;
+        okEl.hidden = true;
+        const btn = document.getElementById('reset-submit');
+        btn.disabled = true;
+        firebase.auth().sendPasswordResetEmail(email)
+          .then(() => { okEl.hidden = false; formReset.reset(); })
           .catch((err) => { errEl.textContent = authErrorMessage(err); errEl.hidden = false; })
           .finally(() => { btn.disabled = false; });
       });
