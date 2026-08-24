@@ -673,11 +673,11 @@
       svg.innerHTML = svgHtml;
     }
 
+    /* Matches account.html's formatTimestampFull() so "test taken" dates read
+       the same way everywhere on the site. */
     function formatTestDate(date) {
       if (!date) return '—';
-      const month = date.getMonth() + 1;
-      const day = String(date.getDate()).padStart(2, '0');
-      return `/${date.getFullYear()} ${month}.${day}`;
+      return date.toLocaleString();
     }
 
     function renderResultsCard(typeKey, stats, testDate) {
