@@ -4618,6 +4618,9 @@
       margin-top: 34px;
     }
     .rfinal-hero-action {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
       min-height: 48px;
       border: 0;
       border-radius: 13px;
@@ -4625,6 +4628,7 @@
       font-family: var(--font-rfinal-body);
       font-size: 13px;
       font-weight: 700;
+      text-decoration: none;
       cursor: pointer;
       transition: transform .2s ease, background-color .2s ease, color .2s ease;
     }
@@ -5524,6 +5528,7 @@
             <div class="account-dropdown" id="account-dropdown" hidden>
               <a href="quiz.html?version=20260718c&amp;start=1">Take the Assessment</a>
               <a href="quiz.html?view=profile-1">Build Your Profile</a>
+              <a href="results.html">My Results Card</a>
               <a href="account.html">My account</a>
               <button type="button" id="btn-logout">Log out</button>
             </div>
@@ -5646,6 +5651,7 @@
                     <div class="rfinal-hero-actions">
                       <button type="button" class="rfinal-hero-action rfinal-hero-action--primary" id="btn-hero-share">Share my type</button>
                       <button type="button" class="rfinal-hero-action rfinal-hero-action--secondary" id="btn-hero-explore">Explore my result →</button>
+                      <a class="rfinal-hero-action rfinal-hero-action--secondary" id="btn-hero-results-card" href="results.html">View my results card</a>
                     </div>
                   </div>
                 </div>
@@ -6792,6 +6798,7 @@
     const STORAGE = {
       answers: 'roomeo_quiz_answers',
       type: 'roomeo_type',
+      stats: 'roomeo_quiz_stats',
       view: 'roomeo_quiz_view',
       p1: 'roomeo_profile_step1',
       p2: 'roomeo_profile_step2',
@@ -7140,17 +7147,36 @@
       return quizResultSubmission;
     }
 
-    /** If the person is signed in, mirror their roomie type onto users/{uid} so the
-        account page can show it and offer a retake link — separate from the anonymous
-        survey_sessions log above, which stays untouched. */
-    function linkResultToAccount(resultType) {
+    /** 0–100% per axis, from the same 12 raw answers resolveType() scores on —
+        keep this in sync with resolveType()'s axis math above if that ever changes.
+        Used to drive both the account-linked "result card" (results.html) and,
+        for anonymous sessions, that same page reading sessionStorage directly. */
+    function axisPercents(ans) {
+      if (!Array.isArray(ans) || ans.some((x) => x === null || x === undefined)) return null;
+      const s = answerScores(ans);
+      const cleanliness = (s[0] + s[1] + s[2]) / 3;
+      const social = (ans[3] + ans[4] + ans[5] + 3) / 3; // inverted axis: A=1 … D=4
+      const structure = (s[6] + s[7] + s[8]) / 3;
+      const homebody = (s[9] + s[10] + s[11]) / 3;
+      const pct = (v) => Math.round(((v - 1) / 3) * 100);
+      return { cleanliness: pct(cleanliness), social: pct(social), structure: pct(structure), homebody: pct(homebody) };
+    }
+
+    /** If the person is signed in, mirror their roomie type + axis stats onto users/{uid}
+        so the account page can show it and results.html can render their results card from
+        any device — separate from the anonymous survey_sessions log above, which stays
+        untouched. */
+    function linkResultToAccount(resultType, answersArr) {
       const user = firebase.auth().currentUser;
       if (!user) return;
-      db.collection('users').doc(user.uid).set({
+      const patch = {
         uid: user.uid,
         result_type: String(resultType || '').toLowerCase(),
         result_updated_at: firebase.firestore.FieldValue.serverTimestamp()
-      }, { merge: true }).catch((err) => console.error('Failed to link quiz result to account', err));
+      };
+      const stats = axisPercents(answersArr);
+      if (stats) patch.result_stats = stats;
+      db.collection('users').doc(user.uid).set(patch, { merge: true }).catch((err) => console.error('Failed to link quiz result to account', err));
     }
 
     let profileResultSubmission = null;
@@ -8196,6 +8222,10 @@
       try {
         sessionStorage.setItem(STORAGE.answers, JSON.stringify(answers));
         if (lastResultKey) sessionStorage.setItem(STORAGE.type, lastResultKey);
+        /* Precomputed so results.html can render without re-implementing the
+           scoring formula — see axisPercents() above. */
+        const stats = axisPercents(answers);
+        if (stats) sessionStorage.setItem(STORAGE.stats, JSON.stringify(stats));
       } catch (_) {}
     }
 
@@ -10371,7 +10401,7 @@
       lastResultKey = key;
       saveSession();
       submitQuizResult(key, answers);
-      linkResultToAccount(key);
+      linkResultToAccount(key, answers);
       scheduleResultsReveal(key, answers, false);
       setQuizFlowFooterVisible(false);
       setQuizView('results');

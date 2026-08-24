@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" width="192" height="192" role="img" aria-label="QR code placeholder">
   <rect width="192" height="192" fill="#FFFFFF"/>
-  <!-- Placeholder QR  replace assets/site/share-qr-placeholder.svg when real code is ready -->
+  <!-- Placeholder QR: replace assets/site/share-qr-placeholder.svg when real code is ready -->
   <g fill="#2D1B14">
     <!-- top-left finder -->
     <rect x="12" y="12" width="42" height="42" rx="4"/>

@@ -32,6 +32,7 @@ DEPLOY_PATHS=(
   index.html
   quiz.html
   account.html
+  results.html
   role-cutouts.js
   roomie-cast.js
   roomie-mini.js
