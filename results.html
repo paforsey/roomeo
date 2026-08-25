@@ -18,10 +18,7 @@
     .rc-card{background:var(--paper);border-radius:20px;padding:52px 44px 36px;position:relative;overflow:hidden}
 
     .rc-ribbon-wrap{position:absolute;top:0;left:50%;transform:translateX(-50%);z-index:2}
-    .rc-ribbon{background:linear-gradient(180deg,#f6a866,var(--orange));color:#3f2b1f;font:700 var(--fs-lg) var(--font-label);letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;padding:14px 34px 20px;border-radius:0 0 16px 16px;position:relative}
-    .rc-ribbon::before,.rc-ribbon::after{content:"";position:absolute;bottom:-9px;width:0;height:0;border-style:solid}
-    .rc-ribbon::before{left:0;border-width:0 0 9px 14px;border-color:transparent transparent transparent #A94527}
-    .rc-ribbon::after{right:0;border-width:9px 14px 0 0;border-color:transparent #A94527 transparent transparent}
+    .rc-ribbon{background:url('assets/results-card/title.png') no-repeat center/100% 100%;color:#3f2b1f;font:700 var(--fs-lg) var(--font-label);letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;width:340px;height:91px;display:flex;align-items:center;justify-content:center;padding:0 20px 12px;margin:0}
 
     .rc-top-row{display:flex;gap:16px;margin-top:34px;align-items:stretch}
     .rc-id-box{border:1px solid var(--border);border-radius:12px;padding:16px 20px;display:flex;flex-direction:column;justify-content:space-between;min-width:210px;background:#fffdf9}
@@ -61,9 +58,7 @@
     .is-nay .rc-yaynay-title{color:var(--orange)}
     .rc-yaynay-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:12px}
     .rc-yaynay-list li{display:flex;align-items:flex-start;gap:10px;font:400 var(--fs-base) var(--font-sans);color:var(--body)}
-    .rc-yaynay-icon{flex:none;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font:700 12px/1 var(--font-sans);color:#fff;margin-top:1px}
-    .is-yay .rc-yaynay-icon{background:#3f9d6c}
-    .is-nay .rc-yaynay-icon{background:var(--orange)}
+    .rc-yaynay-icon{flex:none;width:20px;height:20px;margin-top:1px}
 
     /* ---------- Matches ---------- */
     .rc-matches{margin-top:34px}
@@ -78,7 +73,7 @@
     .rc-match-badge.is-bad{background:var(--orange)}
 
     /* ---------- Footer ---------- */
-    .rc-footer{position:relative;z-index:1;margin-top:40px;background:#fff;border:1px solid var(--border);border-radius:16px;padding:20px 26px;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap}
+    .rc-footer{position:relative;z-index:1;margin-top:40px;margin-right:120px;background:#fff;border:1px solid var(--border);border-radius:16px;padding:20px 26px;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap}
     .rc-footer-tagline{margin:0 0 10px;font:400 var(--fs-lg) var(--font-serif);color:var(--ink)}
     .rc-footer-url{display:inline-flex;align-items:center;gap:10px;background:var(--paper);border:1px solid var(--border);border-radius:999px;padding:8px 10px 8px 18px;font:600 var(--fs-base) var(--font-sans);color:var(--body)}
     .rc-footer-url svg{flex:none}
@@ -89,11 +84,11 @@
     .rc-footer-scan{margin:4px 0 0;font:italic 600 var(--fs-sm) var(--font-serif);color:var(--muted)}
 
     /* ---------- Decorative corner ---------- */
-    .rc-corner{position:absolute;right:0;bottom:0;width:150px;height:auto;z-index:0;pointer-events:none}
+    .rc-corner{position:absolute;right:-6px;bottom:-6px;width:130px;height:auto;z-index:0;pointer-events:none}
 
     @media (max-width:720px){
       .rc-card{padding:56px 20px 28px}
-      .rc-ribbon{font-size:11px;padding:10px 18px 15px}
+      .rc-ribbon{font-size:11px;width:240px;height:64px;padding:0 14px 10px}
       .rc-top-row{flex-direction:column}
       .rc-id-box{min-width:0}
       .rc-yaynay{grid-template-columns:1fr}
@@ -703,9 +698,9 @@
       }).join('');
 
       const yayEl = document.getElementById('rc-yay-list');
-      yayEl.innerHTML = content.yay.map((t) => `<li><span class="rc-yaynay-icon">✓</span>${t}</li>`).join('');
+      yayEl.innerHTML = content.yay.map((t) => `<li><img class="rc-yaynay-icon" src="assets/results-card/check.png" alt="" />${t}</li>`).join('');
       const nayEl = document.getElementById('rc-nay-list');
-      nayEl.innerHTML = content.nay.map((t) => `<li><span class="rc-yaynay-icon">–</span>${t}</li>`).join('');
+      nayEl.innerHTML = content.nay.map((t) => `<li><img class="rc-yaynay-icon" src="assets/results-card/no.png" alt="" />${t}</li>`).join('');
 
       const bestEl = document.getElementById('rc-best-matches');
       const attnEl = document.getElementById('rc-attention-matches');
@@ -715,7 +710,7 @@
         const matchContent = RESULT_CONTENT[m.slug];
         const el = document.createElement('div');
         el.className = 'rc-match';
-        el.innerHTML = `<img class="rc-match-avatar" src="assets/characters/${m.slug}.png" alt="${matchContent ? matchContent.name : m.slug}" />
+        el.innerHTML = `<img class="rc-match-avatar" src="assets/results-card/icon-${m.slug}.png" alt="${matchContent ? matchContent.name : m.slug}" />
           <p class="rc-match-name">${matchContent ? matchContent.name : m.slug}</p>
           <span class="rc-match-badge ${m.tone === 'good' ? 'is-good' : 'is-bad'}">${m.badge}</span>`;
         (m.tone === 'good' ? bestEl : attnEl).appendChild(el);
