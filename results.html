@@ -17,7 +17,7 @@
     .rc-frame{background:var(--orange);border-radius:28px;padding:14px;position:relative}
     .rc-card{background:var(--paper);border-radius:20px;padding:52px 44px 36px;position:relative;overflow:hidden}
 
-    .rc-ribbon-wrap{position:absolute;top:-7px;left:50%;transform:translateX(-50%);z-index:2}
+    .rc-ribbon-wrap{position:absolute;top:7px;left:50%;transform:translateX(-50%);z-index:2}
     .rc-ribbon{background:url('assets/results-card/title.png') no-repeat center/100% 100%;color:#3f2b1f;font:700 var(--fs-lg) var(--font-label);letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;width:340px;height:91px;display:flex;align-items:center;justify-content:center;padding:0 20px 12px;margin:0}
 
     .rc-top-row{display:flex;gap:16px;margin-top:34px;align-items:stretch}
@@ -133,9 +133,9 @@
 
       <div id="results-card-wrap" hidden>
         <div class="rc-frame">
+          <div class="rc-ribbon-wrap"><p class="rc-ribbon">Roomie Type Test</p></div>
           <div class="rc-card" id="rc-card">
             <img class="rc-corner" id="rc-corner" src="" alt="" aria-hidden="true" />
-            <div class="rc-ribbon-wrap"><p class="rc-ribbon">Roomie Type Test</p></div>
 
             <div class="rc-top-row">
               <div class="rc-id-box">
@@ -541,6 +541,7 @@
     const RESULT_CONTENT = {
       turtle: {
         name: 'Turtle',
+        stats: { social: 29, cleanliness: 64, structure: 61, homebody: 100 },
         description: "Warm, steady, and most likely to turn a kitchen run-in into an actual catch-up. You help a shared place feel like home, but your “whatever works” may hide what you really want. Cozy roommate energy with a small risk of becoming the unpaid house therapist.",
         yay: ['Slow mornings', 'Staying comfortably home', 'Familiar routines, same mug, same seat', 'Low-key roommates', 'Shared supplies that get replaced'],
         nay: ['Constant parties', 'Moving my things', 'Being hurried', 'Loud arguments', 'Sudden schedule changes'],
@@ -553,6 +554,7 @@
       },
       owl: {
         name: 'Owl',
+        stats: { social: 0, cleanliness: 74, structure: 63, homebody: 71 },
         description: "Quiet, reliable, and mysteriously awake at 1:43 a.m. You give roommates plenty of space and rarely bring chaos home, though your silence may leave people wondering whether you're tired or secretly mad. Low drama, early payments, emotional status: buffering.",
         yay: ['Quiet hours that actually clock in', 'Rent paid before the Venmo request', 'A sink with zero jump scares', 'Guest notices with timestamps', 'Organized spaces'],
         nay: ['Speakerphone at demon hours', 'Surprise humans in the kitchen', 'Unwashed dishes developing a backstory', 'Misplaced keys', 'Being rushed'],
@@ -565,6 +567,7 @@
       },
       fox: {
         name: 'Fox',
+        stats: { social: 67, cleanliness: 33, structure: 0, homebody: 33 },
         description: "Flexible, social, and often out collecting unexplained lore. You may not be home much, but your mug and unfinished chore sometimes stay behind as your representatives. You thrive with roommates who can embrace spontaneous plans without needing a detailed itinerary.",
         yay: ['Witty conversations', 'Roommates with separate lives and hobbies', 'Exploring new places', 'Last-minute plans', 'Spontaneous adventures'],
         nay: ['Passive-aggressive notes', 'Group chat essays over one dish', 'Nosy roommates', 'Splitting the bill incorrectly', 'Rules for every little thing'],
@@ -577,6 +580,7 @@
       },
       cat: {
         name: 'Cat',
+        stats: { social: 50, cleanliness: 0, structure: 5, homebody: 15 },
         description: "Independent, low-pressure, and happiest at home without being socially on call. You give roommates plenty of space, though your “I'll deal with it later” era may leave behind a dish, a bill reminder, or an empty detergent bottle. Peaceful? Usually. Traceable? Debatable.",
         yay: ['A closed door and zero follow up questions', 'Parallel play in separate rooms', 'Late breakfast at 2:17 p.m.', 'Blankets with emotional support status', 'Roommates who knock like civilized people'],
         nay: ['Forced small talk', 'Early alarms', 'Sharing my snacks', 'Closed bedroom doors', 'People touching my stuff'],
@@ -589,6 +593,7 @@
       },
       bunny: {
         name: 'Bunny',
+        stats: { social: 100, cleanliness: 52, structure: 5, homebody: 15 },
         description: "Social, spontaneous, and capable of turning dinner into a full hangout. You make home feel lively, though the doorbell may occasionally update your roommates before the group chat does. You thrive with people who enjoy shared time and don't treat every guest like a security incident.",
         yay: ['Brunch dates', 'Kitchen debriefs with the full lore', 'A living room with actual life in it', 'Shared snacks, shared screens, shared chaos', 'Roommates down for one more episode'],
         nay: ['Awkward silence', 'Mean energy', 'Being left out', 'Passive aggressive notes instead of talking', 'Roommates who always keep to themselves'],
@@ -601,6 +606,7 @@
       },
       beaver: {
         name: 'Beaver',
+        stats: { social: 9, cleanliness: 100, structure: 100, homebody: 85 },
         description: "Organized, reliable, and usually the first to notice when the paper towels are gone. You may call it basic responsibility, your roommates may call it a surprise performance review. Either way, the bills get paid, the kitchen recovers, and the household somehow keeps functioning.",
         yay: ['A chore chart with active users', 'Rent paid before the due date jump scare', 'A sink at inbox zero', 'Toilet paper replaced before the final square', 'Guest plans with actual advance notice'],
         nay: ['Mystery dishes in the sink', 'Trash Jenga', '“I’ll do it tomorrow”: Season 6', 'Late rent', 'Cluttered counters'],
@@ -675,11 +681,15 @@
       return date.toLocaleString();
     }
 
+    /* stats/radar are fixed per type (content.stats below), not computed from
+       the individual's own answers -- every Turtle sees the same spider
+       chart. The `stats` param is accepted for backward compatibility with
+       callers but intentionally ignored. */
     function renderResultsCard(typeKey, stats, testDate) {
       const content = RESULT_CONTENT[typeKey];
       if (!content) { showEmpty(); return; }
       const color = RESULT_COLORS[typeKey] || 'var(--orange)';
-      const safeStats = stats || { cleanliness: 50, social: 50, structure: 50, homebody: 50 };
+      const safeStats = content.stats || { cleanliness: 50, social: 50, structure: 50, homebody: 50 };
 
       document.getElementById('rc-type-name').textContent = content.name;
       document.getElementById('rc-test-date').textContent = formatTestDate(testDate);
