@@ -85,11 +85,11 @@
     .rc-footer-brand{display:flex;align-items:center;gap:6px;margin-top:10px}
     .rc-footer-brand img{height:18px}
     .rc-footer-qr-wrap{text-align:center;flex:none}
-    .rc-footer-qr-wrap img{width:96px;height:96px}
+    .rc-footer-qr-wrap img{width:96px;height:auto}
     .rc-footer-scan{margin:4px 0 0;font:italic 600 var(--fs-sm) var(--font-serif);color:var(--muted)}
 
     /* ---------- Decorative corner ---------- */
-    .rc-corner{position:absolute;right:-40px;bottom:-40px;width:160px;height:160px;border-radius:50%;opacity:.9;filter:blur(2px);z-index:0;pointer-events:none}
+    .rc-corner{position:absolute;right:0;bottom:0;width:150px;height:auto;z-index:0;pointer-events:none}
 
     @media (max-width:720px){
       .rc-card{padding:56px 20px 28px}
@@ -139,7 +139,7 @@
       <div id="results-card-wrap" hidden>
         <div class="rc-frame">
           <div class="rc-card" id="rc-card">
-            <div class="rc-corner" id="rc-corner" aria-hidden="true"></div>
+            <img class="rc-corner" id="rc-corner" src="" alt="" aria-hidden="true" />
             <div class="rc-ribbon-wrap"><p class="rc-ribbon">Roomie Type Test</p></div>
 
             <div class="rc-top-row">
@@ -202,7 +202,7 @@
                 </div>
               </div>
               <div class="rc-footer-qr-wrap">
-                <img src="assets/site/share-qr-placeholder.svg?v=2" alt="" width="96" height="96" />
+                <img src="assets/results-card/qr-code.png" alt="" width="96" />
                 <p class="rc-footer-scan">Scan Me!</p>
               </div>
             </div>
@@ -689,7 +689,7 @@
       document.getElementById('rc-type-name').textContent = content.name;
       document.getElementById('rc-test-date').textContent = formatTestDate(testDate);
       document.getElementById('rc-description').textContent = content.description;
-      document.getElementById('rc-corner').style.background = color;
+      document.getElementById('rc-corner').src = `assets/results-card/corner-${typeKey}.png`;
       document.getElementById('rc-character-img').src = `assets/roommate-type-cards/RoommateTypeCard_${typeKey}.png`;
       document.getElementById('rc-character-img').alt = `The ${content.name}`;
 
