@@ -809,49 +809,66 @@
         (m.tone === 'good' ? bestEl : attnEl).appendChild(el);
       });
 
-      wireShareActions(typeKey, content);
+      wireShareActions(typeKey);
       document.getElementById('results-loading').hidden = true;
       document.getElementById('results-empty').hidden = true;
       document.getElementById('results-card-wrap').hidden = false;
     }
 
-    /* Share/download under the card. Both use the public copies in share/
-       (share/<type>.html and share/<type>.png -- keep them in step with the source pages
-       if those change). The folder is deliberately short and flat so shared links
-       don't expose how the site is laid out.
-       The shared link is the per-type page rather than results.html?type=<type> so
-       whoever opens it sees that type's card (a bare results.html would show *their*
-       result instead). */
+    /* Share/download under the card: the card IMAGE only -- no page, no link.
+       The image is the type's reference card (same file for Share and Download),
+       served from share/ so the address doesn't expose how the site is laid out. */
     let shownType = null;
-    function wireShareActions(typeKey, content) {
+    let shareBlob = null;   // the card PNG, prefetched so sharing can start inside the click
+    let shareFile = null;
+
+    function cardImageUrl(typeKey) {
+      /* cat was re-exported once, hence its cache-buster. */
+      return `share/${typeKey}.png${typeKey === 'cat' ? '?v=20260901-2' : ''}`;
+    }
+
+    function wireShareActions(typeKey) {
       shownType = typeKey;
+      shareBlob = null;
+      shareFile = null;
+      const url = cardImageUrl(typeKey);
       const dl = document.getElementById('ra-download');
-      /* cat was re-exported once, hence its cache-buster (same as its share/cat.html). */
-      const bust = typeKey === 'cat' ? '?v=20260901-2' : '';
-      dl.href = `share/${typeKey}.png${bust}`;
+      dl.href = url;
       dl.setAttribute('download', `myroomeo-${typeKey}-result.png`);
       document.getElementById('ra-status').textContent = '';
+      /* Prefetch: Safari drops the "user gesture" if we wait for a download inside the click. */
+      fetch(url).then((r) => (r.ok ? r.blob() : null)).then((blob) => {
+        if (!blob || shownType !== typeKey) return;
+        shareBlob = new Blob([blob], { type: 'image/png' });
+        shareFile = new File([shareBlob], `myroomeo-${typeKey}-result.png`, { type: 'image/png' });
+      }).catch(() => {});
     }
+
     document.getElementById('ra-share').addEventListener('click', async () => {
       if (!shownType) return;
       const status = document.getElementById('ra-status');
-      const label = `The ${RESULT_CONTENT[shownType].name}`;
-      const shareData = {
-        title: `My Roomie Type is ${label}`,
-        text: `I got ${label} on the MyRoomeo Roomie Type Test. What are you?`,
-        url: new URL(`share/${shownType}.html`, location.href).href
-      };
+      if (!shareFile) { status.textContent = 'The image is still loading -- try again in a second.'; return; }
+      /* 1) Phones/tablets/Safari: the OS share sheet gets the image file itself. */
       try {
-        if (navigator.share) {
-          await navigator.share(shareData);
+        if (navigator.canShare && navigator.canShare({ files: [shareFile] })) {
+          await navigator.share({ files: [shareFile] });
           status.textContent = 'Shared.';
-        } else {
-          await navigator.clipboard.writeText(`${shareData.text} ${shareData.url}`);
-          status.textContent = 'Share link copied.';
+          return;
         }
       } catch (error) {
-        if (error && error.name !== 'AbortError') status.textContent = 'Copy the page URL to share your result.';
+        if (error && error.name === 'AbortError') return;   // user closed the sheet
       }
+      /* 2) Browsers with no file sharing (most desktop): copy the image so it can be pasted. */
+      try {
+        if (navigator.clipboard && window.ClipboardItem) {
+          await navigator.clipboard.write([new ClipboardItem({ 'image/png': shareBlob })]);
+          status.textContent = 'Image copied -- paste it into a message, email or post.';
+          return;
+        }
+      } catch (_) { /* fall through */ }
+      /* 3) Last resort: show the image in a new tab to save or copy from there. */
+      const w = window.open(cardImageUrl(shownType), '_blank', 'noopener');
+      status.textContent = w ? 'Image opened in a new tab -- save or copy it from there.' : 'Use "Download card" to save the image.';
     });
 
     function showEmpty() {
