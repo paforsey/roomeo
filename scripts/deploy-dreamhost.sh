@@ -39,6 +39,7 @@ DEPLOY_PATHS=(
   scroll-world-3d.html
   scroll-world-preview.html
   assets
+  share
 )
 
 cd "$(dirname "$0")/.."

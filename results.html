@@ -13,89 +13,162 @@
     .results-loading,.results-empty{text-align:center;padding:80px 20px;color:var(--muted);font:400 var(--fs-lg) var(--font-sans)}
     .results-empty a{color:var(--orange);font-weight:600}
 
-    /* ---------- Card frame ---------- */
-    .rc-frame{background:var(--orange);border-radius:28px;padding:14px;position:relative}
-    .rc-card{background:var(--paper);border-radius:20px;padding:52px 44px 36px;position:relative;overflow:hidden}
+    /* ---------- Card frame ----------
+       The card is drawn to the 1080px-wide reference cards.
+       --u is "one reference pixel" -- 100cqw/1080 -- so every size below is the value
+       measured off the PNG and the whole card scales as one piece. Narrow screens
+       (<=720px) drop back to a stacked, fixed-px layout at the bottom of this block. */
+    #results-card-wrap{container-type:inline-size}
+    .rc-frame{--u:calc(100cqw / 1080);background:var(--orange);border-radius:0;padding:calc(var(--u)*36) calc(var(--u)*40);position:relative;overflow:hidden}
+    .rc-card{background:#faf6ee;border-radius:0 0 calc(var(--u)*32) calc(var(--u)*32);position:relative;display:flow-root}
 
-    .rc-ribbon-wrap{position:absolute;top:-9px;left:50%;transform:translateX(-50%);z-index:2}
-    .rc-ribbon{background:url('assets/results-card/title.png') no-repeat center/100% 100%;color:#3f2b1f;font:700 var(--fs-lg) var(--font-label);letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;width:340px;height:91px;display:flex;align-items:center;justify-content:center;padding:0 20px 12px;margin:0}
+    .rc-ribbon-wrap{position:absolute;top:calc(var(--u)*-3);left:50%;transform:translateX(-50%);z-index:3;pointer-events:none}
+    .rc-ribbon{background:url('assets/results-card/title.png') no-repeat center/100% 100%;color:#3a2116;font:700 calc(var(--u)*30)/1 var(--font-sans);letter-spacing:.01em;text-transform:uppercase;white-space:nowrap;width:calc(var(--u)*539);height:calc(var(--u)*144);display:flex;align-items:center;justify-content:center;padding:0 0 calc(var(--u)*28);margin:0}
 
-    .rc-top-row{display:flex;gap:16px;margin-top:34px;align-items:stretch}
-    .rc-id-box{border:1px solid var(--border);border-radius:12px;padding:16px 20px;display:flex;flex-direction:column;justify-content:space-between;min-width:210px;background:#fffdf9}
-    .rc-id-logo{height:26px;object-fit:contain;align-self:flex-start}
-    .rc-id-divider{border:none;border-top:1px solid var(--border);margin:14px 0 10px;width:100%}
-    .rc-id-date-label{font:700 var(--fs-2xs) var(--font-label);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0}
-    .rc-id-date{font:600 var(--fs-sm) var(--font-sans);color:var(--ink);margin:2px 0 0}
-
-    .rc-headline-box{flex:1;border:1px solid var(--border);border-radius:12px;padding:24px 28px;display:flex;align-items:center;background:#fffdf9}
-    .rc-headline{margin:0;font:400 var(--fs-4xl)/1.2 var(--font-serif);color:var(--ink)}
-    .rc-headline strong{display:block;font-size:clamp(40px,7vw,64px);font-weight:700}
+    /* ---------- Header: one hand-drawn box, logo/date | headline ---------- */
+    .rc-top-row{position:relative;margin:calc(var(--u)*47) calc(var(--u)*47) 0;height:calc(var(--u)*179);display:grid;grid-template-columns:calc(var(--u)*238) 1fr}
+    .rc-sketch{position:absolute;inset:0;pointer-events:none;filter:url(#rc-wobble)}
+    .rc-sketch-box{position:absolute;inset:0;border:calc(var(--u)*3) solid #6b5a50;border-radius:calc(var(--u)*3)}
+    .rc-sketch-v{position:absolute;top:0;bottom:0;left:calc(var(--u)*238);border-left:calc(var(--u)*2.5) solid #6b5a50}
+    .rc-sketch-h{position:absolute;left:0;width:calc(var(--u)*238);top:calc(var(--u)*89);border-top:calc(var(--u)*2.5) solid #6b5a50}
+    .rc-id-box{position:relative;padding:calc(var(--u)*25) calc(var(--u)*22) 0;display:flex;flex-direction:column}
+    .rc-id-logo{width:calc(var(--u)*167);height:auto;align-self:flex-start}
+    .rc-id-divider{display:none}
+    .rc-id-date-wrap{position:absolute;left:0;right:0;top:calc(var(--u)*89);bottom:0;display:flex;align-items:center;padding:0 0 0 calc(var(--u)*17)}
+    .rc-id-date-line{margin:0;font:600 calc(var(--u)*19)/1.2 var(--font-sans);letter-spacing:0;text-transform:uppercase;color:#6b5a50;white-space:nowrap}
+    .rc-headline-box{position:relative;display:flex;align-items:center;justify-content:center;padding-top:calc(var(--u)*10)}
+    .rc-headline{margin:0;display:flex;align-items:center;gap:calc(var(--u)*18);font-family:var(--font-serif);font-weight:400}
+    .rc-headline-lead{font-size:calc(var(--u)*40);color:#6b5a50}
+    .rc-headline strong{font-size:calc(var(--u)*121);line-height:1;font-weight:400;color:#2d1b14;letter-spacing:-.01em;display:block}
 
     /* ---------- Radar + character ---------- */
-    .rc-hero{display:flex;gap:24px;align-items:center;margin-top:38px;flex-wrap:wrap}
-    .rc-radar-wrap{flex:1;min-width:280px;max-width:420px}
-    .rc-radar-label{font:700 var(--fs-2xs) var(--font-label);letter-spacing:.06em;text-transform:uppercase;fill:var(--body)}
-    .rc-character{flex:1;min-width:220px;max-width:320px;display:flex;justify-content:center}
-    .rc-character img{max-height:340px;width:auto;object-fit:contain}
+    .rc-hero{position:relative;height:calc(var(--u)*390);margin:calc(var(--u)*38) 0 0 calc(var(--u)*60)}
+    .rc-radar-wrap{width:calc(var(--u)*570)}
+    .rc-radar-wrap svg{display:block;width:100%;height:auto;overflow:visible}
+    .rc-radar-label{font:700 18px var(--font-sans);letter-spacing:.01em;text-transform:uppercase;fill:#6b594f}
+    .rc-character{position:absolute;left:calc(var(--u)*581);bottom:calc(var(--u)*2);width:calc(var(--u)*304);pointer-events:none}
+    .rc-character img{display:block;width:100%;height:auto}
 
     /* ---------- Stat tiles ---------- */
-    .rc-stats{display:flex;margin-top:30px;border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:22px 0}
-    .rc-stat{flex:1;text-align:center;padding:0 12px}
-    .rc-stat + .rc-stat{border-left:1px solid var(--border)}
-    .rc-stat-label{display:flex;align-items:center;justify-content:center;gap:6px;font:700 var(--fs-2xs) var(--font-label);letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin:0 0 8px}
-    .rc-stat-value{font:700 40px/1 var(--font-sans);color:var(--orange);margin:0}
+    .rc-stats{display:grid;grid-template-columns:repeat(4,1fr);margin:calc(var(--u)*44) calc(var(--u)*69) 0}
+    .rc-stat{padding:0 0 0 calc(var(--u)*16);text-align:left}
+    .rc-stat + .rc-stat{border-left:calc(var(--u)*1.5) solid #d9d2c9}
+    .rc-stat-label{display:flex;align-items:center;gap:calc(var(--u)*7);font:700 calc(var(--u)*15)/1 var(--font-sans);letter-spacing:.07em;text-transform:uppercase;color:#6b5a50;margin:0 0 calc(var(--u)*12)}
+    .rc-stat-label svg{width:calc(var(--u)*18);height:calc(var(--u)*18);flex:none}
+    .rc-stat-value{font:700 calc(var(--u)*52)/1.05 var(--font-sans);color:var(--orange);margin:0;text-shadow:0 calc(var(--u)*2) calc(var(--u)*5) rgba(45,27,20,.13)}
 
     /* ---------- Description ---------- */
-    .rc-description{margin:28px 0 0;font:400 var(--fs-lg)/1.6 var(--font-serif);color:var(--ink)}
+    .rc-description{margin:calc(var(--u)*46) calc(var(--u)*62) 0 calc(var(--u)*68);font:400 calc(var(--u)*24.5)/calc(var(--u)*32) var(--font-serif);color:#2d1b14}
 
     /* ---------- Yay / nay ---------- */
-    .rc-yaynay{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:32px}
-    .rc-yaynay-col{border-radius:16px;padding:26px 28px}
-    .rc-yaynay-col.is-yay{background:rgba(74,140,111,.1)}
-    .rc-yaynay-col.is-nay{background:rgba(232,108,44,.08)}
-    .rc-yaynay-title{margin:0 0 16px;font:700 var(--fs-2xl) var(--font-serif)}
-    .is-yay .rc-yaynay-title{color:#2f7d51}
-    .is-nay .rc-yaynay-title{color:var(--orange)}
-    .rc-yaynay-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:12px}
-    .rc-yaynay-list li{display:flex;align-items:flex-start;gap:10px;font:400 var(--fs-base) var(--font-sans);color:var(--body)}
-    .rc-yaynay-icon{flex:none;width:20px;height:20px;margin-top:1px}
+    .rc-yaynay{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:calc(var(--u)*28);margin:calc(var(--u)*49) calc(var(--u)*48) 0}
+    .rc-yaynay-col{border-radius:calc(var(--u)*22);padding:calc(var(--u)*28) calc(var(--u)*10) calc(var(--u)*48) calc(var(--u)*32)}
+    .rc-yaynay-col.is-yay{background:#edf2eb}
+    .rc-yaynay-col.is-nay{background:#feefe4}
+    .rc-yaynay-title{margin:0 0 calc(var(--u)*24);font:700 calc(var(--u)*33)/1.15 var(--font-serif);text-transform:uppercase;letter-spacing:.005em}
+    .is-yay .rc-yaynay-title{color:#2e5742}
+    .is-nay .rc-yaynay-title{color:#c4451f}
+    .rc-yaynay-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:calc(var(--u)*18)}
+    .rc-yaynay-list li{display:flex;align-items:center;gap:calc(var(--u)*14);min-height:calc(var(--u)*26);font:400 calc(var(--u)*18)/1.2 var(--font-sans);color:#29211c;white-space:nowrap}
+    .rc-yaynay-icon{flex:none;width:calc(var(--u)*26);height:calc(var(--u)*26)}
 
     /* ---------- Matches ---------- */
-    .rc-matches{margin-top:34px}
-    .rc-matches-groups{display:grid;grid-template-columns:1fr 1fr;gap:24px}
-    .rc-matches-group-label{font:700 var(--fs-xs) var(--font-label);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0 0 14px}
-    .rc-matches-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    .rc-matches{margin:calc(var(--u)*43) calc(var(--u)*20) 0}
+    .rc-matches-groups{display:grid;grid-template-columns:1fr 1fr;gap:0}
+    .rc-matches-group-label{font:700 calc(var(--u)*15)/1 var(--font-label);letter-spacing:.005em;text-transform:uppercase;color:#1a1209;margin:0 0 calc(var(--u)*20) calc(var(--u)*40)}
+    .rc-matches-groups > div + div .rc-matches-group-label{margin-left:calc(var(--u)*86)}
+    .rc-matches-row{display:grid;grid-template-columns:1fr 1fr}
     .rc-match{text-align:center}
-    .rc-match-avatar{width:88px;height:88px;border-radius:50%;object-fit:cover;background:var(--paper);margin:0 auto 10px;display:block}
-    .rc-match-name{margin:0;font:700 var(--fs-lg) var(--font-serif);color:var(--ink)}
-    .rc-match-badge{display:inline-block;margin-top:6px;padding:4px 14px;border-radius:6px;font:700 var(--fs-2xs) var(--font-label);letter-spacing:.05em;text-transform:uppercase;color:#fff}
-    .rc-match-badge.is-good{background:#3f9d6c}
+    .rc-match-avatar{width:calc(var(--u)*120);height:calc(var(--u)*120);border-radius:50%;object-fit:cover;background:#e5e1db;margin:0 auto;display:block}
+    .rc-match-name{margin:calc(var(--u)*10) 0 0;font:700 calc(var(--u)*19)/1.2 var(--font-label);color:#111}
+    .rc-match-badge{display:inline-block;margin-top:calc(var(--u)*10);padding:calc(var(--u)*3) calc(var(--u)*8);border-radius:calc(var(--u)*3);font:700 calc(var(--u)*12)/1.25 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:#fff}
+    .rc-match-badge.is-good{background:#4a8c6f}
     .rc-match-badge.is-bad{background:var(--orange)}
 
     /* ---------- Footer ---------- */
-    .rc-footer{position:relative;z-index:1;margin-top:40px;margin-right:120px;background:#fff;border:1px solid var(--border);border-radius:16px;padding:20px 26px;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap}
-    .rc-footer-tagline{margin:0 0 10px;font:400 var(--fs-lg) var(--font-serif);color:var(--ink)}
-    .rc-footer-url{display:inline-flex;align-items:center;gap:12px;background:#fbecc4;border-radius:999px;padding:6px 20px 6px 6px;min-width:300px}
-    .rc-footer-url-logo{height:30px;width:auto;flex:none}
-    .rc-footer-url-text{flex:1;font:400 var(--fs-lg) var(--font-serif);color:var(--ink)}
-    .rc-footer-url-search{flex:none;color:var(--orange)}
-    .rc-footer-qr-wrap{text-align:center;flex:none}
-    .rc-footer-qr-wrap img{width:96px;height:auto}
-    .rc-footer-scan{margin:2px 0 0;font:600 22px 'Caveat',cursive;color:var(--blue)}
+    .rc-footer{position:relative;z-index:1;margin:calc(var(--u)*64) calc(var(--u)*20) 0;height:calc(var(--u)*176);background:#fff;border-radius:0 0 calc(var(--u)*22) calc(var(--u)*22);padding:calc(var(--u)*30) 0 0 calc(var(--u)*48);display:flex;align-items:flex-start;gap:calc(var(--u)*38)}
+    .rc-footer-tagline{margin:0;font:400 calc(var(--u)*24.1)/1.2 var(--font-serif);color:#000;white-space:nowrap}
+    .rc-footer-url{display:flex;align-items:center;width:calc(var(--u)*562);height:calc(var(--u)*68);margin-top:calc(var(--u)*23);background:#fcf1be;border-radius:calc(var(--u)*34)}
+    .rc-footer-url-logo{width:calc(var(--u)*137);height:auto;margin-left:calc(var(--u)*42);flex:none}
+    .rc-footer-url-inner{flex:1;align-self:center;height:calc(var(--u)*56);margin:0 calc(var(--u)*30) 0 calc(var(--u)*23);background:#fff;border-radius:0 calc(var(--u)*28) calc(var(--u)*28) 0;display:flex;align-items:center;justify-content:space-between;padding:0 calc(var(--u)*14) 0 calc(var(--u)*11)}
+    .rc-footer-url-text{font:400 calc(var(--u)*25.5)/1 var(--font-serif);color:#000;white-space:nowrap}
+    .rc-footer-url-search{flex:none;width:calc(var(--u)*44);height:calc(var(--u)*44)}
+    .rc-footer-qr-wrap{text-align:center;flex:none;margin-top:calc(var(--u)*-7)}
+    .rc-footer-qr-wrap img{width:calc(var(--u)*116);height:calc(var(--u)*116);object-fit:contain;margin:0 auto}
+    .rc-footer-scan{margin:calc(var(--u)*7) 0 0;font:600 calc(var(--u)*30)/1 'Caveat',cursive;color:#5e9bcf}
 
-    /* ---------- Decorative corner ---------- */
-    .rc-corner{position:absolute;right:-6px;bottom:-6px;width:130px;height:auto;z-index:0;pointer-events:none}
+    /* ---------- Decorative corner: sits over the frame, like the PNGs ---------- */
+    .rc-corner{position:absolute;right:0;bottom:0;height:auto;z-index:4;pointer-events:none}
 
+    /* ---------- Share / download block under the card ---------- */
+    .result-actions{--ra-ink:#352017;--ra-muted:#77665d;--ra-brand:#e56a43;--ra-brand-hover:#d95832;--ra-line:#ded7d0;
+      padding-top:clamp(58px,6.7vw,96px);text-align:center;color:var(--ra-ink);
+      font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+    .result-actions h1{margin:0;font-family:Georgia,"Times New Roman",serif;font-size:clamp(36px,3.2vw,48px);font-weight:400;line-height:1.08;letter-spacing:-.035em}
+    .ra-row{display:flex;justify-content:center;gap:12px;margin-top:28px}
+    .ra-btn{min-height:52px;padding:0 24px;display:inline-flex;align-items:center;justify-content:center;gap:9px;border:1px solid var(--ra-line);border-radius:999px;background:#fff;color:var(--ra-ink);text-decoration:none;font:inherit;font-weight:700;cursor:pointer;transition:transform 180ms ease,background 180ms ease,border-color 180ms ease,color 180ms ease}
+    .ra-btn.is-primary{border-color:var(--ra-brand);background:var(--ra-brand);color:#fff}
+    .ra-btn:hover{transform:translateY(-2px);border-color:#bfb2a9;background:#fffaf6}
+    .ra-btn.is-primary:hover{border-color:var(--ra-brand-hover);background:var(--ra-brand-hover)}
+    .ra-btn:focus-visible{outline:3px solid rgba(229,106,67,.28);outline-offset:3px}
+    .ra-btn svg{width:18px;height:18px;flex:0 0 auto}
+    .ra-status{min-height:20px;margin:12px 0 0;color:var(--ra-muted);font-size:14px}
+    .ra-footer{margin-top:68px;color:var(--ra-muted);font-family:Georgia,"Times New Roman",serif;font-size:14px}
+    @media (prefers-reduced-motion:reduce){.ra-btn{transition:none}}
+
+    /* ---------- Narrow screens: same pieces, stacked, real px sizes ---------- */
     @media (max-width:720px){
-      .rc-card{padding:56px 20px 28px}
-      .rc-ribbon{font-size:11px;width:240px;height:64px;padding:0 14px 10px}
-      .rc-top-row{flex-direction:column}
-      .rc-id-box{min-width:0}
-      .rc-yaynay{grid-template-columns:1fr}
-      .rc-matches-groups{grid-template-columns:1fr}
-      .rc-stats{flex-wrap:wrap;gap:16px 0}
-      .rc-stat{flex:1 1 50%;padding-bottom:12px}
-      .rc-stat + .rc-stat{border-left:none}
+      .rc-frame{padding:14px;border-radius:0}
+      .rc-card{padding:0 0 22px;border-radius:0 0 18px 18px}
+      .rc-ribbon-wrap{top:-6px}
+      .rc-ribbon{width:300px;height:80px;font-size:15px;padding-bottom:24px}
+      .rc-top-row{grid-template-columns:1fr;height:auto;margin:60px 16px 0}
+      .rc-sketch-v,.rc-sketch-h{display:none}
+      .rc-id-box{flex-direction:row;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:2px solid #6b5a50}
+      .rc-id-logo{width:120px}
+      .rc-id-date-wrap{position:static;display:block;margin:0;padding:0 0 0 10px;text-align:right}
+      .rc-id-date-line{font-size:12px}
+      .rc-headline-box{padding:14px 12px 18px}
+      .rc-headline{gap:10px;flex-wrap:wrap;justify-content:center}
+      .rc-headline-lead{font-size:22px}
+      .rc-headline strong{font-size:60px}
+      .rc-hero{height:auto;display:flex;flex-direction:column;align-items:center;margin:20px 12px 0}
+      .rc-radar-wrap{width:100%;max-width:400px}
+      .rc-radar-label{font-size:17px}
+      .rc-character{position:static;margin:6px 0 0;width:min(56%,210px)}
+      .rc-stats{grid-template-columns:1fr 1fr;margin:20px 20px 0;row-gap:18px}
+      .rc-stat{padding-left:12px}
+      .rc-stat:nth-child(odd){border-left:none;padding-left:0}
+      .rc-stat-label{font-size:11px;gap:6px;margin-bottom:6px}
+      .rc-stat-label svg{width:14px;height:14px}
+      .rc-stat-value{font-size:34px}
+      .rc-description{margin:22px 20px 0;font-size:15px;line-height:1.55}
+      .rc-yaynay{grid-template-columns:1fr;gap:14px;margin:24px 16px 0}
+      .rc-yaynay-col{border-radius:16px;padding:20px 20px 18px}
+      .rc-yaynay-title{font-size:22px;margin-bottom:14px}
+      .rc-yaynay-list{gap:12px}
+      .rc-yaynay-list li{font-size:15px;gap:10px;min-height:22px;white-space:normal}
+      .rc-yaynay-icon{width:22px;height:22px}
+      .rc-matches{margin:26px 16px 0}
+      .rc-matches-groups{grid-template-columns:1fr;row-gap:22px}
+      .rc-matches-group-label,.rc-matches-groups > div + div .rc-matches-group-label{font-size:12px;margin:0 0 12px 4px}
+      .rc-match-avatar{width:84px;height:84px}
+      .rc-match-name{font-size:16px;margin-top:8px}
+      .rc-match-badge{font-size:10px;padding:3px 8px;margin-top:6px}
+      .rc-footer{height:auto;margin:28px 12px 0;padding:18px;flex-direction:column;align-items:center;gap:16px;text-align:center;border-radius:0 0 16px 16px}
+      .rc-footer-tagline{font-size:17px;white-space:normal}
+      .rc-footer-url{width:100%;max-width:340px;height:52px;margin-top:12px;border-radius:26px}
+      .rc-footer-url-logo{width:88px;margin-left:16px}
+      .rc-footer-url-inner{height:42px;margin:0 12px 0 10px;border-radius:0 21px 21px 0;padding:0 8px}
+      .rc-footer-url-text{font-size:14px}
+      .rc-footer-url-search{width:28px;height:28px}
+      .rc-footer-qr-wrap img{width:96px;height:96px}
+      .rc-footer-scan{font-size:22px}
+      .rc-corner{width:88px !important}
+      .result-actions{padding-top:44px}
+      .ra-row{flex-direction:column}
+      .ra-btn{width:100%}
+      .ra-footer{margin-top:52px}
     }
   </style>
 </head>
@@ -132,28 +205,31 @@
       </div>
 
       <div id="results-card-wrap" hidden>
+        <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+          <filter id="rc-wobble" x="-2%" y="-2%" width="104%" height="104%">
+            <feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="7" result="n" />
+            <feDisplacementMap in="SourceGraphic" in2="n" scale="4" xChannelSelector="R" yChannelSelector="G" />
+          </filter>
+        </svg>
         <div class="rc-frame">
           <div class="rc-ribbon-wrap"><p class="rc-ribbon">Roomie Type Test</p></div>
           <div class="rc-card" id="rc-card">
-            <img class="rc-corner" id="rc-corner" src="" alt="" aria-hidden="true" />
-
             <div class="rc-top-row">
+              <div class="rc-sketch" aria-hidden="true"><span class="rc-sketch-box"></span><span class="rc-sketch-v"></span><span class="rc-sketch-h"></span></div>
               <div class="rc-id-box">
                 <img class="rc-id-logo" src="assets/brand/logo02.svg" alt="MyRoomeo" />
-                <div>
-                  <hr class="rc-id-divider" />
-                  <p class="rc-id-date-label">Test date</p>
-                  <p class="rc-id-date" id="rc-test-date">—</p>
+                <div class="rc-id-date-wrap">
+                  <p class="rc-id-date-line">Test date /<span id="rc-test-date">—</span></p>
                 </div>
               </div>
               <div class="rc-headline-box">
-                <p class="rc-headline">You are a <strong id="rc-type-name">—</strong></p>
+                <p class="rc-headline"><span class="rc-headline-lead">You are a</span> <strong id="rc-type-name">—</strong></p>
               </div>
             </div>
 
             <div class="rc-hero">
               <div class="rc-radar-wrap">
-                <svg id="rc-radar" viewBox="-60 -60 440 440" width="100%" role="img" aria-label="Trait radar chart"></svg>
+                <svg id="rc-radar" viewBox="100 300 570 390" role="img" aria-label="Trait radar chart"></svg>
               </div>
               <div class="rc-character">
                 <img id="rc-character-img" src="" alt="" />
@@ -193,17 +269,34 @@
                 <p class="rc-footer-tagline">What's your Roomie Type? Take it. Share it. Match up.</p>
                 <div class="rc-footer-url">
                   <img class="rc-footer-url-logo" src="assets/brand/logo02.svg" alt="MyRoomeo" />
-                  <span class="rc-footer-url-text">https://myroomeo.com/</span>
-                  <svg class="rc-footer-url-search" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                  <div class="rc-footer-url-inner">
+                    <span class="rc-footer-url-text">https://myroomeo.com/</span>
+                    <svg class="rc-footer-url-search" viewBox="0 0 44 44" aria-hidden="true">
+                      <circle cx="18" cy="18" r="11.5" fill="#fff6cf" stroke="#f6b400" stroke-width="4.5" />
+                      <path d="M12.5 13.5a7.5 7.5 0 0 1 6-3" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" opacity=".9" />
+                      <path d="M27 27l11 11" stroke="#e86c2c" stroke-width="6" stroke-linecap="round" />
+                    </svg>
+                  </div>
                 </div>
               </div>
               <div class="rc-footer-qr-wrap">
-                <img src="assets/results-card/qr-code.png" alt="" width="96" />
+                <img src="assets/results-card/qr-code.png" alt="" />
                 <p class="rc-footer-scan">Scan Me!</p>
               </div>
             </div>
           </div>
+          <img class="rc-corner" id="rc-corner" src="" alt="" aria-hidden="true" />
         </div>
+
+        <section class="result-actions">
+          <h1>Share your roomie type</h1>
+          <div class="ra-row">
+            <button class="ra-btn is-primary" type="button" id="ra-share"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 16V3m0 0 4 4m-4-4L8 7M5 13v6h14v-6"/></svg>Share result</button>
+            <a class="ra-btn" id="ra-download" href="#" download><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 19h14"/></svg>Download card</a>
+          </div>
+          <p class="ra-status" id="ra-status" aria-live="polite"></p>
+          <footer class="ra-footer">© 2026 MyRoomeo. All rights reserved.</footer>
+        </section>
       </div>
     </main>
   </div>
@@ -530,18 +623,10 @@
     })();
 
     /* ---------- Results card content, transcribed per type ---------- */
-    const RESULT_COLORS = {
-      turtle: 'var(--green)',
-      owl: 'var(--blue)',
-      fox: 'var(--orange)',
-      cat: 'var(--purple)',
-      bunny: 'var(--pink)',
-      beaver: '#8a5a34'
-    };
-
     const RESULT_CONTENT = {
       turtle: {
         name: 'Turtle',
+        radar: [63, 30, 33, 100, 30, 76, 67, 0],
         stats: { social: 29, cleanliness: 64, structure: 61, homebody: 100 },
         description: "Warm, steady, and most likely to turn a kitchen run-in into an actual catch-up. You help a shared place feel like home, but your “whatever works” may hide what you really want. Cozy roommate energy with a small risk of becoming the unpaid house therapist.",
         yay: ['Slow mornings', 'Staying comfortably home', 'Familiar routines, same mug, same seat', 'Low-key roommates', 'Shared supplies that get replaced'],
@@ -555,6 +640,7 @@
       },
       owl: {
         name: 'Owl',
+        radar: [69, 9, 6, 86, 0, 91, 64, 15],
         stats: { social: 0, cleanliness: 74, structure: 63, homebody: 71 },
         description: "Quiet, reliable, and mysteriously awake at 1:43 a.m. You give roommates plenty of space and rarely bring chaos home, though your silence may leave people wondering whether you're tired or secretly mad. Low drama, early payments, emotional status: buffering.",
         yay: ['Quiet hours that actually clock in', 'Rent paid before the Venmo request', 'A sink with zero jump scares', 'Guest notices with timestamps', 'Organized spaces'],
@@ -568,6 +654,7 @@
       },
       fox: {
         name: 'Fox',
+        radar: [25, 75, 66, 30, 74, 32, 0, 75],
         stats: { social: 67, cleanliness: 33, structure: 0, homebody: 33 },
         description: "Flexible, social, and often out collecting unexplained lore. You may not be home much, but your mug and unfinished chore sometimes stay behind as your representatives. You thrive with roommates who can embrace spontaneous plans without needing a detailed itinerary.",
         yay: ['Witty conversations', 'Roommates with separate lives and hobbies', 'Exploring new places', 'Last-minute plans', 'Spontaneous adventures'],
@@ -581,6 +668,7 @@
       },
       cat: {
         name: 'Cat',
+        radar: [0, 31, 88, 90, 75, 41, 24, 67],
         stats: { social: 50, cleanliness: 0, structure: 5, homebody: 15 },
         description: "Independent, low-pressure, and happiest at home without being socially on call. You give roommates plenty of space, though your “I'll deal with it later” era may leave behind a dish, a bill reminder, or an empty detergent bottle. Peaceful? Usually. Traceable? Debatable.",
         yay: ['A closed door and zero follow up questions', 'Parallel play in separate rooms', 'Late breakfast at 2:17 p.m.', 'Blankets with emotional support status', 'Roommates who knock like civilized people'],
@@ -594,6 +682,7 @@
       },
       bunny: {
         name: 'Bunny',
+        radar: [50, 99, 86, 66, 46, 0, 11, 36],
         stats: { social: 100, cleanliness: 52, structure: 5, homebody: 15 },
         description: "Social, spontaneous, and capable of turning dinner into a full hangout. You make home feel lively, though the doorbell may occasionally update your roommates before the group chat does. You thrive with people who enjoy shared time and don't treat every guest like a security incident.",
         yay: ['Brunch dates', 'Kitchen debriefs with the full lore', 'A living room with actual life in it', 'Shared snacks, shared screens, shared chaos', 'Roommates down for one more episode'],
@@ -607,6 +696,7 @@
       },
       beaver: {
         name: 'Beaver',
+        radar: [90, 9, 6, 86, 0, 91, 96, 15],
         stats: { social: 9, cleanliness: 100, structure: 100, homebody: 85 },
         description: "Organized, reliable, and usually the first to notice when the paper towels are gone. You may call it basic responsibility, your roommates may call it a surprise performance review. Either way, the bills get paid, the kitchen recovers, and the household somehow keeps functioning.",
         yay: ['A chore chart with active users', 'Rent paid before the due date jump scare', 'A sink at inbox zero', 'Toilet paper replaced before the final square', 'Guest plans with actual advance notice'],
@@ -620,66 +710,49 @@
       }
     };
 
-    const RADAR_AXES = [
-      { key: 'cleanliness', label: 'Tidy', invert: false },
-      { key: 'social', label: 'Social', invert: false },
-      { key: 'structure', label: 'Spontaneous', invert: true },
-      { key: 'homebody', label: 'Homebody', invert: false },
-      { key: 'cleanliness', label: 'Messy', invert: true },
-      { key: 'social', label: 'Independent', invert: true },
-      { key: 'structure', label: 'Structure', invert: false },
-      { key: 'homebody', label: 'Out & About', invert: true }
-    ];
+    /* Spoke order matches the `radar` arrays in RESULT_CONTENT. */
+    const RADAR_LABELS = ['Tidy', 'Social', 'Spontaneous', 'Homebody', 'Messy', 'Independent', 'Structure', 'Out & About'];
 
-    /** Builds the 8-point bipolar radar (Tidy/Messy, Social/Independent,
-        Structure/Spontaneous, Homebody/Out & About) from the 4 axis percents
-        already computed in quiz.html (see axisPercents() there). */
-    function renderRadar(svg, stats, color) {
-      const cx = 160, cy = 160, rMax = 118;
-      const n = RADAR_AXES.length;
-      const points = RADAR_AXES.map((axis, i) => {
-        const raw = stats[axis.key] == null ? 50 : stats[axis.key];
-        const val = axis.invert ? 100 - raw : raw;
-        const angle = (Math.PI * 2 * i) / n - Math.PI / 2;
-        const r = (val / 100) * rMax;
-        return { x: cx + r * Math.cos(angle), y: cy + r * Math.sin(angle), angle, label: axis.label };
+    /** Draws the 8-spoke radar exactly like the reference cards, in the same
+        coordinate space as those 1080px PNGs (the <svg> viewBox is a window
+        onto it): cream octagon, faint rings + spokes, orange shape, white-ringed
+        dots, bold caps labels. `values` = 8 numbers 0-100 in RADAR_LABELS order. */
+    function renderRadar(svg, values) {
+      const cx = 374.5, cy = 490.5, R = 138.5, n = 8;
+      const ang = (i) => (Math.PI * 2 * i) / n - Math.PI / 2;
+      const pt = (i, r) => [cx + r * Math.cos(ang(i)), cy + r * Math.sin(ang(i))];
+      const poly = (r) => RADAR_LABELS.map((_, i) => pt(i, r).map((v) => v.toFixed(1)).join(',')).join(' ');
+      let h = `<polygon points="${poly(R)}" fill="#feefce" />`;
+      [0.25, 0.5, 0.75].forEach((lvl) => { h += `<polygon points="${poly(R * lvl)}" fill="none" stroke="#f6e5c0" stroke-width="1.4" />`; });
+      RADAR_LABELS.forEach((_, i) => {
+        const [x, y] = pt(i, R);
+        h += `<line x1="${cx}" y1="${cy}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}" stroke="#f6e5c0" stroke-width="1.4" />`;
       });
-      const ringLevels = [0.25, 0.5, 0.75, 1];
-      let svgHtml = '';
-      ringLevels.forEach((lvl) => {
-        const ringPts = RADAR_AXES.map((axis, i) => {
-          const angle = (Math.PI * 2 * i) / n - Math.PI / 2;
-          const r = lvl * rMax;
-          return `${cx + r * Math.cos(angle)},${cy + r * Math.sin(angle)}`;
-        }).join(' ');
-        svgHtml += `<polygon points="${ringPts}" fill="none" stroke="var(--border)" stroke-width="1" />`;
+      const pts = RADAR_LABELS.map((_, i) => pt(i, R * Math.max(0, Math.min(100, values[i] || 0)) / 100));
+      h += `<polygon points="${pts.map((p) => p.map((v) => v.toFixed(1)).join(',')).join(' ')}" fill="#e86c2c" fill-opacity=".38" stroke="#e86c2c" stroke-width="4" stroke-linejoin="round" />`;
+      pts.forEach(([x, y]) => { h += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="7.5" fill="#e86c2c" stroke="#fff" stroke-width="2.5" />`; });
+      RADAR_LABELS.forEach((label, i) => {
+        const c = Math.cos(ang(i));
+        const anchor = c > 0.3 ? 'start' : c < -0.3 ? 'end' : 'middle';
+        const r = Math.abs(c) > 0.9 ? R + 20 : Math.abs(c) < 0.1 ? R + 18 : R + 12;
+        const [x, y] = pt(i, r);
+        h += `<text x="${x.toFixed(1)}" y="${y.toFixed(1)}" text-anchor="${anchor}" dominant-baseline="middle" class="rc-radar-label">${label.replace('&', '&amp;')}</text>`;
       });
-      RADAR_AXES.forEach((axis, i) => {
-        const angle = (Math.PI * 2 * i) / n - Math.PI / 2;
-        const x2 = cx + rMax * Math.cos(angle);
-        const y2 = cy + rMax * Math.sin(angle);
-        svgHtml += `<line x1="${cx}" y1="${cy}" x2="${x2}" y2="${y2}" stroke="var(--border)" stroke-width="1" />`;
-      });
-      const shapePts = points.map((p) => `${p.x},${p.y}`).join(' ');
-      svgHtml += `<polygon points="${shapePts}" fill="${color}" fill-opacity=".35" stroke="${color}" stroke-width="2.5" stroke-linejoin="round" />`;
-      points.forEach((p) => {
-        svgHtml += `<circle cx="${p.x}" cy="${p.y}" r="3.5" fill="${color}" />`;
-      });
-      RADAR_AXES.forEach((axis, i) => {
-        const angle = (Math.PI * 2 * i) / n - Math.PI / 2;
-        const lx = cx + (rMax + 20) * Math.cos(angle);
-        const ly = cy + (rMax + 20) * Math.sin(angle);
-        const anchor = Math.cos(angle) > 0.3 ? 'start' : Math.cos(angle) < -0.3 ? 'end' : 'middle';
-        svgHtml += `<text x="${lx}" y="${ly}" text-anchor="${anchor}" dominant-baseline="middle" class="rc-radar-label" font-size="10">${axis.label}</text>`;
-      });
-      svg.innerHTML = svgHtml;
+      svg.innerHTML = h;
     }
 
-    /* Matches account.html's formatTimestampFull() so "test taken" dates read
-       the same way everywhere on the site. */
+    const STAT_ICONS = {
+      social: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
+      cleanliness: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.94 14.34 4 20.5"/><path d="m14 4 1.2 2.8L18 8l-2.8 1.2L14 12l-1.2-2.8L10 8l2.8-1.2z"/><path d="m5 5 .7 1.6L7.3 7.3 5.7 8 5 9.6 4.3 8 2.7 7.3l1.6-.7z"/><path d="m18 14 .7 1.6 1.6.7-1.6.7L18 18.6l-.7-1.6-1.6-.7 1.6-.7z"/></svg>',
+      structure: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg>',
+      homebody: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>'
+    };
+
+    /* The card's own date format, as drawn on the reference cards:
+       "TEST DATE /2026 7.23" -> year, then month.day (no zero-padding). */
     function formatTestDate(date) {
       if (!date) return '—';
-      return date.toLocaleString();
+      return `${date.getFullYear()} ${date.getMonth() + 1}.${date.getDate()}`;
     }
 
     /* stats/radar are fixed per type (content.stats below), not computed from
@@ -689,30 +762,32 @@
     function renderResultsCard(typeKey, stats, testDate) {
       const content = RESULT_CONTENT[typeKey];
       if (!content) { showEmpty(); return; }
-      const color = RESULT_COLORS[typeKey] || 'var(--orange)';
       /* Radar shape is fixed per type -- every Beaver's spider chart looks
-         the same, drawn from the reference numbers in content.stats.
+         the same (content.radar, measured off the reference card).
          The 4 stat tiles below it are a different thing: the person's own
          computed answers, which can vary between two people who got the
          same type. Fall back to the canonical numbers only if we truly
          don't have the person's real ones (e.g. a very old account). */
-      const radarStats = content.stats || { cleanliness: 50, social: 50, structure: 50, homebody: 50 };
-      const displayStats = stats || radarStats;
+      const displayStats = stats || content.stats;
 
       document.getElementById('rc-type-name').textContent = content.name;
       document.getElementById('rc-test-date').textContent = formatTestDate(testDate);
       document.getElementById('rc-description').textContent = content.description;
-      document.getElementById('rc-corner').src = `assets/results-card/corner-${typeKey}.png`;
+      const corner = document.getElementById('rc-corner');
+      /* Corner art is drawn 1:1 in the reference (native px at the 1080 layout), so
+         size it by the card's --u unit once its natural width is known. */
+      corner.onload = () => { corner.style.width = `calc(var(--u) * ${corner.naturalWidth})`; };
+      corner.src = `assets/results-card/corner-${typeKey}.png`;
       document.getElementById('rc-character-img').src = `assets/results-card/character-${typeKey}.png`;
       document.getElementById('rc-character-img').alt = `The ${content.name}`;
 
-      renderRadar(document.getElementById('rc-radar'), radarStats, color);
+      renderRadar(document.getElementById('rc-radar'), content.radar);
 
       const statsEl = document.getElementById('rc-stats');
       statsEl.innerHTML = ['social', 'cleanliness', 'structure', 'homebody'].map((key) => {
         const labelMap = { social: 'Social energy', cleanliness: 'Cleanliness', structure: 'Structured', homebody: 'Homebody' };
         const val = displayStats[key] == null ? '—' : displayStats[key] + '%';
-        return `<div class="rc-stat"><p class="rc-stat-label">${labelMap[key]}</p><p class="rc-stat-value">${val}</p></div>`;
+        return `<div class="rc-stat"><p class="rc-stat-label">${STAT_ICONS[key]}${labelMap[key]}</p><p class="rc-stat-value">${val}</p></div>`;
       }).join('');
 
       const yayEl = document.getElementById('rc-yay-list');
@@ -734,10 +809,50 @@
         (m.tone === 'good' ? bestEl : attnEl).appendChild(el);
       });
 
+      wireShareActions(typeKey, content);
       document.getElementById('results-loading').hidden = true;
       document.getElementById('results-empty').hidden = true;
       document.getElementById('results-card-wrap').hidden = false;
     }
+
+    /* Share/download under the card. Both use the public copies in share/
+       (share/<type>.html and share/<type>.png -- keep them in step with the source pages
+       if those change). The folder is deliberately short and flat so shared links
+       don't expose how the site is laid out.
+       The shared link is the per-type page rather than results.html?type=<type> so
+       whoever opens it sees that type's card (a bare results.html would show *their*
+       result instead). */
+    let shownType = null;
+    function wireShareActions(typeKey, content) {
+      shownType = typeKey;
+      const dl = document.getElementById('ra-download');
+      /* cat was re-exported once, hence its cache-buster (same as its share/cat.html). */
+      const bust = typeKey === 'cat' ? '?v=20260901-2' : '';
+      dl.href = `share/${typeKey}.png${bust}`;
+      dl.setAttribute('download', `myroomeo-${typeKey}-result.png`);
+      document.getElementById('ra-status').textContent = '';
+    }
+    document.getElementById('ra-share').addEventListener('click', async () => {
+      if (!shownType) return;
+      const status = document.getElementById('ra-status');
+      const label = `The ${RESULT_CONTENT[shownType].name}`;
+      const shareData = {
+        title: `My Roomie Type is ${label}`,
+        text: `I got ${label} on the MyRoomeo Roomie Type Test. What are you?`,
+        url: new URL(`share/${shownType}.html`, location.href).href
+      };
+      try {
+        if (navigator.share) {
+          await navigator.share(shareData);
+          status.textContent = 'Shared.';
+        } else {
+          await navigator.clipboard.writeText(`${shareData.text} ${shareData.url}`);
+          status.textContent = 'Share link copied.';
+        }
+      } catch (error) {
+        if (error && error.name !== 'AbortError') status.textContent = 'Copy the page URL to share your result.';
+      }
+    });
 
     function showEmpty() {
       document.getElementById('results-loading').hidden = true;
@@ -773,7 +888,20 @@
       });
     }
 
+    /** One page, six results: results.html?type=fox (turtle|owl|fox|cat|bunny|beaver)
+        renders that type's card straight from RESULT_CONTENT -- no login or
+        quiz session needed, so a type's card is linkable/previewable directly.
+        Takes priority over the account/session lookup below. */
+    function typeFromUrl() {
+      try {
+        const t = (new URLSearchParams(location.search).get('type') || '').toLowerCase();
+        return RESULT_CONTENT[t] ? t : null;
+      } catch (_) { return null; }
+    }
+
     firebase.auth().onAuthStateChanged((user) => {
+      const urlType = typeFromUrl();
+      if (urlType) { renderResultsCard(urlType, null, new Date()); return; }
       if (user) {
         loadFromAccount(user.uid)
           .then((result) => {
