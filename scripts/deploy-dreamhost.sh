@@ -50,7 +50,8 @@ if [[ ! -f "$SSH_KEY" ]]; then
   exit 1
 fi
 
-RSYNC_FLAGS=(-az)
+# .DS_Store (Finder metadata) lists folder contents -- never publish it.
+RSYNC_FLAGS=(-az --exclude=.DS_Store)
 if [[ "${1:-}" == "--dry-run" ]]; then
   echo "Dry run — no files will actually be uploaded."
   RSYNC_FLAGS+=(--dry-run -v)
