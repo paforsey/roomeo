@@ -1,0 +1,3 @@
+# Don't list a folder's files when it has no index page (e.g. /assets/brand/).
+# Visitors get a 403 instead of a file listing that shows how the site is laid out.
+Options -Indexes

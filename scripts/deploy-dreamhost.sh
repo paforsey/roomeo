@@ -29,6 +29,7 @@ SSH_KEY="${SSH_KEY:-$HOME/.ssh/id_ed25519_myroomeo}"
 
 # Files/directories that make up the live static site.
 DEPLOY_PATHS=(
+  .htaccess
   index.html
   quiz.html
   account.html
