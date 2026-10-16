@@ -18,7 +18,10 @@
        --u is "one reference pixel" -- 100cqw/1080 -- so every size below is the value
        measured off the PNG and the whole card scales as one piece. Narrow screens
        (<=720px) drop back to a stacked, fixed-px layout at the bottom of this block. */
-    #results-card-wrap{container-type:inline-size}
+    /* .rc-fit sizes the card so the whole thing fits on screen when the page opens:
+       its width is the viewport height (minus header + page padding) divided by the
+       card's height-to-width ratio (~1.88), never below 380px. */
+    .rc-fit{container-type:inline-size;width:min(100%,max(380px,calc((100svh - 136px) / 1.88)));margin:0 auto}
     .rc-frame{--u:calc(100cqw / 1080);--ink:#2d1b14;--line:calc(var(--u)*3);background:var(--orange);border-radius:0;padding:calc(var(--u)*70) calc(var(--u)*80) calc(var(--u)*90);position:relative;overflow:hidden}
     .rc-card{background:#faf6ee;border-radius:calc(var(--u)*40);box-shadow:0 0 0 var(--line) var(--ink);position:relative;z-index:1;display:flow-root}
     /* Striped backing card peeking out behind the main card, like a stack of retro postcards. */
@@ -127,6 +130,7 @@
 
     /* ---------- Narrow screens: same pieces, stacked, real px sizes ---------- */
     @media (max-width:720px){
+      .rc-fit{width:100%}
       .rc-frame{padding:20px 22px 30px;border-radius:0;--line:2px}
       .rc-back{inset:20px 22px 30px;transform:translate(8px,9px) rotate(1.4deg);border-radius:22px;background:repeating-linear-gradient(90deg,#fbe9d6 0 10px,#f3a678 10px 20px)}
       .rc-card{padding:0;border-radius:22px}
@@ -213,6 +217,7 @@
       </div>
 
       <div id="results-card-wrap" hidden>
+        <div class="rc-fit">
         <div class="rc-frame">
           <div class="rc-back" aria-hidden="true"></div>
           <div class="rc-card" id="rc-card">
@@ -305,6 +310,7 @@
             </div>
           </div>
           <img class="rc-corner" id="rc-corner" src="" alt="" aria-hidden="true" />
+        </div>
         </div>
 
         <section class="result-actions">
