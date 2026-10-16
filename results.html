@@ -25,12 +25,18 @@
 
     /* ---------- Header: round "Roomie type test" stamp + headline, one row ---------- */
     .rc-top-row{display:flex;align-items:center;justify-content:center;gap:calc(var(--u)*40);margin:calc(var(--u)*64) calc(var(--u)*47) 0}
-    .rc-stamp{flex:none;width:calc(var(--u)*132);height:calc(var(--u)*132);transform:rotate(-8deg)}
-    .rc-stamp svg{display:block;width:100%;height:100%}
-    .rc-stamp-text{font:700 13.5px var(--font-label);letter-spacing:.1em;fill:#fff7ec}
     .rc-headline{margin:0;display:flex;align-items:baseline;gap:calc(var(--u)*20);white-space:nowrap;font-family:var(--font-serif);font-weight:400}
     .rc-headline-lead{font-size:calc(var(--u)*44);font-style:italic;color:var(--orange)}
-    .rc-headline strong{font-size:calc(var(--u)*150);line-height:1;font-weight:700;color:#2d1b14;letter-spacing:-.03em;display:block}
+    .rc-headline strong{position:relative;z-index:0;font-size:calc(var(--u)*150);line-height:1;font-weight:700;color:#2d1b14;letter-spacing:-.03em;display:block}
+    /* Hand-drawn ink underline under the type name (pseudo-element, so it
+       survives renderResultsCard() rewriting the name's text). */
+    .rc-headline strong::after{content:"";position:absolute;left:-3%;width:106%;bottom:calc(var(--u)*-6);height:calc(var(--u)*22);
+      background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 20' preserveAspectRatio='none'%3E%3Cpath d='M4 13 C 30 8, 58 11, 88 9 S 150 7, 196 10' fill='none' stroke='%232d1b14' stroke-width='4' stroke-linecap='round' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E") no-repeat center/100% 100%}
+
+    /* ---------- Sticker: flat ink-line stamp, sits inside the card ---------- */
+    .rc-sticker{position:absolute;z-index:2;left:calc(var(--u)*-62);bottom:calc(var(--u)*18);width:calc(var(--u)*118);height:calc(var(--u)*118);pointer-events:none}
+    .rc-sticker svg{display:block;width:100%;height:100%;overflow:visible}
+    .rc-st-ringtext{font:700 14px var(--font-label);letter-spacing:.08em;fill:#2d1b14}
 
     /* ---------- Radar + character ---------- */
     .rc-hero{position:relative;height:calc(var(--u)*390);margin:calc(var(--u)*38) 0 0 calc(var(--u)*60)}
@@ -88,6 +94,11 @@
     .rc-footer-qr-wrap img{width:calc(var(--u)*116);height:calc(var(--u)*116);object-fit:contain;margin:0 auto}
     .rc-footer-scan{margin:calc(var(--u)*7) 0 0;font:600 calc(var(--u)*30)/1 'Caveat',cursive;color:#5e9bcf}
 
+    .rc-match-stamp{display:inline-block;padding:calc(var(--u)*12);background:#efdcbc;
+      -webkit-mask:linear-gradient(#000 0 0) content-box,radial-gradient(circle at center,#0000 calc(var(--u)*5),#000 calc(var(--u)*5.6)) calc(var(--u)*-7) calc(var(--u)*-7)/calc(var(--u)*14) calc(var(--u)*14) round;
+              mask:linear-gradient(#000 0 0) content-box,radial-gradient(circle at center,#0000 calc(var(--u)*5),#000 calc(var(--u)*5.6)) calc(var(--u)*-7) calc(var(--u)*-7)/calc(var(--u)*14) calc(var(--u)*14) round}
+    .rc-match-stamp .rc-match-avatar{border-radius:calc(var(--u)*3);outline:calc(var(--u)*2) solid #2d1b14;outline-offset:calc(var(--u)*-2)}
+
     /* ---------- Decorative corner: sits over the frame, like the PNGs ---------- */
     .rc-corner{position:absolute;right:0;bottom:0;height:auto;z-index:4;pointer-events:none}
 
@@ -119,14 +130,14 @@
       .rc-frame{padding:14px;border-radius:0}
       .rc-card{padding:0 0 22px;border-radius:0 0 18px 18px}
       .rc-top-row{gap:14px;margin:36px 14px 0}
-      .rc-stamp{width:72px;height:72px}
       .rc-headline{gap:8px}
       .rc-headline-lead{font-size:20px}
       .rc-headline strong{font-size:60px}
       .rc-hero{height:auto;display:flex;flex-direction:column;align-items:center;margin:20px 12px 0}
       .rc-radar-wrap{width:100%;max-width:400px}
       .rc-radar-label{font-size:17px}
-      .rc-character{position:static;margin:6px 0 0;width:min(56%,210px)}
+      .rc-character{position:relative;left:auto;bottom:auto;margin:6px 0 0;width:min(56%,210px)}
+      .rc-sticker{width:78px;height:78px;left:-34px;bottom:8px}
       .rc-stats{grid-template-columns:1fr 1fr;margin:20px 20px 0;row-gap:18px}
       .rc-stat{padding-left:12px}
       .rc-stat:nth-child(odd){border-left:none;padding-left:0}
@@ -144,6 +155,7 @@
       .rc-matches-groups{grid-template-columns:1fr;row-gap:22px}
       .rc-matches-group-label,.rc-matches-groups > div + div .rc-matches-group-label{font-size:12px;margin:0 0 12px 4px}
       .rc-match-avatar{width:84px;height:84px}
+      .rc-match-stamp{padding:7px}
       .rc-match-name{font-size:16px;margin-top:8px}
       .rc-match-badge{font-size:10px;padding:3px 8px;margin-top:6px}
       .rc-footer{height:auto;margin:28px 12px 0;padding:18px;flex-direction:column;align-items:center;gap:16px;text-align:center;border-radius:0 0 16px 16px}
@@ -205,19 +217,6 @@
         <div class="rc-frame">
           <div class="rc-card" id="rc-card">
             <div class="rc-top-row">
-              <div class="rc-stamp" aria-hidden="true">
-                <svg viewBox="0 0 146 146" focusable="false">
-                  <defs><path id="rc-stamp-ring" d="M73 73 m-50 0 a50 50 0 1 1 100 0 a50 50 0 1 1 -100 0" /></defs>
-                  <circle cx="73" cy="73" r="70" fill="#e86c2c" />
-                  <circle cx="73" cy="73" r="63" fill="none" stroke="#fff7ec" stroke-width="1.6" stroke-opacity=".7" />
-                  <text class="rc-stamp-text"><textPath href="#rc-stamp-ring" textLength="312" lengthAdjust="spacing">ROOMIE TYPE TEST ✦ ROOMIE TYPE TEST ✦</textPath></text>
-                  <g fill="none" stroke="#fff7ec" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M57 74 L73 60 L89 74" />
-                    <path d="M61 71 V88 H85 V71" />
-                    <path d="M70 88 V81 H76 V88" />
-                  </g>
-                </svg>
-              </div>
               <p class="rc-headline"><span class="rc-headline-lead">You are a</span> <strong id="rc-type-name">—</strong></p>
             </div>
 
@@ -227,6 +226,23 @@
               </div>
               <div class="rc-character">
                 <img id="rc-character-img" src="" alt="" />
+                <div class="rc-sticker" aria-hidden="true">
+                  <svg viewBox="0 0 146 146" focusable="false">
+                    <defs><path id="rc-st-ring" d="M73 73 m-49 0 a49 49 0 1 1 98 0 a49 49 0 1 1 -98 0" /></defs>
+                    <g filter="url(#rc-wobble)">
+                      <circle cx="73" cy="73" r="68" fill="#fff3e2" stroke="#2d1b14" stroke-width="3" />
+                      <circle cx="73" cy="73" r="36" fill="none" stroke="#2d1b14" stroke-width="1.8" />
+                      <text class="rc-st-ringtext"><textPath href="#rc-st-ring" textLength="304" lengthAdjust="spacing">ROOMIE TYPE TEST ✦ ROOMIE TYPE TEST ✦</textPath></text>
+                      <g class="rc-st-icon" fill="none" stroke="#2d1b14" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M57 73 L73 59 L89 73" />
+                        <path d="M61 70 V88 H85 V70" />
+                        <rect x="64.5" y="74" width="6" height="6" rx=".8" />
+                        <rect x="75.5" y="74" width="6" height="6" rx=".8" />
+                        <path d="M71 88 V83 H75 V88" />
+                      </g>
+                    </g>
+                  </svg>
+                </div>
               </div>
             </div>
 
@@ -797,7 +813,7 @@
         const matchContent = RESULT_CONTENT[m.slug];
         const el = document.createElement('div');
         el.className = 'rc-match';
-        el.innerHTML = `<img class="rc-match-avatar" src="assets/results-card/icon-${m.slug}.png" alt="${matchContent ? matchContent.name : m.slug}" />
+        el.innerHTML = `<span class="rc-match-stamp"><img class="rc-match-avatar" src="assets/results-card/icon-${m.slug}.png" alt="${matchContent ? matchContent.name : m.slug}" /></span>
           <p class="rc-match-name">${matchContent ? matchContent.name : m.slug}</p>
           <span class="rc-match-badge ${m.tone === 'good' ? 'is-good' : 'is-bad'}">${m.badge}</span>`;
         (m.tone === 'good' ? bestEl : attnEl).appendChild(el);
