@@ -7176,7 +7176,7 @@
       };
       const stats = axisPercents(answersArr);
       if (stats) patch.result_stats = stats;
-      db.collection('users').doc(user.uid).set(patch, { merge: true }).catch((err) => console.error('Failed to link quiz result to account', err));
+      return db.collection('users').doc(user.uid).set(patch, { merge: true }).catch((err) => console.error('Failed to link quiz result to account', err));
     }
 
     let profileResultSubmission = null;
@@ -10391,7 +10391,22 @@
       window.scrollTo(0, 0);
     }
 
+    /** Finishing the quiz goes straight to the results card (results.html), which reads
+        the type + stats saveSession() just stashed (or users/{uid} when signed in).
+        Waits briefly for the Firestore writes so navigating away doesn't drop them.
+        Compare-invite sessions stay on the in-page result, where the comparison panel lives. */
     function showResults() {
+      if (!loadCompareInvite()) {
+        const key = resolveType(answers);
+        lastResultKey = key;
+        saveSession();
+        const writes = [submitQuizResult(key, answers), linkResultToAccount(key, answers)];
+        const timeout = new Promise((resolve) => setTimeout(resolve, 2500));
+        Promise.race([Promise.all(writes), timeout]).then(() => {
+          window.location.href = 'results.html';
+        });
+        return;
+      }
       el('quiz-split-wrap').classList.add('hidden');
       el('quiz-intro').classList.add('hidden');
       el('quiz-flow').classList.add('hidden');
