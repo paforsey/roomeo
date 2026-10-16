@@ -7176,7 +7176,7 @@
       };
       const stats = axisPercents(answersArr);
       if (stats) patch.result_stats = stats;
-      db.collection('users').doc(user.uid).set(patch, { merge: true }).catch((err) => console.error('Failed to link quiz result to account', err));
+      return db.collection('users').doc(user.uid).set(patch, { merge: true }).catch((err) => console.error('Failed to link quiz result to account', err));
     }
 
     let profileResultSubmission = null;
@@ -10396,16 +10396,20 @@
       el('quiz-intro').classList.add('hidden');
       el('quiz-flow').classList.add('hidden');
       hidePostQuizFlow();
-      el('quiz-results').classList.remove('hidden');
       const key = resolveType(answers);
       lastResultKey = key;
       saveSession();
-      submitQuizResult(key, answers);
-      linkResultToAccount(key, answers);
+      const writes = [submitQuizResult(key, answers), linkResultToAccount(key, answers)];
       scheduleResultsReveal(key, answers, false);
       setQuizFlowFooterVisible(false);
       setQuizView('results');
       window.scrollTo(0, 0);
+      /* Go straight to the results card once the result writes land (capped so a
+         slow network never strands the user here). */
+      const cap = new Promise((resolve) => setTimeout(resolve, 2500));
+      Promise.race([Promise.allSettled(writes), cap]).then(() => {
+        window.location.href = 'results.html';
+      });
     }
 
     function showResultsFromMemory() {
