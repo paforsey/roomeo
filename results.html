@@ -20,8 +20,9 @@
        (<=720px) drop back to a stacked, fixed-px layout at the bottom of this block. */
     /* .rc-fit sizes the card so the whole thing fits on screen when the page opens:
        its width is the viewport height (minus header + page padding) divided by the
-       card's height-to-width ratio (~1.88), never below 380px. */
-    .rc-fit{container-type:inline-size;width:min(100%,max(380px,calc((100svh - 136px) / 1.88)));margin:0 auto}
+       card's height-to-width ratio (~1.88), then enlarged ~25% so the type,
+       radar and Yay/Nay show on entry with the bottom a short scroll away; never below 460px. */
+    .rc-fit{container-type:inline-size;width:min(100%,max(460px,calc((100svh - 136px) / 1.5)));margin:0 auto}
     .rc-frame{--u:calc(100cqw / 1080);--ink:#2d1b14;--line:calc(var(--u)*3);background:var(--orange);border-radius:0;padding:calc(var(--u)*70) calc(var(--u)*80) calc(var(--u)*90);position:relative;overflow:hidden}
     .rc-card{background:#faf6ee;border-radius:calc(var(--u)*40);box-shadow:0 0 0 var(--line) var(--ink);position:relative;z-index:1;display:flow-root}
     /* Striped backing card peeking out behind the main card, like a stack of retro postcards. */
