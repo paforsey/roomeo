@@ -6,7 +6,7 @@
   <title>My Results Card — MyRoomeo</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=PT+Serif:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=PT+Serif:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="assets/css/roomeo-system.css" />
   <style>
     .results-page{max-width:1000px;margin:0 auto;padding:40px 20px 80px}
@@ -32,7 +32,7 @@
 
     /* ---------- Header: round "Roomie type test" stamp + headline, one row ---------- */
     .rc-top-row{display:flex;flex-direction:column;align-items:center;gap:calc(var(--u)*6);margin:calc(var(--u)*80) calc(var(--u)*47) 0}
-    .rc-eyebrow{margin:0;display:flex;align-items:center;gap:calc(var(--u)*14);font:700 calc(var(--u)*17)/1 var(--font-label);letter-spacing:.18em;text-transform:uppercase;color:var(--ink)}
+    .rc-eyebrow{margin:0;display:flex;align-items:center;gap:calc(var(--u)*14);font:700 calc(var(--u)*17)/1 var(--font-sans);letter-spacing:.18em;text-transform:uppercase;color:var(--ink)}
     .rc-eyebrow::before,.rc-eyebrow::after{content:"";width:calc(var(--u)*46);height:calc(var(--u)*3);background:var(--ink);border-radius:9px}
     .rc-headline{margin:0;display:flex;align-items:baseline;gap:calc(var(--u)*20);white-space:nowrap;font-family:var(--font-serif);font-weight:400}
     .rc-headline-lead{font-size:calc(var(--u)*56);font-style:italic;color:var(--orange)}
@@ -41,13 +41,13 @@
     /* ---------- Seal: round "Roomie type test" stamp in the card's top-left ---------- */
     .rc-seal{position:absolute;z-index:2;left:calc(var(--u)*48);top:calc(var(--u)*44);width:calc(var(--u)*128);height:calc(var(--u)*128);pointer-events:none}
     .rc-seal svg{display:block;width:100%;height:100%}
-    .rc-seal-text{font:700 14px var(--font-label);letter-spacing:.1em;fill:var(--orange)}
+    .rc-seal-text{font:700 14px var(--font-sans);letter-spacing:.1em;fill:var(--orange)}
 
     /* ---------- Radar + character ---------- */
     .rc-hero{position:relative;height:calc(var(--u)*390);margin:calc(var(--u)*38) 0 0 calc(var(--u)*60)}
     .rc-radar-wrap{width:calc(var(--u)*570)}
     .rc-radar-wrap svg{display:block;width:100%;height:auto;overflow:visible}
-    .rc-radar-label{font:700 16px var(--font-label);letter-spacing:.08em;text-transform:uppercase;fill:var(--ink)}
+    .rc-radar-label{font:700 16px var(--font-sans);letter-spacing:.08em;text-transform:uppercase;fill:var(--ink)}
     .rc-character{position:absolute;z-index:2;isolation:isolate;left:calc(var(--u)*540);bottom:calc(var(--u)*2);width:calc(var(--u)*304);pointer-events:none}
     .rc-character img{display:block;width:100%;height:auto}
     /* Little ink-line props around the character: a potted plant and a floor lamp. */
@@ -64,7 +64,7 @@
     .rc-stat-value{font:700 calc(var(--u)*52)/1.05 var(--font-sans);color:var(--ink);margin:0}
 
     /* ---------- Description ---------- */
-    .rc-description{margin:calc(var(--u)*46) calc(var(--u)*62) 0 calc(var(--u)*68);font:400 calc(var(--u)*24.5)/calc(var(--u)*32) var(--font-serif);color:#2d1b14}
+    .rc-description{margin:calc(var(--u)*46) calc(var(--u)*62) 0 calc(var(--u)*68);font:400 calc(var(--u)*23)/calc(var(--u)*34) var(--font-sans);color:#2d1b14}
 
     /* ---------- Yay / nay ---------- */
     .rc-yaynay{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:calc(var(--u)*28);margin:calc(var(--u)*70) calc(var(--u)*48) 0}
@@ -80,12 +80,12 @@
     /* ---------- Matches ---------- */
     .rc-matches{margin:calc(var(--u)*43) calc(var(--u)*20) 0}
     .rc-matches-groups{display:grid;grid-template-columns:1fr 1fr;gap:0}
-    .rc-matches-group-label{font:700 calc(var(--u)*15)/1 var(--font-label);letter-spacing:.14em;text-transform:uppercase;color:#1a1209;margin:0 0 calc(var(--u)*20) calc(var(--u)*40)}
+    .rc-matches-group-label{font:700 calc(var(--u)*15)/1 var(--font-sans);letter-spacing:.14em;text-transform:uppercase;color:#1a1209;margin:0 0 calc(var(--u)*20) calc(var(--u)*40)}
     .rc-matches-groups > div + div .rc-matches-group-label{margin-left:calc(var(--u)*86)}
     .rc-matches-row{display:grid;grid-template-columns:1fr 1fr}
     .rc-match{text-align:center}
     .rc-match-avatar{width:calc(var(--u)*120);height:calc(var(--u)*120);border-radius:50%;object-fit:cover;background:#fbe6cf;margin:0 auto;display:block}
-    .rc-match-name{margin:calc(var(--u)*10) 0 0;font:700 calc(var(--u)*19)/1.2 var(--font-label);color:#111}
+    .rc-match-name{margin:calc(var(--u)*10) 0 0;font:700 calc(var(--u)*19)/1.2 var(--font-sans);color:var(--ink)}
     .rc-match-badge{display:inline-block;margin-top:calc(var(--u)*10);padding:calc(var(--u)*3) calc(var(--u)*10);border-radius:99px;box-shadow:0 0 0 calc(var(--u)*2) var(--ink);font:700 calc(var(--u)*12)/1.25 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:#fff}
     .rc-match-badge.is-good{background:var(--ink)}
     .rc-match-badge.is-bad{background:var(--orange)}
