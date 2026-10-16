@@ -123,17 +123,14 @@
     .ra-btn:focus-visible{outline:3px solid rgba(229,106,67,.28);outline-offset:3px}
     .ra-btn svg{width:18px;height:18px;flex:0 0 auto}
     .ra-status{min-height:20px;margin:12px 0 0;color:var(--ra-muted);font-size:14px}
-    /* "What happens next" floats as a plain bar pinned to the bottom of the screen. */
+    /* "What happens next" floats as a plain bar pinned to the bottom of the screen.
+       It is the only way into the matching profile / waitlist, so it cannot be dismissed. */
     .ra-next{position:fixed;z-index:50;left:0;right:0;bottom:0;background:#2d1b14;color:#fbe9d6}
-    .ra-next[hidden]{display:none}
     .ra-next-inner{max-width:1000px;margin:0 auto;padding:14px 24px;display:flex;align-items:center;gap:16px}
     .ra-next p{flex:1;min-width:0;margin:0;text-align:left;font-size:16px;font-weight:600;line-height:1.4}
     .ra-next-btn{flex:none;display:inline-flex;align-items:center;min-height:44px;padding:0 22px;border-radius:999px;background:var(--ra-brand);color:#fff;text-decoration:none;font-weight:700;transition:background 180ms ease}
     .ra-next-btn:hover{background:var(--ra-brand-hover)}
     .ra-next-btn:focus-visible{outline:3px solid #fbe9d6;outline-offset:3px}
-    .ra-skip{flex:none;width:32px;height:32px;padding:0;border:0;background:none;color:#bfa999;font-size:24px;line-height:1;cursor:pointer}
-    .ra-skip:hover{color:#fff}
-    .ra-skip:focus-visible{outline:3px solid #fbe9d6;outline-offset:2px;border-radius:6px}
     /* Room under the page content so the bar never covers the footer. */
     body.has-next-bar .result-actions{padding-bottom:84px}
     .ra-footer{margin-top:68px;color:var(--ra-muted);font-family:Georgia,"Times New Roman",serif;font-size:14px}
@@ -194,7 +191,7 @@
       .ra-row{flex-direction:column}
       .ra-btn{width:100%}
       .ra-footer{margin-top:52px}
-      .ra-next-inner{padding:10px 10px calc(10px + env(safe-area-inset-bottom)) 16px;gap:10px}
+      .ra-next-inner{padding:10px 12px calc(10px + env(safe-area-inset-bottom)) 16px;gap:12px}
       .ra-next p{font-size:14px}
       .ra-next-btn{min-height:40px;padding:0 16px;font-size:14px}
       body.has-next-bar .result-actions{padding-bottom:76px}
@@ -335,7 +332,6 @@
             <div class="ra-next-inner">
               <p id="ra-next-heading">Now that you know your roomie type, find a roommate who fits.</p>
               <a class="ra-next-btn" id="ra-build-profile" href="quiz.html?view=profile-1">Build my profile</a>
-              <button class="ra-skip" type="button" id="ra-skip-profile" aria-label="Skip for now">&times;</button>
             </div>
           </div>
           <footer class="ra-footer">© 2026 MyRoomeo. All rights reserved.</footer>
@@ -910,10 +906,6 @@
       status.textContent = w ? 'Image opened in a new tab -- save or copy it from there.' : 'Use "Download card" to save the image.';
     });
 
-    document.getElementById('ra-skip-profile').addEventListener('click', () => {
-      document.getElementById('ra-next').hidden = true;
-      document.body.classList.remove('has-next-bar');
-    });
     document.body.classList.add('has-next-bar');
 
     function showEmpty() {
