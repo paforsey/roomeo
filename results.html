@@ -123,26 +123,21 @@
     .ra-btn:focus-visible{outline:3px solid rgba(229,106,67,.28);outline-offset:3px}
     .ra-btn svg{width:18px;height:18px;flex:0 0 auto}
     .ra-status{min-height:20px;margin:12px 0 0;color:var(--ra-muted);font-size:14px}
-    /* "What happens next" floats as a bar pinned to the bottom of the screen. */
-    .ra-next{position:fixed;z-index:50;left:0;right:0;bottom:0;background:#2d1b14;color:#fbe9d6;border-top:3px solid var(--ra-brand);animation:ra-next-in .45s ease-out both}
+    /* "What happens next" floats as a plain bar pinned to the bottom of the screen. */
+    .ra-next{position:fixed;z-index:50;left:0;right:0;bottom:0;background:#2d1b14;color:#fbe9d6}
     .ra-next[hidden]{display:none}
-    .ra-next-inner{max-width:1000px;margin:0 auto;padding:16px 24px;display:flex;align-items:center;gap:20px}
-    .ra-next-text{flex:1;min-width:0;text-align:left}
-    .ra-next h2{margin:0;font:700 20px/1.2 var(--font-serif);color:#fff6ea}
-    .ra-next h2 em{font-weight:400;color:#f3a678}
-    .ra-next p{margin:4px 0 0;font-size:14px;line-height:1.4;color:#e5cfbd}
-    .ra-next-btn{flex:none;display:inline-flex;align-items:center;gap:8px;min-height:48px;padding:0 22px;border-radius:999px;background:var(--ra-brand);color:#fff;box-shadow:0 0 0 2px #fbe9d6;text-decoration:none;font-weight:700;transition:transform 180ms ease,background 180ms ease}
-    .ra-next-btn:hover{transform:translateY(-2px);background:var(--ra-brand-hover)}
+    .ra-next-inner{max-width:1000px;margin:0 auto;padding:14px 24px;display:flex;align-items:center;gap:16px}
+    .ra-next p{flex:1;min-width:0;margin:0;text-align:left;font-size:16px;font-weight:600;line-height:1.4}
+    .ra-next-btn{flex:none;display:inline-flex;align-items:center;min-height:44px;padding:0 22px;border-radius:999px;background:var(--ra-brand);color:#fff;text-decoration:none;font-weight:700;transition:background 180ms ease}
+    .ra-next-btn:hover{background:var(--ra-brand-hover)}
     .ra-next-btn:focus-visible{outline:3px solid #fbe9d6;outline-offset:3px}
-    .ra-next-btn svg{width:18px;height:18px}
-    .ra-skip{flex:none;padding:8px 4px;border:0;background:none;color:#e5cfbd;font:inherit;font-size:14px;font-weight:600;text-decoration:underline;text-underline-offset:4px;cursor:pointer}
+    .ra-skip{flex:none;width:32px;height:32px;padding:0;border:0;background:none;color:#bfa999;font-size:24px;line-height:1;cursor:pointer}
     .ra-skip:hover{color:#fff}
-    .ra-skip:focus-visible{outline:3px solid #fbe9d6;outline-offset:3px;border-radius:6px}
+    .ra-skip:focus-visible{outline:3px solid #fbe9d6;outline-offset:2px;border-radius:6px}
     /* Room under the page content so the bar never covers the footer. */
-    body.has-next-bar .result-actions{padding-bottom:96px}
-    @keyframes ra-next-in{from{transform:translateY(100%)}to{transform:none}}
+    body.has-next-bar .result-actions{padding-bottom:84px}
     .ra-footer{margin-top:68px;color:var(--ra-muted);font-family:Georgia,"Times New Roman",serif;font-size:14px}
-    @media (prefers-reduced-motion:reduce){.ra-btn,.ra-next-btn{transition:none}.ra-next{animation:none}}
+    @media (prefers-reduced-motion:reduce){.ra-btn,.ra-next-btn{transition:none}}
 
     /* ---------- Narrow screens: same pieces, stacked, real px sizes ---------- */
     @media (max-width:720px){
@@ -199,12 +194,10 @@
       .ra-row{flex-direction:column}
       .ra-btn{width:100%}
       .ra-footer{margin-top:52px}
-      .ra-next-inner{padding:12px 14px calc(12px + env(safe-area-inset-bottom));gap:10px;flex-wrap:wrap}
-      .ra-next-text{flex-basis:100%}
-      .ra-next h2{font-size:17px}
-      .ra-next p{display:none}
-      .ra-next-btn{flex:1;justify-content:center;min-height:44px;padding:0 16px;font-size:15px}
-      body.has-next-bar .result-actions{padding-bottom:130px}
+      .ra-next-inner{padding:10px 10px calc(10px + env(safe-area-inset-bottom)) 16px;gap:10px}
+      .ra-next p{font-size:14px}
+      .ra-next-btn{min-height:40px;padding:0 16px;font-size:14px}
+      body.has-next-bar .result-actions{padding-bottom:76px}
     }
   </style>
 </head>
@@ -340,12 +333,9 @@
           <p class="ra-status" id="ra-status" aria-live="polite"></p>
           <div class="ra-next" id="ra-next" role="region" aria-labelledby="ra-next-heading">
             <div class="ra-next-inner">
-              <div class="ra-next-text">
-                <h2 id="ra-next-heading">What happens next? <em>Find your match.</em></h2>
-                <p>Now that you know your roomie type, generate a swipe-ready roommate profile for matching.</p>
-              </div>
-              <a class="ra-next-btn" id="ra-build-profile" href="quiz.html?view=profile-1">Build my matching profile<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
-              <button class="ra-skip" type="button" id="ra-skip-profile">Skip for now</button>
+              <p id="ra-next-heading">Now that you know your roomie type, find a roommate who fits.</p>
+              <a class="ra-next-btn" id="ra-build-profile" href="quiz.html?view=profile-1">Build my profile</a>
+              <button class="ra-skip" type="button" id="ra-skip-profile" aria-label="Skip for now">&times;</button>
             </div>
           </div>
           <footer class="ra-footer">© 2026 MyRoomeo. All rights reserved.</footer>
