@@ -9,6 +9,15 @@
   <link href="https://fonts.googleapis.com/css2?family=PT+Serif:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="assets/css/roomeo-system.css" />
   <style>
+    /* Headings use the design system's Recoleta. It is NOT shipped with the site
+       (this repo is public and we have no redistributable web license yet), so it
+       only loads from fonts installed on the viewer's machine; everyone else gets
+       PT Serif. Swap these src lines for licensed webfont files once we have them. */
+    @font-face{font-family:"Recoleta Local";font-weight:400;src:local("Recoleta"),local("Recoleta-Regular"),local("Recoleta Regular")}
+    @font-face{font-family:"Recoleta Local";font-weight:500;src:local("Recoleta Medium"),local("Recoleta-Medium")}
+    @font-face{font-family:"Recoleta Local";font-weight:600;src:local("Recoleta SemiBold"),local("Recoleta-SemiBold")}
+    @font-face{font-family:"Recoleta Local";font-weight:700;src:local("Recoleta Bold"),local("Recoleta-Bold")}
+    :root{--font-display:"Recoleta Local","PT Serif",Georgia,serif}
     .results-page{max-width:1000px;margin:0 auto;padding:40px 20px 80px}
     .results-loading,.results-empty{text-align:center;padding:80px 20px;color:var(--muted);font:400 var(--fs-lg) var(--font-sans)}
     .results-empty a{color:var(--orange);font-weight:600}
@@ -196,6 +205,11 @@
       .ra-next-btn{min-height:40px;padding:0 16px;font-size:14px}
       body.has-next-bar .result-actions{padding-bottom:76px}
     }
+
+    /* Display font (Recoleta, see @font-face at the top). Last in the sheet so it
+       wins over the font shorthands above. Recoleta has no italic: keep these upright. */
+    .rc-headline,.rc-yaynay-title,.rc-footer-cta,.rc-footer-qr-tab,.result-actions h1{font-family:var(--font-display)}
+    .rc-headline-lead,.rc-yaynay-title,.rc-footer-cta em,.rc-footer-qr-tab{font-style:normal}
   </style>
 </head>
 <body>
