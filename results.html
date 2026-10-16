@@ -6,7 +6,7 @@
   <title>My Results Card — MyRoomeo</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=PT+Serif:wght@400;700&family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;700&family=Caveat:wght@600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=PT+Serif:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;700&family=Caveat:wght@600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="assets/css/roomeo-system.css" />
   <style>
     .results-page{max-width:1000px;margin:0 auto;padding:40px 20px 80px}
@@ -22,30 +22,28 @@
     .rc-frame{--u:calc(100cqw / 1080);background:var(--orange);border-radius:0;padding:calc(var(--u)*36) calc(var(--u)*40);position:relative;overflow:hidden}
     .rc-card{background:#faf6ee;border-radius:0 0 calc(var(--u)*32) calc(var(--u)*32);position:relative;display:flow-root}
 
-    .rc-ribbon-wrap{position:absolute;top:calc(var(--u)*-3);left:50%;transform:translateX(-50%);z-index:3;pointer-events:none}
-    .rc-ribbon{background:url('assets/results-card/title.png') no-repeat center/100% 100%;color:#3a2116;font:700 calc(var(--u)*30)/1 var(--font-sans);letter-spacing:.01em;text-transform:uppercase;white-space:nowrap;width:calc(var(--u)*539);height:calc(var(--u)*144);display:flex;align-items:center;justify-content:center;padding:0 0 calc(var(--u)*28);margin:0}
 
     /* ---------- Header: one hand-drawn box, logo/date | headline ---------- */
-    .rc-top-row{position:relative;margin:calc(var(--u)*47) calc(var(--u)*47) 0;height:calc(var(--u)*179);display:grid;grid-template-columns:calc(var(--u)*238) 1fr}
-    .rc-sketch{position:absolute;inset:0;pointer-events:none;filter:url(#rc-wobble)}
-    .rc-sketch-box{position:absolute;inset:0;border:calc(var(--u)*3) solid #6b5a50;border-radius:calc(var(--u)*3)}
-    .rc-sketch-v{position:absolute;top:0;bottom:0;left:calc(var(--u)*238);border-left:calc(var(--u)*2.5) solid #6b5a50}
-    .rc-sketch-h{position:absolute;left:0;width:calc(var(--u)*238);top:calc(var(--u)*89);border-top:calc(var(--u)*2.5) solid #6b5a50}
-    .rc-id-box{position:relative;padding:calc(var(--u)*25) calc(var(--u)*22) 0;display:flex;flex-direction:column}
-    .rc-id-label{margin:0;height:calc(var(--u)*64);display:flex;align-items:center;font:600 calc(var(--u)*19)/1.2 var(--font-sans);letter-spacing:.08em;text-transform:uppercase;color:#6b5a50;white-space:nowrap}
-    .rc-id-divider{display:none}
-    .rc-id-date-wrap{position:absolute;left:0;right:0;top:calc(var(--u)*89);bottom:0;display:flex;align-items:center;padding:0 0 0 calc(var(--u)*17)}
-    .rc-id-icon{width:calc(var(--u)*66);height:calc(var(--u)*66);object-fit:contain}
-    .rc-headline-box{position:relative;display:flex;align-items:center;justify-content:center;padding-top:calc(var(--u)*10)}
-    .rc-headline{margin:0;display:flex;align-items:center;gap:calc(var(--u)*18);font-family:var(--font-serif);font-weight:400}
-    .rc-headline-lead{font-size:calc(var(--u)*40);color:#6b5a50}
-    .rc-headline strong{font-size:calc(var(--u)*121);line-height:1;font-weight:400;color:#2d1b14;letter-spacing:-.01em;display:block}
+    .rc-top-row{position:relative;margin:calc(var(--u)*84) calc(var(--u)*47) 0;display:grid;grid-template-columns:1fr}
+    .rc-headline-box{position:relative;display:flex;align-items:center;justify-content:center}
+    .rc-headline{margin:0;display:flex;align-items:baseline;gap:calc(var(--u)*22);white-space:nowrap;font-family:var(--font-serif);font-weight:400}
+    .rc-headline-lead{font-size:calc(var(--u)*46);font-style:italic;color:var(--orange)}
+    .rc-headline strong{position:relative;z-index:0;font-size:calc(var(--u)*176);line-height:1;font-weight:700;color:#2d1b14;letter-spacing:-.03em;display:block}
+    /* Hand-drawn ink underline under the type name (pseudo-element, so it
+       survives renderResultsCard() rewriting the name's text). */
+    .rc-headline strong::after{content:"";position:absolute;left:-3%;width:106%;bottom:calc(var(--u)*-6);height:calc(var(--u)*22);
+      background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 20' preserveAspectRatio='none'%3E%3Cpath d='M4 13 C 30 8, 58 11, 88 9 S 150 7, 196 10' fill='none' stroke='%232d1b14' stroke-width='5' stroke-linecap='round' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E") no-repeat center/100% 100%}
+
+    /* ---------- Sticker: flat ink-line stamp, sits inside the card ---------- */
+    .rc-sticker{position:absolute;z-index:2;left:calc(var(--u)*-62);bottom:calc(var(--u)*18);width:calc(var(--u)*118);height:calc(var(--u)*118);transform:rotate(-8deg);pointer-events:none}
+    .rc-sticker svg{display:block;width:100%;height:100%;overflow:visible}
+    .rc-st-ringtext{font:700 14px var(--font-label);letter-spacing:.08em;fill:#2d1b14}
 
     /* ---------- Radar + character ---------- */
     .rc-hero{position:relative;height:calc(var(--u)*390);margin:calc(var(--u)*38) 0 0 calc(var(--u)*60)}
     .rc-radar-wrap{width:calc(var(--u)*570)}
     .rc-radar-wrap svg{display:block;width:100%;height:auto;overflow:visible}
-    .rc-radar-label{font:700 18px var(--font-sans);letter-spacing:.01em;text-transform:uppercase;fill:#6b594f}
+    .rc-radar-label{font:700 18px var(--font-sans);letter-spacing:.01em;text-transform:uppercase;fill:#2d1b14;fill-opacity:.85}
     .rc-character{position:absolute;left:calc(var(--u)*581);bottom:calc(var(--u)*2);width:calc(var(--u)*304);pointer-events:none}
     .rc-character img{display:block;width:100%;height:auto}
 
@@ -55,7 +53,7 @@
     .rc-stat + .rc-stat{border-left:calc(var(--u)*1.5) solid #d9d2c9}
     .rc-stat-label{display:flex;align-items:center;gap:calc(var(--u)*7);font:700 calc(var(--u)*15)/1 var(--font-sans);letter-spacing:.07em;text-transform:uppercase;color:#6b5a50;margin:0 0 calc(var(--u)*12)}
     .rc-stat-label svg{width:calc(var(--u)*18);height:calc(var(--u)*18);flex:none}
-    .rc-stat-value{font:700 calc(var(--u)*52)/1.05 var(--font-sans);color:var(--orange);margin:0;text-shadow:0 calc(var(--u)*2) calc(var(--u)*5) rgba(45,27,20,.13)}
+    .rc-stat-value{font:700 calc(var(--u)*52)/1.05 var(--font-sans);color:#2d1b14;margin:0}
 
     /* ---------- Description ---------- */
     .rc-description{margin:calc(var(--u)*46) calc(var(--u)*62) 0 calc(var(--u)*68);font:400 calc(var(--u)*24.5)/calc(var(--u)*32) var(--font-serif);color:#2d1b14}
@@ -97,6 +95,28 @@
     .rc-footer-qr-wrap img{width:calc(var(--u)*116);height:calc(var(--u)*116);object-fit:contain;margin:0 auto}
     .rc-footer-scan{margin:calc(var(--u)*7) 0 0;font:600 calc(var(--u)*30)/1 'Caveat',cursive;color:#5e9bcf}
 
+    /* ---------- Flat ink-line pass (stats, notes, stamps, footer) ----------
+       One ink colour, flat fills, no shadows. Wobbly outlines live on
+       pseudo-elements so the filter never distorts the text. */
+    .rc-stat-label{color:#2d1b14}
+    .rc-stat + .rc-stat{border-left:none;position:relative}
+    .rc-stat + .rc-stat::before{content:"";position:absolute;left:0;top:calc(var(--u)*4);bottom:calc(var(--u)*4);border-left:calc(var(--u)*2.5) solid #2d1b14;opacity:.55;filter:url(#rc-wobble)}
+    .rc-yaynay-col{position:relative;isolation:isolate}
+    .rc-yaynay-col.is-yay{background:#e3ead9;transform:rotate(-1deg)}
+    .rc-yaynay-col.is-nay{background:#f8dfcf;transform:rotate(1deg)}
+    .rc-yaynay-col::before{content:"";position:absolute;inset:0;border:calc(var(--u)*2.5) solid #2d1b14;border-radius:inherit;filter:url(#rc-wobble);pointer-events:none}
+    .rc-yaynay-title{text-transform:none;font-style:italic;letter-spacing:-.005em}
+    .rc-yaynay-col .rc-yaynay-list li{white-space:normal}
+    .rc-match-stamp{display:inline-block;padding:calc(var(--u)*12);background:#efdcbc;
+      -webkit-mask:linear-gradient(#000 0 0) content-box,radial-gradient(circle at center,#0000 calc(var(--u)*5),#000 calc(var(--u)*5.6)) calc(var(--u)*-7) calc(var(--u)*-7)/calc(var(--u)*14) calc(var(--u)*14) round;
+              mask:linear-gradient(#000 0 0) content-box,radial-gradient(circle at center,#0000 calc(var(--u)*5),#000 calc(var(--u)*5.6)) calc(var(--u)*-7) calc(var(--u)*-7)/calc(var(--u)*14) calc(var(--u)*14) round}
+    .rc-match:nth-child(odd) .rc-match-stamp{transform:rotate(-3deg)}
+    .rc-match:nth-child(even) .rc-match-stamp{transform:rotate(3deg)}
+    .rc-match-stamp .rc-match-avatar{border-radius:calc(var(--u)*3);outline:calc(var(--u)*2) solid #2d1b14;outline-offset:calc(var(--u)*-2)}
+    .rc-match-badge{border-radius:calc(var(--u)*2);box-shadow:inset 0 0 0 calc(var(--u)*1.5) #2d1b14}
+    .rc-footer{isolation:isolate;margin-bottom:calc(var(--u)*28);border-radius:calc(var(--u)*18)}
+    .rc-footer::before{content:"";position:absolute;inset:0;border:calc(var(--u)*2.5) solid #2d1b14;border-radius:inherit;filter:url(#rc-wobble);pointer-events:none}
+
     /* ---------- Decorative corner: sits over the frame, like the PNGs ---------- */
     .rc-corner{position:absolute;right:0;bottom:0;height:auto;z-index:4;pointer-events:none}
 
@@ -127,22 +147,16 @@
     @media (max-width:720px){
       .rc-frame{padding:14px;border-radius:0}
       .rc-card{padding:0 0 22px;border-radius:0 0 18px 18px}
-      .rc-ribbon-wrap{top:-6px}
-      .rc-ribbon{width:300px;height:80px;font-size:15px;padding-bottom:24px}
-      .rc-top-row{grid-template-columns:1fr;height:auto;margin:60px 16px 0}
-      .rc-sketch-v,.rc-sketch-h{display:none}
-      .rc-id-box{flex-direction:row;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:2px solid #6b5a50}
-      .rc-id-label{height:auto;font-size:12px}
-      .rc-id-date-wrap{position:static;display:block;margin:0;padding:0 0 0 10px;text-align:right}
-      .rc-id-icon{width:40px;height:40px}
-      .rc-headline-box{padding:14px 12px 18px}
-      .rc-headline{gap:10px;flex-wrap:wrap;justify-content:center}
-      .rc-headline-lead{font-size:22px}
-      .rc-headline strong{font-size:60px}
+          .rc-top-row{grid-template-columns:1fr;margin:48px 16px 0}
+      .rc-sticker{width:78px;height:78px;left:-34px;bottom:8px}
+                .rc-headline-box{padding:14px 12px 18px}
+      .rc-headline{gap:10px;flex-wrap:nowrap;justify-content:center}
+      .rc-headline-lead{font-size:24px}
+      .rc-headline strong{font-size:64px}
       .rc-hero{height:auto;display:flex;flex-direction:column;align-items:center;margin:20px 12px 0}
       .rc-radar-wrap{width:100%;max-width:400px}
       .rc-radar-label{font-size:17px}
-      .rc-character{position:static;margin:6px 0 0;width:min(56%,210px)}
+      .rc-character{position:relative;left:auto;bottom:auto;margin:6px 0 0;width:min(56%,210px)}
       .rc-stats{grid-template-columns:1fr 1fr;margin:20px 20px 0;row-gap:18px}
       .rc-stat{padding-left:12px}
       .rc-stat:nth-child(odd){border-left:none;padding-left:0}
@@ -160,9 +174,12 @@
       .rc-matches-groups{grid-template-columns:1fr;row-gap:22px}
       .rc-matches-group-label,.rc-matches-groups > div + div .rc-matches-group-label{font-size:12px;margin:0 0 12px 4px}
       .rc-match-avatar{width:84px;height:84px}
+      .rc-match-stamp{padding:7px}
+      .rc-stat:nth-child(odd)::before{display:none}
       .rc-match-name{font-size:16px;margin-top:8px}
       .rc-match-badge{font-size:10px;padding:3px 8px;margin-top:6px}
       .rc-footer{height:auto;margin:28px 12px 0;padding:18px;flex-direction:column;align-items:center;gap:16px;text-align:center;border-radius:0 0 16px 16px}
+      .rc-footer{margin-bottom:14px;border-radius:14px}
       .rc-footer-tagline{font-size:17px;white-space:normal}
       .rc-footer-url{width:100%;max-width:340px;height:52px;margin-top:12px;border-radius:26px}
       .rc-footer-url-logo{width:88px;margin-left:16px}
@@ -219,16 +236,8 @@
           </filter>
         </svg>
         <div class="rc-frame">
-          <div class="rc-ribbon-wrap"><p class="rc-ribbon">Roomie Type Test</p></div>
           <div class="rc-card" id="rc-card">
             <div class="rc-top-row">
-              <div class="rc-sketch" aria-hidden="true"><span class="rc-sketch-box"></span><span class="rc-sketch-v"></span><span class="rc-sketch-h"></span></div>
-              <div class="rc-id-box">
-                <p class="rc-id-label">Roomie type</p>
-                <div class="rc-id-date-wrap">
-                  <img class="rc-id-icon" id="rc-id-icon" src="" alt="" />
-                </div>
-              </div>
               <div class="rc-headline-box">
                 <p class="rc-headline"><span class="rc-headline-lead">You are a</span> <strong id="rc-type-name">—</strong></p>
               </div>
@@ -240,6 +249,23 @@
               </div>
               <div class="rc-character">
                 <img id="rc-character-img" src="" alt="" />
+                <div class="rc-sticker" aria-hidden="true">
+                  <svg viewBox="0 0 146 146" focusable="false">
+                    <defs><path id="rc-st-ring" d="M73 73 m-49 0 a49 49 0 1 1 98 0 a49 49 0 1 1 -98 0" /></defs>
+                    <g filter="url(#rc-wobble)">
+                      <circle cx="73" cy="73" r="68" fill="#fff3e2" stroke="#2d1b14" stroke-width="3" />
+                      <circle cx="73" cy="73" r="36" fill="none" stroke="#2d1b14" stroke-width="1.8" />
+                      <text class="rc-st-ringtext"><textPath href="#rc-st-ring" textLength="304" lengthAdjust="spacing">ROOMIE TYPE TEST ✦ ROOMIE TYPE TEST ✦</textPath></text>
+                      <g class="rc-st-icon" fill="none" stroke="#2d1b14" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M57 73 L73 59 L89 73" />
+                        <path d="M61 70 V88 H85 V70" />
+                        <rect x="64.5" y="74" width="6" height="6" rx=".8" />
+                        <rect x="75.5" y="74" width="6" height="6" rx=".8" />
+                        <path d="M71 88 V83 H75 V88" />
+                      </g>
+                    </g>
+                  </svg>
+                </div>
               </div>
             </div>
 
@@ -737,24 +763,29 @@
       const ang = (i) => (Math.PI * 2 * i) / n - Math.PI / 2;
       const pt = (i, r) => [cx + r * Math.cos(ang(i)), cy + r * Math.sin(ang(i))];
       const poly = (r) => RADAR_LABELS.map((_, i) => pt(i, r).map((v) => v.toFixed(1)).join(',')).join(' ');
-      let h = `<polygon points="${poly(R)}" fill="#feefce" />`;
-      [0.25, 0.5, 0.75].forEach((lvl) => { h += `<polygon points="${poly(R * lvl)}" fill="none" stroke="#f6e5c0" stroke-width="1.4" />`; });
+      let h = `<polygon points="${poly(R)}" fill="#fbefd9" stroke="#2d1b14" stroke-opacity=".55" stroke-width="2" />`;
+      [0.25, 0.5, 0.75].forEach((lvl) => { h += `<polygon points="${poly(R * lvl)}" fill="none" stroke="#2d1b14" stroke-opacity=".14" stroke-width="1.4" />`; });
       RADAR_LABELS.forEach((_, i) => {
         const [x, y] = pt(i, R);
-        h += `<line x1="${cx}" y1="${cy}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}" stroke="#f6e5c0" stroke-width="1.4" />`;
+        h += `<line x1="${cx}" y1="${cy}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}" stroke="#2d1b14" stroke-opacity=".14" stroke-width="1.4" />`;
       });
       const pts = RADAR_LABELS.map((_, i) => pt(i, R * Math.max(0, Math.min(100, values[i] || 0)) / 100));
-      h += `<polygon points="${pts.map((p) => p.map((v) => v.toFixed(1)).join(',')).join(' ')}" fill="#e86c2c" fill-opacity=".38" stroke="#e86c2c" stroke-width="4" stroke-linejoin="round" />`;
-      pts.forEach(([x, y]) => { h += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="7.5" fill="#e86c2c" stroke="#fff" stroke-width="2.5" />`; });
+      h += `<polygon points="${pts.map((p) => p.map((v) => v.toFixed(1)).join(',')).join(' ')}" fill="#e86c2c" fill-opacity=".35" stroke="#2d1b14" stroke-width="3" stroke-linejoin="round" />`;
+      pts.forEach(([x, y]) => { h += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="7" fill="#e86c2c" stroke="#2d1b14" stroke-width="2.5" />`; });
+      let labels = '';
       RADAR_LABELS.forEach((label, i) => {
         const c = Math.cos(ang(i));
         const anchor = c > 0.3 ? 'start' : c < -0.3 ? 'end' : 'middle';
         const r = Math.abs(c) > 0.9 ? R + 20 : Math.abs(c) < 0.1 ? R + 18 : R + 12;
         const [x, y] = pt(i, r);
-        h += `<text x="${x.toFixed(1)}" y="${y.toFixed(1)}" text-anchor="${anchor}" dominant-baseline="middle" class="rc-radar-label">${label.replace('&', '&amp;')}</text>`;
+        labels += `<text x="${x.toFixed(1)}" y="${y.toFixed(1)}" text-anchor="${anchor}" dominant-baseline="middle" class="rc-radar-label">${label.replace('&', '&amp;')}</text>`;
       });
-      svg.innerHTML = h;
+      svg.innerHTML = `<g filter="url(#rc-wobble)">${h}</g>${labels}`;
     }
+
+    /* Hand-drawn ink marks for the Yay / Nay lists. */
+    const INK_TICK = '<svg class="rc-yaynay-icon" viewBox="0 0 26 26" fill="none" stroke="#2d1b14" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="13" cy="13" r="10.5" fill="#fff8ec"/><path d="M8.2 13.6 L11.6 16.8 L18 9.6"/></svg>';
+    const INK_DASH = '<svg class="rc-yaynay-icon" viewBox="0 0 26 26" fill="none" stroke="#2d1b14" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="13" cy="13" r="10.5" fill="#fff8ec"/><path d="M8.5 13.3 C 11 12.6, 15 13.6, 17.5 12.9"/></svg>';
 
     const STAT_ICONS = {
       social: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
@@ -779,9 +810,6 @@
       const displayStats = stats || content.stats;
 
       document.getElementById('rc-type-name').textContent = content.name;
-      const idIcon = document.getElementById('rc-id-icon');
-      idIcon.src = `assets/results-card/icon-${typeKey}.png`;
-      idIcon.alt = content.name;
       document.getElementById('rc-description').textContent = content.description;
       const corner = document.getElementById('rc-corner');
       /* Corner art is drawn 1:1 in the reference (native px at the 1080 layout), so
@@ -801,9 +829,9 @@
       }).join('');
 
       const yayEl = document.getElementById('rc-yay-list');
-      yayEl.innerHTML = content.yay.map((t) => `<li><img class="rc-yaynay-icon" src="assets/results-card/check.png" alt="" />${t}</li>`).join('');
+      yayEl.innerHTML = content.yay.map((t) => `<li>${INK_TICK}${t}</li>`).join('');
       const nayEl = document.getElementById('rc-nay-list');
-      nayEl.innerHTML = content.nay.map((t) => `<li><img class="rc-yaynay-icon" src="assets/results-card/no.png" alt="" />${t}</li>`).join('');
+      nayEl.innerHTML = content.nay.map((t) => `<li>${INK_DASH}${t}</li>`).join('');
 
       const bestEl = document.getElementById('rc-best-matches');
       const attnEl = document.getElementById('rc-attention-matches');
@@ -813,7 +841,7 @@
         const matchContent = RESULT_CONTENT[m.slug];
         const el = document.createElement('div');
         el.className = 'rc-match';
-        el.innerHTML = `<img class="rc-match-avatar" src="assets/results-card/icon-${m.slug}.png" alt="${matchContent ? matchContent.name : m.slug}" />
+        el.innerHTML = `<span class="rc-match-stamp"><img class="rc-match-avatar" src="assets/results-card/icon-${m.slug}.png" alt="${matchContent ? matchContent.name : m.slug}" /></span>
           <p class="rc-match-name">${matchContent ? matchContent.name : m.slug}</p>
           <span class="rc-match-badge ${m.tone === 'good' ? 'is-good' : 'is-bad'}">${m.badge}</span>`;
         (m.tone === 'good' ? bestEl : attnEl).appendChild(el);
