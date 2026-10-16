@@ -6,7 +6,7 @@
   <title>My Results Card — MyRoomeo</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=PT+Serif:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;700&family=Caveat:wght@600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=PT+Serif:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="assets/css/roomeo-system.css" />
   <style>
     .results-page{max-width:1000px;margin:0 auto;padding:40px 20px 80px}
@@ -91,16 +91,20 @@
     .rc-match-badge.is-bad{background:var(--orange)}
 
     /* ---------- Footer ---------- */
-    .rc-footer{position:relative;z-index:1;margin:calc(var(--u)*64) 0 0;height:calc(var(--u)*176);background:#fff;box-shadow:inset 0 calc(var(--u)*2.5) 0 var(--ink);border-radius:0 0 calc(var(--u)*40) calc(var(--u)*40);padding:calc(var(--u)*30) 0 0 calc(var(--u)*48);display:flex;align-items:flex-start;gap:calc(var(--u)*38)}
-    .rc-footer-tagline{margin:0;font:400 calc(var(--u)*24.1)/1.2 var(--font-serif);color:#000;white-space:nowrap}
-    .rc-footer-url{display:flex;align-items:center;width:calc(var(--u)*562);height:calc(var(--u)*68);margin-top:calc(var(--u)*23);background:#fcf1be;border-radius:calc(var(--u)*34)}
-    .rc-footer-url-logo{width:calc(var(--u)*137);height:auto;margin-left:calc(var(--u)*42);flex:none}
-    .rc-footer-url-inner{flex:1;align-self:center;height:calc(var(--u)*56);margin:0 calc(var(--u)*30) 0 calc(var(--u)*23);background:#fff;border-radius:0 calc(var(--u)*28) calc(var(--u)*28) 0;display:flex;align-items:center;justify-content:space-between;padding:0 calc(var(--u)*14) 0 calc(var(--u)*11)}
-    .rc-footer-url-text{font:400 calc(var(--u)*25.5)/1 var(--font-serif);color:#000;white-space:nowrap}
-    .rc-footer-url-search{flex:none;width:calc(var(--u)*44);height:calc(var(--u)*44)}
-    .rc-footer-qr-wrap{text-align:center;flex:none;margin-top:calc(var(--u)*-7)}
-    .rc-footer-qr-wrap img{width:calc(var(--u)*116);height:calc(var(--u)*116);object-fit:contain;margin:0 auto}
-    .rc-footer-scan{margin:calc(var(--u)*7) 0 0;font:600 calc(var(--u)*30)/1 'Caveat',cursive;color:#5e9bcf}
+    .rc-footer{position:relative;z-index:1;margin:calc(var(--u)*64) 0 0;background:#fff9ef;box-shadow:inset 0 calc(var(--u)*2.5) 0 var(--ink);border-radius:0 0 calc(var(--u)*40) calc(var(--u)*40);padding:calc(var(--u)*40) calc(var(--u)*150) calc(var(--u)*44) calc(var(--u)*52);display:flex;align-items:center;justify-content:space-between;gap:calc(var(--u)*40)}
+    .rc-footer-main{flex:1;min-width:0}
+    .rc-footer-cta{margin:0 0 calc(var(--u)*20);font:700 calc(var(--u)*34)/1.15 var(--font-serif);color:var(--ink)}
+    .rc-footer-cta em{font-weight:400;color:var(--orange)}
+    /* Hand-drawn search bar: ink magnifier, typed URL with a caret, orange Search pill. */
+    .rc-footer-search{display:flex;align-items:center;gap:calc(var(--u)*14);height:calc(var(--u)*76);padding:0 calc(var(--u)*8) 0 calc(var(--u)*24);border-radius:99px;background:#fff;box-shadow:0 0 0 var(--line) var(--ink)}
+    .rc-footer-search-icon{flex:none;width:calc(var(--u)*32);height:calc(var(--u)*32)}
+    .rc-footer-url-text{flex:1;display:flex;align-items:center;font:400 calc(var(--u)*30)/1 var(--font-serif);color:var(--ink);white-space:nowrap}
+    .rc-footer-url-text::after{content:"";width:calc(var(--u)*3);height:calc(var(--u)*34);margin-left:calc(var(--u)*4);background:var(--orange)}
+    .rc-footer-search-btn{flex:none;display:flex;align-items:center;gap:calc(var(--u)*8);height:calc(var(--u)*60);padding:0 calc(var(--u)*26);border-radius:99px;background:var(--orange);color:#fff;box-shadow:0 0 0 calc(var(--u)*2.5) var(--ink);font:700 calc(var(--u)*24)/1 var(--font-sans)}
+    .rc-footer-search-btn svg{width:calc(var(--u)*24);height:calc(var(--u)*24)}
+    .rc-footer-qr{position:relative;flex:none;width:calc(var(--u)*150);box-sizing:border-box;padding:calc(var(--u)*30) calc(var(--u)*14) calc(var(--u)*14);border-radius:calc(var(--u)*20);background:#fff;box-shadow:0 0 0 calc(var(--u)*2.5) var(--ink)}
+    .rc-footer-qr img{display:block;width:100%;height:auto}
+    .rc-footer-qr-tab{position:absolute;top:calc(var(--u)*-17);left:50%;transform:translateX(-50%);white-space:nowrap;padding:calc(var(--u)*6) calc(var(--u)*16);border-radius:99px;background:var(--orange);color:#fff;box-shadow:0 0 0 calc(var(--u)*2.5) var(--ink);font:italic 400 calc(var(--u)*22)/1 var(--font-serif)}
 
 
     /* ---------- Decorative corner: sits over the frame, like the PNGs ---------- */
@@ -167,17 +171,19 @@
       .rc-match-avatar{width:84px;height:84px}
       .rc-match-name{font-size:16px;margin-top:8px}
       .rc-match-badge{font-size:10px;padding:3px 8px;margin-top:6px}
-      .rc-footer{height:auto;margin:28px 0 0;padding:18px;flex-direction:column;align-items:center;gap:16px;text-align:center;border-radius:0 0 22px 22px;box-shadow:inset 0 2px 0 var(--ink)}
-      .rc-footer > div:first-child{width:100%;min-width:0;display:flex;flex-direction:column;align-items:center}
-      .rc-footer-tagline{font-size:17px;white-space:normal}
-      .rc-footer-url{width:100%;max-width:340px;height:52px;margin-top:12px;border-radius:26px}
-      .rc-footer-url-logo{width:72px;margin-left:12px}
-      .rc-footer-url-inner{min-width:0;height:42px;margin:0 6px 0 8px;border-radius:0 21px 21px 0;padding:0 6px}
-      .rc-footer-url-text{font-size:13px}
-      .rc-footer-url-search{width:28px;height:28px}
-      .rc-footer-qr-wrap img{width:96px;height:96px}
+      .rc-footer{margin:28px 0 0;padding:24px 18px 26px;flex-direction:column;gap:30px;text-align:center;border-radius:0 0 22px 22px;box-shadow:inset 0 2px 0 var(--ink)}
+      .rc-footer-main{width:100%}
+      .rc-footer-cta{font-size:20px;margin-bottom:14px}
+      .rc-footer-cta em{display:block}
+      .rc-footer-search{height:50px;gap:8px;padding:0 5px 0 14px;box-shadow:0 0 0 2px var(--ink)}
+      .rc-footer-search-icon{width:20px;height:20px}
+      .rc-footer-url-text{font-size:17px}
+      .rc-footer-url-text::after{width:2px;height:20px}
+      .rc-footer-search-btn{height:40px;padding:0 14px;font-size:14px;gap:5px;box-shadow:0 0 0 2px var(--ink)}
+      .rc-footer-search-btn svg{width:14px;height:14px}
+      .rc-footer-qr{width:120px;padding:22px 10px 10px;border-radius:14px;box-shadow:0 0 0 2px var(--ink)}
+      .rc-footer-qr-tab{top:-13px;font-size:16px;padding:5px 12px;box-shadow:0 0 0 2px var(--ink)}
       .rc-corner{width:88px !important}
-      .rc-footer-scan{font-size:22px}
       .result-actions{padding-top:44px}
       .ra-row{flex-direction:column}
       .ra-btn{width:100%}
@@ -290,23 +296,17 @@
             </div>
 
             <div class="rc-footer">
-              <div>
-                <p class="rc-footer-tagline">What's your Roomie Type? Take it. Share it. Match up.</p>
-                <div class="rc-footer-url">
-                  <img class="rc-footer-url-logo" src="assets/brand/logo02.svg" alt="MyRoomeo" />
-                  <div class="rc-footer-url-inner">
-                    <span class="rc-footer-url-text">https://myroomeo.com/</span>
-                    <svg class="rc-footer-url-search" viewBox="0 0 44 44" aria-hidden="true">
-                      <circle cx="18" cy="18" r="11.5" fill="#fff6cf" stroke="#f6b400" stroke-width="4.5" />
-                      <path d="M12.5 13.5a7.5 7.5 0 0 1 6-3" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" opacity=".9" />
-                      <path d="M27 27l11 11" stroke="#e86c2c" stroke-width="6" stroke-linecap="round" />
-                    </svg>
-                  </div>
+              <div class="rc-footer-main">
+                <p class="rc-footer-cta">Meet your roomie. <em>Look us up!</em></p>
+                <div class="rc-footer-search">
+                  <svg class="rc-footer-search-icon" viewBox="0 0 30 30" fill="none" stroke="#2d1b14" stroke-width="3.2" stroke-linecap="round" aria-hidden="true"><circle cx="12.5" cy="12.5" r="8.5" /><path d="M19 19.5c2.6 2.4 4.6 4.4 7 7" /></svg>
+                  <span class="rc-footer-url-text">myroomeo.com</span>
+                  <span class="rc-footer-search-btn">Search <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h15M13 6l6 6-6 6" /></svg></span>
                 </div>
               </div>
-              <div class="rc-footer-qr-wrap">
-                <img src="assets/results-card/qr-code.png" alt="" />
-                <p class="rc-footer-scan">Scan Me!</p>
+              <div class="rc-footer-qr">
+                <span class="rc-footer-qr-tab">Scan me</span>
+                <img src="assets/results-card/qr-code.png" alt="QR code to myroomeo.com" />
               </div>
             </div>
           </div>
