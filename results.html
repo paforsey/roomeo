@@ -32,10 +32,10 @@
     .rc-sketch-v{position:absolute;top:0;bottom:0;left:calc(var(--u)*238);border-left:calc(var(--u)*2.5) solid #6b5a50}
     .rc-sketch-h{position:absolute;left:0;width:calc(var(--u)*238);top:calc(var(--u)*89);border-top:calc(var(--u)*2.5) solid #6b5a50}
     .rc-id-box{position:relative;padding:calc(var(--u)*25) calc(var(--u)*22) 0;display:flex;flex-direction:column}
-    .rc-id-logo{width:calc(var(--u)*167);height:auto;align-self:flex-start}
+    .rc-id-label{margin:0;height:calc(var(--u)*64);display:flex;align-items:center;font:600 calc(var(--u)*19)/1.2 var(--font-sans);letter-spacing:.08em;text-transform:uppercase;color:#6b5a50;white-space:nowrap}
     .rc-id-divider{display:none}
-    .rc-id-date-wrap{position:absolute;left:0;right:0;top:calc(var(--u)*89);bottom:0;display:flex;align-items:center;padding:0 0 0 calc(var(--u)*17)}
-    .rc-id-date-line{margin:0;font:600 calc(var(--u)*19)/1.2 var(--font-sans);letter-spacing:0;text-transform:uppercase;color:#6b5a50;white-space:nowrap}
+    .rc-id-date-wrap{position:absolute;left:0;right:0;top:calc(var(--u)*89);bottom:0;display:flex;align-items:center;padding:0 calc(var(--u)*14) 0 calc(var(--u)*17)}
+    .rc-id-date-line{margin:0;font:italic 400 calc(var(--u)*26)/1.1 var(--font-serif);letter-spacing:-.01em;color:#2d1b14}
     .rc-headline-box{position:relative;display:flex;align-items:center;justify-content:center;padding-top:calc(var(--u)*10)}
     .rc-headline{margin:0;display:flex;align-items:center;gap:calc(var(--u)*18);font-family:var(--font-serif);font-weight:400}
     .rc-headline-lead{font-size:calc(var(--u)*40);color:#6b5a50}
@@ -132,9 +132,9 @@
       .rc-top-row{grid-template-columns:1fr;height:auto;margin:60px 16px 0}
       .rc-sketch-v,.rc-sketch-h{display:none}
       .rc-id-box{flex-direction:row;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:2px solid #6b5a50}
-      .rc-id-logo{width:120px}
+      .rc-id-label{height:auto;font-size:12px}
       .rc-id-date-wrap{position:static;display:block;margin:0;padding:0 0 0 10px;text-align:right}
-      .rc-id-date-line{font-size:12px}
+      .rc-id-date-line{font-size:18px}
       .rc-headline-box{padding:14px 12px 18px}
       .rc-headline{gap:10px;flex-wrap:wrap;justify-content:center}
       .rc-headline-lead{font-size:22px}
@@ -224,9 +224,9 @@
             <div class="rc-top-row">
               <div class="rc-sketch" aria-hidden="true"><span class="rc-sketch-box"></span><span class="rc-sketch-v"></span><span class="rc-sketch-h"></span></div>
               <div class="rc-id-box">
-                <img class="rc-id-logo" src="assets/brand/logo02.svg" alt="MyRoomeo" />
+                <p class="rc-id-label">Known as</p>
                 <div class="rc-id-date-wrap">
-                  <p class="rc-id-date-line">Test date /<span id="rc-test-date">—</span></p>
+                  <p class="rc-id-date-line" id="rc-alias">—</p>
                 </div>
               </div>
               <div class="rc-headline-box">
@@ -641,6 +641,7 @@
     const RESULT_CONTENT = {
       turtle: {
         name: 'Turtle',
+        alias: 'The couch CEO',
         radar: [63, 30, 33, 100, 30, 76, 67, 0],
         stats: { social: 29, cleanliness: 64, structure: 61, homebody: 100 },
         description: "Warm, steady, and most likely to turn a kitchen run-in into an actual catch-up. You help a shared place feel like home, but your “whatever works” may hide what you really want. Cozy roommate energy with a small risk of becoming the unpaid house therapist.",
@@ -655,6 +656,7 @@
       },
       owl: {
         name: 'Owl',
+        alias: 'The resident ghost',
         radar: [69, 9, 6, 86, 0, 91, 64, 15],
         stats: { social: 0, cleanliness: 74, structure: 63, homebody: 71 },
         description: "Quiet, reliable, and mysteriously awake at 1:43 a.m. You give roommates plenty of space and rarely bring chaos home, though your silence may leave people wondering whether you're tired or secretly mad. Low drama, early payments, emotional status: buffering.",
@@ -669,6 +671,7 @@
       },
       fox: {
         name: 'Fox',
+        alias: 'The human tornado',
         radar: [25, 75, 66, 30, 74, 32, 0, 75],
         stats: { social: 67, cleanliness: 33, structure: 0, homebody: 33 },
         description: "Flexible, social, and often out collecting unexplained lore. You may not be home much, but your mug and unfinished chore sometimes stay behind as your representatives. You thrive with roommates who can embrace spontaneous plans without needing a detailed itinerary.",
@@ -683,6 +686,7 @@
       },
       cat: {
         name: 'Cat',
+        alias: 'The mystery guest',
         radar: [0, 31, 88, 90, 75, 41, 24, 67],
         stats: { social: 50, cleanliness: 0, structure: 5, homebody: 15 },
         description: "Independent, low-pressure, and happiest at home without being socially on call. You give roommates plenty of space, though your “I'll deal with it later” era may leave behind a dish, a bill reminder, or an empty detergent bottle. Peaceful? Usually. Traceable? Debatable.",
@@ -697,6 +701,7 @@
       },
       bunny: {
         name: 'Bunny',
+        alias: 'The main character',
         radar: [50, 99, 86, 66, 46, 0, 11, 36],
         stats: { social: 100, cleanliness: 52, structure: 5, homebody: 15 },
         description: "Social, spontaneous, and capable of turning dinner into a full hangout. You make home feel lively, though the doorbell may occasionally update your roommates before the group chat does. You thrive with people who enjoy shared time and don't treat every guest like a security incident.",
@@ -711,6 +716,7 @@
       },
       beaver: {
         name: 'Beaver',
+        alias: 'The unpaid landlord',
         radar: [90, 9, 6, 86, 0, 91, 96, 15],
         stats: { social: 9, cleanliness: 100, structure: 100, homebody: 85 },
         description: "Organized, reliable, and usually the first to notice when the paper towels are gone. You may call it basic responsibility, your roommates may call it a surprise performance review. Either way, the bills get paid, the kitchen recovers, and the household somehow keeps functioning.",
@@ -763,13 +769,6 @@
       homebody: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>'
     };
 
-    /* The card's own date format, as drawn on the reference cards:
-       "TEST DATE /2026 7.23" -> year, then month.day (no zero-padding). */
-    function formatTestDate(date) {
-      if (!date) return '—';
-      return `${date.getFullYear()} ${date.getMonth() + 1}.${date.getDate()}`;
-    }
-
     /* stats/radar are fixed per type (content.stats below), not computed from
        the individual's own answers -- every Turtle sees the same spider
        chart. The `stats` param is accepted for backward compatibility with
@@ -786,7 +785,7 @@
       const displayStats = stats || content.stats;
 
       document.getElementById('rc-type-name').textContent = content.name;
-      document.getElementById('rc-test-date').textContent = formatTestDate(testDate);
+      document.getElementById('rc-alias').textContent = content.alias;
       document.getElementById('rc-description').textContent = content.description;
       const corner = document.getElementById('rc-corner');
       /* Corner art is drawn 1:1 in the reference (native px at the 1080 layout), so
