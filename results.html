@@ -113,6 +113,13 @@
     .ra-btn:focus-visible{outline:3px solid rgba(229,106,67,.28);outline-offset:3px}
     .ra-btn svg{width:18px;height:18px;flex:0 0 auto}
     .ra-status{min-height:20px;margin:12px 0 0;color:var(--ra-muted);font-size:14px}
+    .ra-next{max-width:560px;margin:56px auto 0;padding:36px 32px;border:1px solid var(--ra-line);border-radius:24px;background:#fffdf9}
+    .ra-next h2{margin:0;font-family:Georgia,"Times New Roman",serif;font-size:clamp(28px,2.4vw,34px);font-weight:400;line-height:1.1;letter-spacing:-.025em}
+    .ra-next p{margin:12px auto 0;max-width:30rem;color:var(--ra-muted);font-size:16px;line-height:1.55}
+    .ra-next .ra-row{align-items:center;margin-top:24px}
+    .ra-skip{padding:8px 4px;border:0;background:none;color:var(--ra-muted);font:inherit;font-weight:600;text-decoration:underline;text-underline-offset:4px;cursor:pointer}
+    .ra-skip:hover{color:var(--ra-ink)}
+    .ra-skip:focus-visible{outline:3px solid rgba(229,106,67,.28);outline-offset:3px;border-radius:6px}
     .ra-footer{margin-top:68px;color:var(--ra-muted);font-family:Georgia,"Times New Roman",serif;font-size:14px}
     @media (prefers-reduced-motion:reduce){.ra-btn{transition:none}}
 
@@ -295,6 +302,14 @@
             <a class="ra-btn" id="ra-download" href="#" download><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 19h14"/></svg>Download card</a>
           </div>
           <p class="ra-status" id="ra-status" aria-live="polite"></p>
+          <div class="ra-next" id="ra-next" aria-labelledby="ra-next-heading">
+            <h2 id="ra-next-heading">What happens next</h2>
+            <p>Now that you know your roomie type, generate a swipe-ready roommate profile for matching.</p>
+            <div class="ra-row">
+              <a class="ra-btn is-primary" id="ra-build-profile" href="quiz.html?view=profile-1">Build my matching profile<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+              <button class="ra-skip" type="button" id="ra-skip-profile">Skip for now</button>
+            </div>
+          </div>
           <footer class="ra-footer">© 2026 MyRoomeo. All rights reserved.</footer>
         </section>
       </div>
@@ -869,6 +884,10 @@
       /* 3) Last resort: show the image in a new tab to save or copy from there. */
       const w = window.open(cardImageUrl(shownType), '_blank', 'noopener');
       status.textContent = w ? 'Image opened in a new tab -- save or copy it from there.' : 'Use "Download card" to save the image.';
+    });
+
+    document.getElementById('ra-skip-profile').addEventListener('click', () => {
+      document.getElementById('ra-next').hidden = true;
     });
 
     function showEmpty() {

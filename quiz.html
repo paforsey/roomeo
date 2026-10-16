@@ -10938,7 +10938,8 @@
         window.scrollTo({ top: 0, behavior: 'smooth' });
         return;
       }
-      if (!showResultsFromMemory()) showIntro();
+      if (loadSessionAnswers()) window.location.href = 'results.html';
+      else showIntro();
     });
 
     el('btn-profile1-continue').addEventListener('click', () => {
