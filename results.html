@@ -113,8 +113,8 @@
     /* ---------- Share / download block under the card ---------- */
     .result-actions{--ra-ink:#352017;--ra-muted:#77665d;--ra-brand:#e56a43;--ra-brand-hover:#d95832;--ra-line:#ded7d0;
       padding-top:clamp(58px,6.7vw,96px);text-align:center;color:var(--ra-ink);
-      font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
-    .result-actions h1{margin:0;font-family:Georgia,"Times New Roman",serif;font-size:clamp(36px,3.2vw,48px);font-weight:400;line-height:1.08;letter-spacing:-.035em}
+      font-family:var(--font-sans)}
+    .result-actions h1{margin:0;font-family:var(--font-serif);font-size:clamp(36px,3.2vw,48px);font-weight:400;line-height:1.08;letter-spacing:-.035em}
     .ra-row{display:flex;justify-content:center;gap:12px;margin-top:28px}
     .ra-btn{min-height:52px;padding:0 24px;display:inline-flex;align-items:center;justify-content:center;gap:9px;border:1px solid var(--ra-line);border-radius:999px;background:#fff;color:var(--ra-ink);text-decoration:none;font:inherit;font-weight:700;cursor:pointer;transition:transform 180ms ease,background 180ms ease,border-color 180ms ease,color 180ms ease}
     .ra-btn.is-primary{border-color:var(--ra-brand);background:var(--ra-brand);color:#fff}
@@ -133,7 +133,7 @@
     .ra-next-btn:focus-visible{outline:3px solid #fbe9d6;outline-offset:3px}
     /* Room under the page content so the bar never covers the footer. */
     body.has-next-bar .result-actions{padding-bottom:84px}
-    .ra-footer{margin-top:68px;color:var(--ra-muted);font-family:Georgia,"Times New Roman",serif;font-size:14px}
+    .ra-footer{margin-top:68px;color:var(--ra-muted);font-family:var(--font-serif);font-size:14px}
     @media (prefers-reduced-motion:reduce){.ra-btn,.ra-next-btn{transition:none}}
 
     /* ---------- Narrow screens: same pieces, stacked, real px sizes ---------- */
