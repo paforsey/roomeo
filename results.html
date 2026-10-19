@@ -6,7 +6,7 @@
   <title>My Results Card — MyRoomeo</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=PT+Serif:wght@400;700&family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;700&family=Caveat:wght@600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=PT+Serif:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="assets/css/roomeo-system.css" />
   <style>
     .results-page{max-width:1000px;margin:0 auto;padding:40px 20px 80px}
@@ -18,84 +18,94 @@
        --u is "one reference pixel" -- 100cqw/1080 -- so every size below is the value
        measured off the PNG and the whole card scales as one piece. Narrow screens
        (<=720px) drop back to a stacked, fixed-px layout at the bottom of this block. */
-    #results-card-wrap{container-type:inline-size}
-    .rc-frame{--u:calc(100cqw / 1080);background:var(--orange);border-radius:0;padding:calc(var(--u)*36) calc(var(--u)*40);position:relative;overflow:hidden}
-    .rc-card{background:#faf6ee;border-radius:0 0 calc(var(--u)*32) calc(var(--u)*32);position:relative;display:flow-root}
+    /* .rc-fit sizes the card so the whole thing fits on screen when the page opens:
+       its width is the viewport height (minus header + page padding) divided by the
+       card's height-to-width ratio (~1.88), then enlarged ~25% so the type,
+       radar and Yay/Nay show on entry with the bottom a short scroll away; never below 460px. */
+    .rc-fit{container-type:inline-size;width:min(100%,max(460px,calc((100svh - 136px) / 1.5)));margin:0 auto}
+    .rc-frame{--u:calc(100cqw / 1080);--ink:#2d1b14;--line:calc(var(--u)*3);background:var(--orange);border-radius:0;padding:calc(var(--u)*70) calc(var(--u)*80) calc(var(--u)*90);position:relative;overflow:hidden}
+    .rc-card{background:#faf6ee;border-radius:calc(var(--u)*40);box-shadow:0 0 0 var(--line) var(--ink);position:relative;z-index:1;display:flow-root}
+    /* Striped backing card peeking out behind the main card, like a stack of retro postcards. */
+    .rc-back{position:absolute;z-index:0;inset:calc(var(--u)*70) calc(var(--u)*80) calc(var(--u)*90);transform:translate(calc(var(--u)*26),calc(var(--u)*24)) rotate(1.6deg);border-radius:calc(var(--u)*40);
+      background:repeating-linear-gradient(90deg,#fbe9d6 0 calc(var(--u)*22),#f3a678 calc(var(--u)*22) calc(var(--u)*44));box-shadow:0 0 0 var(--line) var(--ink)}
 
-    .rc-ribbon-wrap{position:absolute;top:calc(var(--u)*-3);left:50%;transform:translateX(-50%);z-index:3;pointer-events:none}
-    .rc-ribbon{background:url('assets/results-card/title.png') no-repeat center/100% 100%;color:#3a2116;font:700 calc(var(--u)*30)/1 var(--font-sans);letter-spacing:.01em;text-transform:uppercase;white-space:nowrap;width:calc(var(--u)*539);height:calc(var(--u)*144);display:flex;align-items:center;justify-content:center;padding:0 0 calc(var(--u)*28);margin:0}
 
-    /* ---------- Header: one hand-drawn box, logo/date | headline ---------- */
-    .rc-top-row{position:relative;margin:calc(var(--u)*47) calc(var(--u)*47) 0;height:calc(var(--u)*179);display:grid;grid-template-columns:calc(var(--u)*238) 1fr}
-    .rc-sketch{position:absolute;inset:0;pointer-events:none;filter:url(#rc-wobble)}
-    .rc-sketch-box{position:absolute;inset:0;border:calc(var(--u)*3) solid #6b5a50;border-radius:calc(var(--u)*3)}
-    .rc-sketch-v{position:absolute;top:0;bottom:0;left:calc(var(--u)*238);border-left:calc(var(--u)*2.5) solid #6b5a50}
-    .rc-sketch-h{position:absolute;left:0;width:calc(var(--u)*238);top:calc(var(--u)*89);border-top:calc(var(--u)*2.5) solid #6b5a50}
-    .rc-id-box{position:relative;padding:calc(var(--u)*25) calc(var(--u)*22) 0;display:flex;flex-direction:column}
-    .rc-id-logo{width:calc(var(--u)*167);height:auto;align-self:flex-start}
-    .rc-id-divider{display:none}
-    .rc-id-date-wrap{position:absolute;left:0;right:0;top:calc(var(--u)*89);bottom:0;display:flex;align-items:center;padding:0 0 0 calc(var(--u)*17)}
-    .rc-id-date-line{margin:0;font:600 calc(var(--u)*19)/1.2 var(--font-sans);letter-spacing:0;text-transform:uppercase;color:#6b5a50;white-space:nowrap}
-    .rc-headline-box{position:relative;display:flex;align-items:center;justify-content:center;padding-top:calc(var(--u)*10)}
-    .rc-headline{margin:0;display:flex;align-items:center;gap:calc(var(--u)*18);font-family:var(--font-serif);font-weight:400}
-    .rc-headline-lead{font-size:calc(var(--u)*40);color:#6b5a50}
-    .rc-headline strong{font-size:calc(var(--u)*121);line-height:1;font-weight:400;color:#2d1b14;letter-spacing:-.01em;display:block}
+    /* ---------- Header: round "Roomie type test" stamp + headline, one row ---------- */
+    .rc-top-row{display:flex;flex-direction:column;align-items:center;gap:calc(var(--u)*6);margin:calc(var(--u)*80) calc(var(--u)*47) 0}
+    .rc-eyebrow{margin:0;display:flex;align-items:center;gap:calc(var(--u)*14);font:700 calc(var(--u)*17)/1 var(--font-sans);letter-spacing:.18em;text-transform:uppercase;color:var(--ink)}
+    .rc-eyebrow::before,.rc-eyebrow::after{content:"";width:calc(var(--u)*46);height:calc(var(--u)*3);background:var(--ink);border-radius:9px}
+    .rc-headline{margin:0;display:flex;align-items:baseline;gap:calc(var(--u)*20);white-space:nowrap;font-family:var(--font-serif);font-weight:400}
+    .rc-headline-lead{font-size:calc(var(--u)*56);font-style:italic;color:var(--orange)}
+    .rc-headline strong{font-size:calc(var(--u)*160);line-height:1;font-weight:700;color:var(--ink);letter-spacing:-.03em;display:block}
+
+    /* ---------- Seal: round "Roomie type test" stamp in the card's top-left ---------- */
+    .rc-seal{position:absolute;z-index:2;left:calc(var(--u)*48);top:calc(var(--u)*44);width:calc(var(--u)*128);height:calc(var(--u)*128);pointer-events:none}
+    .rc-seal svg{display:block;width:100%;height:100%}
+    .rc-seal-text{font:700 14px var(--font-sans);letter-spacing:.1em;fill:var(--orange)}
 
     /* ---------- Radar + character ---------- */
     .rc-hero{position:relative;height:calc(var(--u)*390);margin:calc(var(--u)*38) 0 0 calc(var(--u)*60)}
     .rc-radar-wrap{width:calc(var(--u)*570)}
     .rc-radar-wrap svg{display:block;width:100%;height:auto;overflow:visible}
-    .rc-radar-label{font:700 18px var(--font-sans);letter-spacing:.01em;text-transform:uppercase;fill:#6b594f}
-    .rc-character{position:absolute;left:calc(var(--u)*581);bottom:calc(var(--u)*2);width:calc(var(--u)*304);pointer-events:none}
+    .rc-radar-label{font:700 16px var(--font-sans);letter-spacing:.08em;text-transform:uppercase;fill:var(--ink)}
+    .rc-character{position:absolute;z-index:2;isolation:isolate;left:calc(var(--u)*540);bottom:calc(var(--u)*2);width:calc(var(--u)*304);pointer-events:none}
     .rc-character img{display:block;width:100%;height:auto}
+    /* Little ink-line props around the character: a potted plant and a floor lamp. */
+    .rc-prop{position:absolute;bottom:0;height:auto;pointer-events:none}
+    .rc-prop-plant{left:calc(var(--u)*-62);width:calc(var(--u)*72)}
+    .rc-prop-lamp{right:calc(var(--u)*-6);width:calc(var(--u)*52);z-index:-1}
 
     /* ---------- Stat tiles ---------- */
     .rc-stats{display:grid;grid-template-columns:repeat(4,1fr);margin:calc(var(--u)*44) calc(var(--u)*69) 0}
     .rc-stat{padding:0 0 0 calc(var(--u)*16);text-align:left}
-    .rc-stat + .rc-stat{border-left:calc(var(--u)*1.5) solid #d9d2c9}
+    .rc-stat + .rc-stat{border-left:calc(var(--u)*2.5) dotted var(--ink)}
     .rc-stat-label{display:flex;align-items:center;gap:calc(var(--u)*7);font:700 calc(var(--u)*15)/1 var(--font-sans);letter-spacing:.07em;text-transform:uppercase;color:#6b5a50;margin:0 0 calc(var(--u)*12)}
     .rc-stat-label svg{width:calc(var(--u)*18);height:calc(var(--u)*18);flex:none}
-    .rc-stat-value{font:700 calc(var(--u)*52)/1.05 var(--font-sans);color:var(--orange);margin:0;text-shadow:0 calc(var(--u)*2) calc(var(--u)*5) rgba(45,27,20,.13)}
+    .rc-stat-value{font:700 calc(var(--u)*52)/1.05 var(--font-sans);color:var(--ink);margin:0}
 
     /* ---------- Description ---------- */
-    .rc-description{margin:calc(var(--u)*46) calc(var(--u)*62) 0 calc(var(--u)*68);font:400 calc(var(--u)*24.5)/calc(var(--u)*32) var(--font-serif);color:#2d1b14}
+    .rc-description{margin:calc(var(--u)*46) calc(var(--u)*62) 0 calc(var(--u)*68);font:400 calc(var(--u)*23)/calc(var(--u)*34) var(--font-sans);color:#2d1b14}
 
     /* ---------- Yay / nay ---------- */
-    .rc-yaynay{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:calc(var(--u)*28);margin:calc(var(--u)*49) calc(var(--u)*48) 0}
-    .rc-yaynay-col{border-radius:calc(var(--u)*22);padding:calc(var(--u)*28) calc(var(--u)*10) calc(var(--u)*48) calc(var(--u)*32)}
-    .rc-yaynay-col.is-yay{background:#edf2eb}
-    .rc-yaynay-col.is-nay{background:#feefe4}
-    .rc-yaynay-title{margin:0 0 calc(var(--u)*24);font:700 calc(var(--u)*33)/1.15 var(--font-serif);text-transform:uppercase;letter-spacing:.005em}
-    .is-yay .rc-yaynay-title{color:#2e5742}
-    .is-nay .rc-yaynay-title{color:#c4451f}
+    .rc-yaynay{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:calc(var(--u)*28);margin:calc(var(--u)*70) calc(var(--u)*48) 0}
+    .rc-yaynay-col{position:relative;background:#fff9ef;border-radius:calc(var(--u)*26);box-shadow:0 0 0 calc(var(--u)*2.5) var(--ink);padding:calc(var(--u)*56) calc(var(--u)*20) calc(var(--u)*40) calc(var(--u)*32)}
+    /* Title sits on the card's top edge as a pill tab. */
+    .rc-yaynay-title{position:absolute;top:calc(var(--u)*-22);left:calc(var(--u)*26);margin:0;padding:calc(var(--u)*8) calc(var(--u)*22);border-radius:99px;box-shadow:0 0 0 calc(var(--u)*2.5) var(--ink);font:italic 400 calc(var(--u)*30)/1 var(--font-serif)}
+    .is-yay .rc-yaynay-title{background:var(--ink);color:#fbe9d6}
+    .is-nay .rc-yaynay-title{background:var(--orange);color:#fff}
     .rc-yaynay-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:calc(var(--u)*18)}
-    .rc-yaynay-list li{display:flex;align-items:center;gap:calc(var(--u)*14);min-height:calc(var(--u)*26);font:400 calc(var(--u)*18)/1.2 var(--font-sans);color:#29211c;white-space:nowrap}
+    .rc-yaynay-list li{display:flex;align-items:center;gap:calc(var(--u)*14);min-height:calc(var(--u)*26);font:400 calc(var(--u)*18)/1.2 var(--font-sans);color:var(--ink)}
     .rc-yaynay-icon{flex:none;width:calc(var(--u)*26);height:calc(var(--u)*26)}
 
     /* ---------- Matches ---------- */
     .rc-matches{margin:calc(var(--u)*43) calc(var(--u)*20) 0}
     .rc-matches-groups{display:grid;grid-template-columns:1fr 1fr;gap:0}
-    .rc-matches-group-label{font:700 calc(var(--u)*15)/1 var(--font-label);letter-spacing:.005em;text-transform:uppercase;color:#1a1209;margin:0 0 calc(var(--u)*20) calc(var(--u)*40)}
+    .rc-matches-group-label{font:700 calc(var(--u)*15)/1 var(--font-sans);letter-spacing:.14em;text-transform:uppercase;color:#1a1209;margin:0 0 calc(var(--u)*20) calc(var(--u)*40)}
     .rc-matches-groups > div + div .rc-matches-group-label{margin-left:calc(var(--u)*86)}
     .rc-matches-row{display:grid;grid-template-columns:1fr 1fr}
     .rc-match{text-align:center}
-    .rc-match-avatar{width:calc(var(--u)*120);height:calc(var(--u)*120);border-radius:50%;object-fit:cover;background:#e5e1db;margin:0 auto;display:block}
-    .rc-match-name{margin:calc(var(--u)*10) 0 0;font:700 calc(var(--u)*19)/1.2 var(--font-label);color:#111}
-    .rc-match-badge{display:inline-block;margin-top:calc(var(--u)*10);padding:calc(var(--u)*3) calc(var(--u)*8);border-radius:calc(var(--u)*3);font:700 calc(var(--u)*12)/1.25 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:#fff}
-    .rc-match-badge.is-good{background:#4a8c6f}
+    .rc-match-avatar{width:calc(var(--u)*120);height:calc(var(--u)*120);border-radius:50%;object-fit:cover;background:#fbe6cf;margin:0 auto;display:block}
+    .rc-match-name{margin:calc(var(--u)*10) 0 0;font:700 calc(var(--u)*19)/1.2 var(--font-sans);color:var(--ink)}
+    .rc-match-badge{display:inline-block;margin-top:calc(var(--u)*10);padding:calc(var(--u)*3) calc(var(--u)*10);border-radius:99px;box-shadow:0 0 0 calc(var(--u)*2) var(--ink);font:700 calc(var(--u)*12)/1.25 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:#fff}
+    .rc-match-badge.is-good{background:var(--ink)}
     .rc-match-badge.is-bad{background:var(--orange)}
 
     /* ---------- Footer ---------- */
-    .rc-footer{position:relative;z-index:1;margin:calc(var(--u)*64) calc(var(--u)*20) 0;height:calc(var(--u)*176);background:#fff;border-radius:0 0 calc(var(--u)*22) calc(var(--u)*22);padding:calc(var(--u)*30) 0 0 calc(var(--u)*48);display:flex;align-items:flex-start;gap:calc(var(--u)*38)}
-    .rc-footer-tagline{margin:0;font:400 calc(var(--u)*24.1)/1.2 var(--font-serif);color:#000;white-space:nowrap}
-    .rc-footer-url{display:flex;align-items:center;width:calc(var(--u)*562);height:calc(var(--u)*68);margin-top:calc(var(--u)*23);background:#fcf1be;border-radius:calc(var(--u)*34)}
-    .rc-footer-url-logo{width:calc(var(--u)*137);height:auto;margin-left:calc(var(--u)*42);flex:none}
-    .rc-footer-url-inner{flex:1;align-self:center;height:calc(var(--u)*56);margin:0 calc(var(--u)*30) 0 calc(var(--u)*23);background:#fff;border-radius:0 calc(var(--u)*28) calc(var(--u)*28) 0;display:flex;align-items:center;justify-content:space-between;padding:0 calc(var(--u)*14) 0 calc(var(--u)*11)}
-    .rc-footer-url-text{font:400 calc(var(--u)*25.5)/1 var(--font-serif);color:#000;white-space:nowrap}
-    .rc-footer-url-search{flex:none;width:calc(var(--u)*44);height:calc(var(--u)*44)}
-    .rc-footer-qr-wrap{text-align:center;flex:none;margin-top:calc(var(--u)*-7)}
-    .rc-footer-qr-wrap img{width:calc(var(--u)*116);height:calc(var(--u)*116);object-fit:contain;margin:0 auto}
-    .rc-footer-scan{margin:calc(var(--u)*7) 0 0;font:600 calc(var(--u)*30)/1 'Caveat',cursive;color:#5e9bcf}
+    .rc-footer{position:relative;z-index:1;margin:calc(var(--u)*64) 0 0;background:#fff9ef;box-shadow:inset 0 calc(var(--u)*2.5) 0 var(--ink);border-radius:0 0 calc(var(--u)*40) calc(var(--u)*40);padding:calc(var(--u)*40) calc(var(--u)*150) calc(var(--u)*44) calc(var(--u)*52);display:flex;align-items:center;justify-content:space-between;gap:calc(var(--u)*40)}
+    .rc-footer-main{flex:1;min-width:0}
+    .rc-footer-cta{margin:0 0 calc(var(--u)*20);font:700 calc(var(--u)*34)/1.15 var(--font-serif);color:var(--ink)}
+    .rc-footer-cta em{font-weight:400;color:var(--orange)}
+    /* Hand-drawn search bar: ink magnifier, typed URL with a caret, orange Search pill. */
+    .rc-footer-search{display:flex;align-items:center;gap:calc(var(--u)*14);height:calc(var(--u)*76);padding:0 calc(var(--u)*8) 0 calc(var(--u)*24);border-radius:99px;background:#fff;box-shadow:0 0 0 var(--line) var(--ink)}
+    .rc-footer-search-icon{flex:none;width:calc(var(--u)*32);height:calc(var(--u)*32)}
+    .rc-footer-url-text{flex:1;display:flex;align-items:center;font:400 calc(var(--u)*30)/1 var(--font-serif);color:var(--ink);white-space:nowrap}
+    .rc-footer-url-text::after{content:"";width:calc(var(--u)*3);height:calc(var(--u)*34);margin-left:calc(var(--u)*4);background:var(--orange)}
+    .rc-footer-search-btn{flex:none;display:flex;align-items:center;gap:calc(var(--u)*8);height:calc(var(--u)*60);padding:0 calc(var(--u)*26);border-radius:99px;background:var(--orange);color:#fff;box-shadow:0 0 0 calc(var(--u)*2.5) var(--ink);font:700 calc(var(--u)*24)/1 var(--font-sans)}
+    .rc-footer-search-btn svg{width:calc(var(--u)*24);height:calc(var(--u)*24)}
+    .rc-footer-qr{position:relative;flex:none;width:calc(var(--u)*150);box-sizing:border-box;padding:calc(var(--u)*30) calc(var(--u)*14) calc(var(--u)*14);border-radius:calc(var(--u)*20);background:#fff;box-shadow:0 0 0 calc(var(--u)*2.5) var(--ink)}
+    .rc-footer-qr img{display:block;width:100%;height:auto}
+    .rc-footer-qr-tab{position:absolute;top:calc(var(--u)*-17);left:50%;transform:translateX(-50%);white-space:nowrap;padding:calc(var(--u)*6) calc(var(--u)*16);border-radius:99px;background:var(--orange);color:#fff;box-shadow:0 0 0 calc(var(--u)*2.5) var(--ink);font:italic 400 calc(var(--u)*22)/1 var(--font-serif)}
+
 
     /* ---------- Decorative corner: sits over the frame, like the PNGs ---------- */
     .rc-corner{position:absolute;right:0;bottom:0;height:auto;z-index:4;pointer-events:none}
@@ -103,8 +113,8 @@
     /* ---------- Share / download block under the card ---------- */
     .result-actions{--ra-ink:#352017;--ra-muted:#77665d;--ra-brand:#e56a43;--ra-brand-hover:#d95832;--ra-line:#ded7d0;
       padding-top:clamp(58px,6.7vw,96px);text-align:center;color:var(--ra-ink);
-      font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
-    .result-actions h1{margin:0;font-family:Georgia,"Times New Roman",serif;font-size:clamp(36px,3.2vw,48px);font-weight:400;line-height:1.08;letter-spacing:-.035em}
+      font-family:var(--font-sans)}
+    .result-actions h1{margin:0;font-family:var(--font-serif);font-size:clamp(36px,3.2vw,48px);font-weight:400;line-height:1.08;letter-spacing:-.035em}
     .ra-row{display:flex;justify-content:center;gap:12px;margin-top:28px}
     .ra-btn{min-height:52px;padding:0 24px;display:inline-flex;align-items:center;justify-content:center;gap:9px;border:1px solid var(--ra-line);border-radius:999px;background:#fff;color:var(--ra-ink);text-decoration:none;font:inherit;font-weight:700;cursor:pointer;transition:transform 180ms ease,background 180ms ease,border-color 180ms ease,color 180ms ease}
     .ra-btn.is-primary{border-color:var(--ra-brand);background:var(--ra-brand);color:#fff}
@@ -113,29 +123,38 @@
     .ra-btn:focus-visible{outline:3px solid rgba(229,106,67,.28);outline-offset:3px}
     .ra-btn svg{width:18px;height:18px;flex:0 0 auto}
     .ra-status{min-height:20px;margin:12px 0 0;color:var(--ra-muted);font-size:14px}
-    .ra-footer{margin-top:68px;color:var(--ra-muted);font-family:Georgia,"Times New Roman",serif;font-size:14px}
-    @media (prefers-reduced-motion:reduce){.ra-btn{transition:none}}
+    /* "What happens next" floats as a plain bar pinned to the bottom of the screen.
+       It is the only way into the matching profile / waitlist, so it cannot be dismissed. */
+    .ra-next{position:fixed;z-index:50;left:0;right:0;bottom:0;background:#2d1b14;color:#fbe9d6}
+    .ra-next-inner{max-width:1000px;margin:0 auto;padding:14px 24px;display:flex;align-items:center;gap:16px}
+    .ra-next p{flex:1;min-width:0;margin:0;text-align:left;font-size:16px;font-weight:600;line-height:1.4}
+    .ra-next-btn{flex:none;display:inline-flex;align-items:center;min-height:44px;padding:0 22px;border-radius:999px;background:var(--ra-brand);color:#fff;text-decoration:none;font-weight:700;transition:background 180ms ease}
+    .ra-next-btn:hover{background:var(--ra-brand-hover)}
+    .ra-next-btn:focus-visible{outline:3px solid #fbe9d6;outline-offset:3px}
+    /* Room under the page content so the bar never covers the footer. */
+    body.has-next-bar .result-actions{padding-bottom:84px}
+    .ra-footer{margin-top:68px;color:var(--ra-muted);font-family:var(--font-serif);font-size:14px}
+    @media (prefers-reduced-motion:reduce){.ra-btn,.ra-next-btn{transition:none}}
 
     /* ---------- Narrow screens: same pieces, stacked, real px sizes ---------- */
     @media (max-width:720px){
-      .rc-frame{padding:14px;border-radius:0}
-      .rc-card{padding:0 0 22px;border-radius:0 0 18px 18px}
-      .rc-ribbon-wrap{top:-6px}
-      .rc-ribbon{width:300px;height:80px;font-size:15px;padding-bottom:24px}
-      .rc-top-row{grid-template-columns:1fr;height:auto;margin:60px 16px 0}
-      .rc-sketch-v,.rc-sketch-h{display:none}
-      .rc-id-box{flex-direction:row;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:2px solid #6b5a50}
-      .rc-id-logo{width:120px}
-      .rc-id-date-wrap{position:static;display:block;margin:0;padding:0 0 0 10px;text-align:right}
-      .rc-id-date-line{font-size:12px}
-      .rc-headline-box{padding:14px 12px 18px}
-      .rc-headline{gap:10px;flex-wrap:wrap;justify-content:center}
-      .rc-headline-lead{font-size:22px}
-      .rc-headline strong{font-size:60px}
+      .rc-fit{width:100%}
+      .rc-frame{padding:20px 22px 30px;border-radius:0;--line:2px}
+      .rc-back{inset:20px 22px 30px;transform:translate(8px,9px) rotate(1.4deg);border-radius:22px;background:repeating-linear-gradient(90deg,#fbe9d6 0 10px,#f3a678 10px 20px)}
+      .rc-card{padding:0;border-radius:22px}
+      .rc-top-row{gap:4px;margin:84px 14px 0}
+      .rc-eyebrow{font-size:11px;gap:8px}
+      .rc-eyebrow::before,.rc-eyebrow::after{width:22px;height:2px}
+      .rc-headline{gap:8px}
+      .rc-headline-lead{font-size:24px}
+      .rc-headline strong{font-size:66px}
       .rc-hero{height:auto;display:flex;flex-direction:column;align-items:center;margin:20px 12px 0}
       .rc-radar-wrap{width:100%;max-width:400px}
-      .rc-radar-label{font-size:17px}
-      .rc-character{position:static;margin:6px 0 0;width:min(56%,210px)}
+      .rc-radar-label{font-size:16px}
+      .rc-character{position:relative;left:auto;bottom:auto;margin:6px 0 0;width:min(56%,210px)}
+      .rc-prop-plant{left:-58px;width:56px}
+      .rc-prop-lamp{right:-36px;width:40px}
+      .rc-seal{width:60px;height:60px;left:14px;top:14px}
       .rc-stats{grid-template-columns:1fr 1fr;margin:20px 20px 0;row-gap:18px}
       .rc-stat{padding-left:12px}
       .rc-stat:nth-child(odd){border-left:none;padding-left:0}
@@ -143,9 +162,9 @@
       .rc-stat-label svg{width:14px;height:14px}
       .rc-stat-value{font-size:34px}
       .rc-description{margin:22px 20px 0;font-size:15px;line-height:1.55}
-      .rc-yaynay{grid-template-columns:1fr;gap:14px;margin:24px 16px 0}
-      .rc-yaynay-col{border-radius:16px;padding:20px 20px 18px}
-      .rc-yaynay-title{font-size:22px;margin-bottom:14px}
+      .rc-yaynay{grid-template-columns:1fr;gap:34px;margin:40px 16px 0}
+      .rc-yaynay-col{border-radius:16px;padding:34px 18px 20px;box-shadow:0 0 0 2px var(--ink)}
+      .rc-yaynay-title{font-size:20px;top:-16px;left:16px;padding:7px 16px;box-shadow:0 0 0 2px var(--ink)}
       .rc-yaynay-list{gap:12px}
       .rc-yaynay-list li{font-size:15px;gap:10px;min-height:22px;white-space:normal}
       .rc-yaynay-icon{width:22px;height:22px}
@@ -155,20 +174,27 @@
       .rc-match-avatar{width:84px;height:84px}
       .rc-match-name{font-size:16px;margin-top:8px}
       .rc-match-badge{font-size:10px;padding:3px 8px;margin-top:6px}
-      .rc-footer{height:auto;margin:28px 12px 0;padding:18px;flex-direction:column;align-items:center;gap:16px;text-align:center;border-radius:0 0 16px 16px}
-      .rc-footer-tagline{font-size:17px;white-space:normal}
-      .rc-footer-url{width:100%;max-width:340px;height:52px;margin-top:12px;border-radius:26px}
-      .rc-footer-url-logo{width:88px;margin-left:16px}
-      .rc-footer-url-inner{height:42px;margin:0 12px 0 10px;border-radius:0 21px 21px 0;padding:0 8px}
-      .rc-footer-url-text{font-size:14px}
-      .rc-footer-url-search{width:28px;height:28px}
-      .rc-footer-qr-wrap img{width:96px;height:96px}
-      .rc-footer-scan{font-size:22px}
+      .rc-footer{margin:28px 0 0;padding:24px 18px 26px;flex-direction:column;gap:30px;text-align:center;border-radius:0 0 22px 22px;box-shadow:inset 0 2px 0 var(--ink)}
+      .rc-footer-main{width:100%}
+      .rc-footer-cta{font-size:20px;margin-bottom:14px}
+      .rc-footer-cta em{display:block}
+      .rc-footer-search{height:50px;gap:8px;padding:0 5px 0 14px;box-shadow:0 0 0 2px var(--ink)}
+      .rc-footer-search-icon{width:20px;height:20px}
+      .rc-footer-url-text{font-size:17px}
+      .rc-footer-url-text::after{width:2px;height:20px}
+      .rc-footer-search-btn{height:40px;padding:0 14px;font-size:14px;gap:5px;box-shadow:0 0 0 2px var(--ink)}
+      .rc-footer-search-btn svg{width:14px;height:14px}
+      .rc-footer-qr{width:120px;padding:22px 10px 10px;border-radius:14px;box-shadow:0 0 0 2px var(--ink)}
+      .rc-footer-qr-tab{top:-13px;font-size:16px;padding:5px 12px;box-shadow:0 0 0 2px var(--ink)}
       .rc-corner{width:88px !important}
       .result-actions{padding-top:44px}
       .ra-row{flex-direction:column}
       .ra-btn{width:100%}
       .ra-footer{margin-top:52px}
+      .ra-next-inner{padding:10px 12px calc(10px + env(safe-area-inset-bottom)) 16px;gap:12px}
+      .ra-next p{font-size:14px}
+      .ra-next-btn{min-height:40px;padding:0 16px;font-size:14px}
+      body.has-next-bar .result-actions{padding-bottom:76px}
     }
   </style>
 </head>
@@ -205,26 +231,25 @@
       </div>
 
       <div id="results-card-wrap" hidden>
-        <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
-          <filter id="rc-wobble" x="-2%" y="-2%" width="104%" height="104%">
-            <feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="7" result="n" />
-            <feDisplacementMap in="SourceGraphic" in2="n" scale="4" xChannelSelector="R" yChannelSelector="G" />
-          </filter>
-        </svg>
+        <div class="rc-fit">
         <div class="rc-frame">
-          <div class="rc-ribbon-wrap"><p class="rc-ribbon">Roomie Type Test</p></div>
+          <div class="rc-back" aria-hidden="true"></div>
           <div class="rc-card" id="rc-card">
+            <div class="rc-seal" aria-hidden="true">
+              <svg viewBox="0 0 146 146" focusable="false">
+                <defs><path id="rc-seal-ring" d="M73 73 m-52 0 a52 52 0 1 1 104 0 a52 52 0 1 1 -104 0" /></defs>
+                <circle cx="73" cy="73" r="70" fill="#f8d9c4" />
+                <text class="rc-seal-text"><textPath href="#rc-seal-ring" textLength="320" lengthAdjust="spacing">ROOMIE TYPE TEST · MYROOMEO · </textPath></text>
+                <g fill="none" stroke="#e86c2c" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M56 76 L73 61 L90 76" />
+                  <path d="M61 72 V90 H85 V72" />
+                  <path d="M70 90 V82 H76 V90" />
+                </g>
+              </svg>
+            </div>
             <div class="rc-top-row">
-              <div class="rc-sketch" aria-hidden="true"><span class="rc-sketch-box"></span><span class="rc-sketch-v"></span><span class="rc-sketch-h"></span></div>
-              <div class="rc-id-box">
-                <img class="rc-id-logo" src="assets/brand/logo02.svg" alt="MyRoomeo" />
-                <div class="rc-id-date-wrap">
-                  <p class="rc-id-date-line">Test date /<span id="rc-test-date">—</span></p>
-                </div>
-              </div>
-              <div class="rc-headline-box">
-                <p class="rc-headline"><span class="rc-headline-lead">You are a</span> <strong id="rc-type-name">—</strong></p>
-              </div>
+              <p class="rc-eyebrow">Your roomie type</p>
+              <p class="rc-headline"><span class="rc-headline-lead">You are a</span> <strong id="rc-type-name">—</strong></p>
             </div>
 
             <div class="rc-hero">
@@ -233,6 +258,19 @@
               </div>
               <div class="rc-character">
                 <img id="rc-character-img" src="" alt="" />
+                <svg class="rc-prop rc-prop-plant" viewBox="0 0 90 130" fill="none" stroke="#2d1b14" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M22 92 H68 L62 126 H28 Z" />
+                  <path d="M45 92 C44 70 46 52 45 30" />
+                  <path d="M45 62 C30 60 18 48 16 34 C30 34 42 44 45 58" />
+                  <path d="M45 48 C58 44 68 32 70 18 C56 20 47 30 45 44" />
+                  <path d="M45 30 C40 22 40 12 45 4 C50 12 50 22 45 30" />
+                </svg>
+                <svg class="rc-prop rc-prop-lamp" viewBox="0 0 80 200" fill="none" stroke="#2d1b14" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M18 50 L30 8 H50 L62 50 Z" fill="#fff6ea" />
+                  <path d="M40 50 V192" />
+                  <path d="M20 194 H60" />
+                  <path d="M52 50 C52 60 56 64 60 66" />
+                </svg>
               </div>
             </div>
 
@@ -265,27 +303,22 @@
             </div>
 
             <div class="rc-footer">
-              <div>
-                <p class="rc-footer-tagline">What's your Roomie Type? Take it. Share it. Match up.</p>
-                <div class="rc-footer-url">
-                  <img class="rc-footer-url-logo" src="assets/brand/logo02.svg" alt="MyRoomeo" />
-                  <div class="rc-footer-url-inner">
-                    <span class="rc-footer-url-text">https://myroomeo.com/</span>
-                    <svg class="rc-footer-url-search" viewBox="0 0 44 44" aria-hidden="true">
-                      <circle cx="18" cy="18" r="11.5" fill="#fff6cf" stroke="#f6b400" stroke-width="4.5" />
-                      <path d="M12.5 13.5a7.5 7.5 0 0 1 6-3" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" opacity=".9" />
-                      <path d="M27 27l11 11" stroke="#e86c2c" stroke-width="6" stroke-linecap="round" />
-                    </svg>
-                  </div>
+              <div class="rc-footer-main">
+                <p class="rc-footer-cta">Meet your roomie. <em>Look us up!</em></p>
+                <div class="rc-footer-search">
+                  <svg class="rc-footer-search-icon" viewBox="0 0 30 30" fill="none" stroke="#2d1b14" stroke-width="3.2" stroke-linecap="round" aria-hidden="true"><circle cx="12.5" cy="12.5" r="8.5" /><path d="M19 19.5c2.6 2.4 4.6 4.4 7 7" /></svg>
+                  <span class="rc-footer-url-text">myroomeo.com</span>
+                  <span class="rc-footer-search-btn">Search <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h15M13 6l6 6-6 6" /></svg></span>
                 </div>
               </div>
-              <div class="rc-footer-qr-wrap">
-                <img src="assets/results-card/qr-code.png" alt="" />
-                <p class="rc-footer-scan">Scan Me!</p>
+              <div class="rc-footer-qr">
+                <span class="rc-footer-qr-tab">Scan me</span>
+                <img src="assets/results-card/qr-code.png" alt="QR code to myroomeo.com" />
               </div>
             </div>
           </div>
           <img class="rc-corner" id="rc-corner" src="" alt="" aria-hidden="true" />
+        </div>
         </div>
 
         <section class="result-actions">
@@ -295,6 +328,12 @@
             <a class="ra-btn" id="ra-download" href="#" download><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 19h14"/></svg>Download card</a>
           </div>
           <p class="ra-status" id="ra-status" aria-live="polite"></p>
+          <div class="ra-next" id="ra-next" role="region" aria-labelledby="ra-next-heading">
+            <div class="ra-next-inner">
+              <p id="ra-next-heading">Now that you know your roomie type, find a roommate who fits.</p>
+              <a class="ra-next-btn" id="ra-build-profile" href="quiz.html?view=profile-1">Build my profile</a>
+            </div>
+          </div>
           <footer class="ra-footer">© 2026 MyRoomeo. All rights reserved.</footer>
         </section>
       </div>
@@ -715,22 +754,22 @@
 
     /** Draws the 8-spoke radar exactly like the reference cards, in the same
         coordinate space as those 1080px PNGs (the <svg> viewBox is a window
-        onto it): cream octagon, faint rings + spokes, orange shape, white-ringed
+        onto it): cream octagon, faint rings + spokes, orange shape with an ink outline, ink
         dots, bold caps labels. `values` = 8 numbers 0-100 in RADAR_LABELS order. */
     function renderRadar(svg, values) {
       const cx = 374.5, cy = 490.5, R = 138.5, n = 8;
       const ang = (i) => (Math.PI * 2 * i) / n - Math.PI / 2;
       const pt = (i, r) => [cx + r * Math.cos(ang(i)), cy + r * Math.sin(ang(i))];
       const poly = (r) => RADAR_LABELS.map((_, i) => pt(i, r).map((v) => v.toFixed(1)).join(',')).join(' ');
-      let h = `<polygon points="${poly(R)}" fill="#feefce" />`;
-      [0.25, 0.5, 0.75].forEach((lvl) => { h += `<polygon points="${poly(R * lvl)}" fill="none" stroke="#f6e5c0" stroke-width="1.4" />`; });
+      let h = `<polygon points="${poly(R)}" fill="#fbe6cf" />`;
+      [0.25, 0.5, 0.75].forEach((lvl) => { h += `<polygon points="${poly(R * lvl)}" fill="none" stroke="#efcfae" stroke-width="1.4" />`; });
       RADAR_LABELS.forEach((_, i) => {
         const [x, y] = pt(i, R);
-        h += `<line x1="${cx}" y1="${cy}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}" stroke="#f6e5c0" stroke-width="1.4" />`;
+        h += `<line x1="${cx}" y1="${cy}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}" stroke="#efcfae" stroke-width="1.4" />`;
       });
       const pts = RADAR_LABELS.map((_, i) => pt(i, R * Math.max(0, Math.min(100, values[i] || 0)) / 100));
-      h += `<polygon points="${pts.map((p) => p.map((v) => v.toFixed(1)).join(',')).join(' ')}" fill="#e86c2c" fill-opacity=".38" stroke="#e86c2c" stroke-width="4" stroke-linejoin="round" />`;
-      pts.forEach(([x, y]) => { h += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="7.5" fill="#e86c2c" stroke="#fff" stroke-width="2.5" />`; });
+      h += `<polygon points="${pts.map((p) => p.map((v) => v.toFixed(1)).join(',')).join(' ')}" fill="#e86c2c" fill-opacity=".85" stroke="#2d1b14" stroke-width="3" stroke-linejoin="round" />`;
+      pts.forEach(([x, y]) => { h += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="5" fill="#2d1b14" />`; });
       RADAR_LABELS.forEach((label, i) => {
         const c = Math.cos(ang(i));
         const anchor = c > 0.3 ? 'start' : c < -0.3 ? 'end' : 'middle';
@@ -741,19 +780,16 @@
       svg.innerHTML = h;
     }
 
+    /* Hand-drawn ink tick / cross for the yay and nay lists. */
+    const INK_TICK = '<svg class="rc-yaynay-icon" viewBox="0 0 26 26" fill="none" stroke="#2d1b14" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 14.2c2.4 1.6 4.2 3.6 5.6 6.1C12.8 13.4 16.9 8 22 4.2"/></svg>';
+    const INK_CROSS = '<svg class="rc-yaynay-icon" viewBox="0 0 26 26" fill="none" stroke="#2d1b14" stroke-width="3.2" stroke-linecap="round" aria-hidden="true"><path d="M5.5 5.8c5 4.6 9.6 9.6 14.6 14.8M20.4 5.2C15 10 10.4 15 5.8 20.4"/></svg>';
+
     const STAT_ICONS = {
       social: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
       cleanliness: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.94 14.34 4 20.5"/><path d="m14 4 1.2 2.8L18 8l-2.8 1.2L14 12l-1.2-2.8L10 8l2.8-1.2z"/><path d="m5 5 .7 1.6L7.3 7.3 5.7 8 5 9.6 4.3 8 2.7 7.3l1.6-.7z"/><path d="m18 14 .7 1.6 1.6.7-1.6.7L18 18.6l-.7-1.6-1.6-.7 1.6-.7z"/></svg>',
       structure: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg>',
       homebody: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>'
     };
-
-    /* The card's own date format, as drawn on the reference cards:
-       "TEST DATE /2026 7.23" -> year, then month.day (no zero-padding). */
-    function formatTestDate(date) {
-      if (!date) return '—';
-      return `${date.getFullYear()} ${date.getMonth() + 1}.${date.getDate()}`;
-    }
 
     /* stats/radar are fixed per type (content.stats below), not computed from
        the individual's own answers -- every Turtle sees the same spider
@@ -771,7 +807,6 @@
       const displayStats = stats || content.stats;
 
       document.getElementById('rc-type-name').textContent = content.name;
-      document.getElementById('rc-test-date').textContent = formatTestDate(testDate);
       document.getElementById('rc-description').textContent = content.description;
       const corner = document.getElementById('rc-corner');
       /* Corner art is drawn 1:1 in the reference (native px at the 1080 layout), so
@@ -791,9 +826,9 @@
       }).join('');
 
       const yayEl = document.getElementById('rc-yay-list');
-      yayEl.innerHTML = content.yay.map((t) => `<li><img class="rc-yaynay-icon" src="assets/results-card/check.png" alt="" />${t}</li>`).join('');
+      yayEl.innerHTML = content.yay.map((t) => `<li>${INK_TICK}${t}</li>`).join('');
       const nayEl = document.getElementById('rc-nay-list');
-      nayEl.innerHTML = content.nay.map((t) => `<li><img class="rc-yaynay-icon" src="assets/results-card/no.png" alt="" />${t}</li>`).join('');
+      nayEl.innerHTML = content.nay.map((t) => `<li>${INK_CROSS}${t}</li>`).join('');
 
       const bestEl = document.getElementById('rc-best-matches');
       const attnEl = document.getElementById('rc-attention-matches');
@@ -870,6 +905,8 @@
       const w = window.open(cardImageUrl(shownType), '_blank', 'noopener');
       status.textContent = w ? 'Image opened in a new tab -- save or copy it from there.' : 'Use "Download card" to save the image.';
     });
+
+    document.body.classList.add('has-next-bar');
 
     function showEmpty() {
       document.getElementById('results-loading').hidden = true;
